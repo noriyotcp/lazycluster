@@ -55,5 +55,8 @@
 
 ## Known Issues
 
-- **Duplicate Manager Tabs:** Pressing the Window Manager button in the popup repeatedly opens multiple manager tabs. The manager tab should only open once, and subsequent clicks should focus the existing tab.
-- **Window Transfer:** Opening the manager tab from different windows causes the existing manager tab to move to the new window. The manager tab should remain in its original window.
+- **Duplicate Manager Tabs:** Pressing the Window Manager button in the popup will repeatedly open multiple manager tabs. A manager tab should only be opened once. The behavior on subsequent clicks is as follows:
+- If a manager tab is already open on the active window
+  - The existing tab will be focused.
+- If a manager tab is already open in another window, but not in the active window 
+  - The manager tab will open in the active window
