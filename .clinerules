@@ -30,3 +30,34 @@ Follow the template in `/docs/adr/template.md` (create this template file).
 -   Unit tests required for core business logic.
 -   Integration tests for API endpoints and extension-specific functionalities.
 -   End-to-end tests for critical user flows.
+
+## Development Workflow
+- Cline helps write and review code changes
+- Pay close attention to UI feedback from the user and address it promptly.
+- Before completing a task, thoroughly test the UI to ensure that all elements are displayed correctly and that all functionalities are working as expected.
+- After making changes, always test the application to ensure that all functionalities are working as expected.
+- Before completing a task, verify that all acceptance criteria have been met.
+- After completing a task, list up the mistakes we made and what we can learn from them.
+- Memory bank files should be reviewed and updated when discovering new project patterns, after implementing significant changes, when the user requests with "update memory bank", and when context needs clarification.
+
+## Commit Description Guidelines
+Commit description should:
+- Suggested before committing changes
+- Be a bullet list.
+- Start with a verb.
+- Not use "I" or "We".
+
+Commit message should:
+- Be a single line.
+- Be created from the commit description.
+
+## Commit Message Example
+- feat: Add user profile page
+- style: Update user profile page layout
+- fix: Fix user profile page layout
+- refactor: Improve code readability in user authentication
+- docs: Update API documentation for user profile
+- test: Add unit tests for user registration
+- chore: Update dependencies
+- perf: Improve loading speed of user profile page
+- ci: Configure CI/CD pipeline
