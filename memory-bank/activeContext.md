@@ -20,6 +20,25 @@
 
 ## Active Decisions
 
-- **Framework Selection:**  Decided to use WXT (Web Extension Toolkit) as the preferred framework for development due to its Vite integration, HMR, and Chrome Extension specific features.
+- **Framework Selection:** Decided to use WXT (Web Extension Toolkit) as the preferred framework for development due to its Vite integration, HMR, and Chrome Extension specific features.
 - **Technology Stack:** Confirmed technology stack: React, TypeScript, Vite, Chrome Extension APIs.
-- **Design Principle:**  Affirmed "Simple is the best" as the guiding design and development principle.
+- **Design Principle:** Affirmed "Simple is the best" as the guiding design and development principle.
+
+## Development Process Reflection
+
+### Lessons Learned
+
+- **API Selection:** We initially experienced issues by confusing `browser.runtime` with `chrome.runtime` APIs. In future projects, we will verify the project configuration (e.g., `wxt.config.ts`) early in the development process to ensure the correct API usage.
+
+- **Connection Timing:** The manager page did not immediately display the tab list due to connection timing issues—messages were sent before the manager was ready. We resolved this by consolidating communication through a persistent port connection, which ensures that messages are sent only after the manager page is fully connected.
+
+- **Tool Selection and Usage:** We encountered difficulties with the `replace_in_file` tool due to strict matching requirements. In cases of extensive or complex changes, using the `write_to_file` tool directly can be more reliable and save time.
+
+- **Value of PLAN MODE:** This process highlighted the critical importance of thorough planning in PLAN MODE. A more in-depth plan could have identified potential pitfalls early and reduced rework during ACT MODE.
+
+### Process Improvements
+
+- Allocate more time in PLAN MODE for analysis and risk assessment before starting implementation.
+- Standardize API checks at the beginning of projects to avoid misconfiguration issues.
+- Develop guidelines for selecting appropriate tools (e.g., when to use `write_to_file` versus `replace_in_file`) based on the scale of the changes.
+- Document lessons learned in a centralized location (e.g., this Active Context document) to inform and improve future development iterations.

@@ -10,6 +10,9 @@
 - **Documentation Setup:** `README.md` has been updated with project overview, technologies, and development plan. `docs/adr` directory and `docs/adr/template.md` have been created for Architecture Decision Records. `.clinerules` has been updated to reflect project standards.
 - **Popup UI Implementation:** The popup UI has been implemented with a "Window Manager" button.
 - **Manager Page Setup:** The basic structure for the main UI (manager.html) has been created as a React component in `entrypoints/manager`.
+- **Implemented initial tab list loading on manager page open using port connection.**
+- **Addressed "Could not establish connection" error.**
+- **Created ADR to document port connection refactor.**
 
 ## What's Left to Build
 
@@ -52,4 +55,5 @@
 
 ## Known Issues
 
-- **None identified yet.** Further development and testing may reveal potential issues.
+- **Duplicate Manager Tabs:** Pressing the Window Manager button in the popup repeatedly opens multiple manager tabs. The manager tab should only open once, and subsequent clicks should focus the existing tab.
+- **Window Transfer:** Opening the manager tab from different windows causes the existing manager tab to move to the new window. The manager tab should remain in its original window.
