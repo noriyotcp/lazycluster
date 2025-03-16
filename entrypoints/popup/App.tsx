@@ -1,10 +1,17 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import reactLogo from '@/assets/react.svg';
 import wxtLogo from '/wxt.svg';
 import './App.css';
 
 function App() {
   const [count, setCount] = useState(0);
+
+  const openWindowManager = useCallback(() => {
+    chrome.tabs.create({
+      url: chrome.runtime.getURL('/manager.html'),
+      pinned: true,
+    });
+  }, []);
 
   return (
     <>
@@ -18,6 +25,9 @@ function App() {
       </div>
       <h1>WXT + React</h1>
       <div className="card">
+        <button onClick={openWindowManager}>
+          Window Manager
+        </button>
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
