@@ -10,9 +10,10 @@ function Manager() {
   const [tabs, setTabs] = useState<Tab[]>([]);
 
   useEffect(() => {
-    const handleMessage = (message: any) => {
+    type Message = { type: string; tabs: Tab[] };
+    const handleMessage = (message: Message) => {
       if (message.type === "UPDATE_TABS") {
-        setTabs(message.tabs as Tab[]);
+        setTabs(message.tabs);
       }
     };
 
