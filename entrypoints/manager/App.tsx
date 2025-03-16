@@ -10,18 +10,19 @@ function Manager() {
   const [tabs, setTabs] = useState<Tab[]>([]);
 
   useEffect(() => {
-    type Message = { type: string; tabs: Tab[] };
-    const handleMessage = (message: Message) => {
+    // Connect to background script
+    const connection = chrome.runtime.connect({ name: "manager" });
+
+    connection.onMessage.addListener((message) => {
       if (message.type === "UPDATE_TABS") {
         setTabs(message.tabs);
+      } else if (message.type === "BACKGROUND_INITIALIZED") {
+        console.log("Background script initialized");
       }
-    };
+    });
 
-    browser.runtime.onMessage.addListener(handleMessage);
-
-    return () => {
-      browser.runtime.onMessage.removeListener(handleMessage);
-    };
+    // Request initial data
+    connection.postMessage({ type: "REQUEST_INITIAL_DATA" });
   }, []);
 
   return (
