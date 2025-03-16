@@ -19,12 +19,18 @@ export default defineConfig([
       },
     },
   },
-// combine configurations using spread syntax
+  // combine configurations using spread syntax
   ...[
     {
       files: ["**/*.{jsx,tsx}"], // Apply to JSX and TSX files
       rules: {
         "react/react-in-jsx-scope": "off",
+        "react/function-component-definition": [
+          2,
+          {
+            namedComponents: "arrow-function",
+          },
+        ],
       },
     },
   ],

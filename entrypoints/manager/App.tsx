@@ -8,7 +8,7 @@ interface Tab {
 
 type Message = { type: string; tabs: Tab[] };
 
-function Manager() {
+const Manager = () => {
   const [tabs, setTabs] = useState<Tab[]>([]);
 
   useEffect(() => {
