@@ -10,9 +10,17 @@ function Manager() {
   const [tabs, setTabs] = useState<Tab[]>([]);
 
   useEffect(() => {
-    chrome.tabs.query({}, (results) => {
-      setTabs(results as Tab[]);
-    });
+    const handleMessage = (message: any) => {
+      if (message.type === "UPDATE_TABS") {
+        setTabs(message.tabs as Tab[]);
+      }
+    };
+
+    browser.runtime.onMessage.addListener(handleMessage);
+
+    return () => {
+      browser.runtime.onMessage.removeListener(handleMessage);
+    };
   }, []);
 
   return (
