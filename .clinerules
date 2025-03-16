@@ -2,32 +2,31 @@
 
 ## Documentation Requirements
 
--   Update relevant documentation in /docs when modifying features
--   Keep README.md in sync with new capabilities
--   Maintain changelog entries in CHANGELOG.md
+-   Update relevant documentation in `/docs` when modifying features.
+-   Keep `README.md` in sync with new capabilities.
+-   Create ADRs in `/docs/adr` for significant architectural decisions.
 
 ## Architecture Decision Records
 
-Create ADRs in /docs/adr for:
+Create ADRs in `/docs/adr` for:
 
 -   Major dependency changes
 -   Architectural pattern changes
 -   New integration patterns
--   Database schema changes
--   Follow template in /docs/adr/template.md
+-   Data storage schema changes
+
+Follow the template in `/docs/adr/template.md` (create this template file).
 
 ## Code Style & Patterns
 
--   Use TypeScript best practices; enforce clear typing and consistent naming conventions
--   Place generated code in /src/generated
--   Prefer composition over inheritance
--   Use repository pattern for data access
--   Follow error handling pattern in /src/utils/errors.ts
--   Follow project coding standards with emphasis on modular, component-based architecture (React components)
--   Utilize repository patterns for data access
+-   Follow project coding standards with emphasis on modular, component-based architecture (React components).
+-   Use TypeScript best practices; enforce clear typing and consistent naming conventions.
+-   Prefer composition over inheritance.
+-   Utilize React Hooks for managing component state and side effects.
+-   Follow a consistent error handling pattern.
 
 ## Testing Standards
 
--   Unit tests required for business logic
--   Integration tests for API endpoints and extension-specific functionalities
--   E2E tests for critical user flows
+-   Unit tests required for core business logic.
+-   Integration tests for API endpoints and extension-specific functionalities.
+-   End-to-end tests for critical user flows.

@@ -3,10 +3,13 @@
 ## What Works
 
 - **Memory Bank Initialization:** Core memory bank files (`projectbrief.md`, `productContext.md`, `activeContext.md`, `systemPatterns.md`, `techContext.md`, `progress.md`) are created and initialized with basic content.
-- **Project Context Documentation:**  Research documents (`answer-deep-research.md`, `ask-deep-research.md`, `designs/gemini-2.0-flash.md`) have been read and analyzed to understand project background, user needs, technical considerations, and design direction.
+- **Project Context Documentation:** Research documents have been read and analyzed to understand project background, user needs, technical considerations, and design direction.
 - **Memory Bank Update:** Core memory bank files have been updated with detailed information extracted from research documents, providing a comprehensive project context.
-- **Technology Stack Defined:** Key technologies and frameworks (WXT, React, TypeScript, Vite, Chrome Extension APIs, Tailwind CSS/Shadcn UI (conceptual)) have been selected and documented.
-- **System Architecture Outlined:**  A modular system architecture consisting of Popup UI, Background Service Worker, and optional Content Scripts has been defined.
+- **Technology Stack Defined:** Key technologies and frameworks (WXT, React, TypeScript, Vite, Chrome Extension APIs, Tailwind CSS (conceptual), Shadcn UI (conceptual)) have been selected and documented.
+- **System Architecture Outlined:** A modular system architecture consisting of Popup UI, Background Service Worker, and optional Content Scripts has been defined.
+- **Documentation Setup:** `README.md` has been updated with project overview, technologies, and development plan. `docs/adr` directory and `docs/adr/template.md` have been created for Architecture Decision Records. `.clinerules` has been updated to reflect project standards.
+- **Popup UI Implementation:** The popup UI has been implemented with a "Window Manager" button.
+- **Manager Page Setup:** The basic structure for the main UI (manager.html) has been created as a React component in `entrypoints/manager`.
 
 ## What's Left to Build
 
@@ -16,11 +19,14 @@
     - Implement window management features (creation, focusing, closing, optional naming).
     - Implement keyboard shortcuts for extension actions.
 - **User Interface (Popup UI):**
-    - Develop the popup UI using React and Tailwind CSS/Shadcn UI (conceptual).
+    - Further develop the popup UI using React and Tailwind CSS (conceptual), Shadcn UI (conceptual).
     - Implement tab and window list display with different view options (list all tabs, group by window).
     - Implement search and filter functionality in the popup UI.
     - Implement action buttons and UI elements for tab and window management.
-    - Implement settings UI and integrate with Chrome Storage API.
+    - Integrate settings UI and Chrome Storage API.
+- **Manager Page (Main UI):**
+    - Implement tab listing using Chrome APIs.
+    - Implement tab and window management features in the main UI.
 - **Settings and Customization:**
     - Develop settings page UI based on design documents.
     - Implement settings for theme, tab display, keyboard shortcuts, auto-save, etc.
@@ -39,8 +45,11 @@
 - **Memory bank initialized and updated with research findings.**
 - **Initial project plan and architecture defined.**
 - **Technology stack and development setup configured.**
-- **Ready to start implementing core extension functionality and UI development.**
+- **Documentation setup complete (README.md, docs/adr, .clinerules).**
+- **Popup UI implemented with "Window Manager" button.**
+- **Basic structure for main UI (manager.html) created as React component.**
+- **Ready to implement core extension functionality and UI development.**
 
 ## Known Issues
 
-- **None identified yet.**  Further development and testing may reveal potential issues.
+- **None identified yet.** Further development and testing may reveal potential issues.
