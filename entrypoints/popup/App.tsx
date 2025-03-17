@@ -7,9 +7,27 @@ const App = () => {
   const [count, setCount] = useState(0);
 
   const openWindowManager = useCallback(() => {
-    chrome.tabs.create({
-      url: chrome.runtime.getURL('/manager.html'),
-      pinned: true,
+    const managerUrl = chrome.runtime.getURL('/manager.html');
+
+    chrome.windows.getCurrent((currentWindow) => {
+      chrome.tabs.query({ url: managerUrl, windowId: currentWindow.id }, (tabsInCurrentWindow) => {
+        if (tabsInCurrentWindow.length > 0) {
+          chrome.tabs.update(tabsInCurrentWindow[0].id!, { active: true });
+        } else {
+          chrome.tabs.query({ url: managerUrl }, (allTabs) => {
+            const tabsInOtherWindows = allTabs.filter(tab => tab.windowId !== currentWindow.id);
+            if (tabsInOtherWindows.length > 0) {
+              tabsInOtherWindows.forEach(tab => {
+                chrome.tabs.remove(tab.id!);
+              });
+            }
+            chrome.tabs.create({
+              url: managerUrl,
+              pinned: true,
+            });
+          });
+        }
+      });
     });
   }, []);
 
