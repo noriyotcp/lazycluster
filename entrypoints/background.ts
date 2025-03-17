@@ -1,11 +1,19 @@
+import { Tab } from '@/src/@types/types';
+
 export default defineBackground(() => {
   console.log('Hello background!', { id: browser.runtime.id });
 
   let port: chrome.runtime.Port | null = null;
 
-  // Function to get tabs
-  const getTabs = async () => {
-    const tabs = await browser.tabs.query({});
+  // Function to get tabs with windowId
+  const getTabs = async (): Promise<Tab[]> => {
+    const windows = await browser.windows.getAll({ populate: true });
+    const tabs: Tab[] = windows.reduce<Tab[]>((acc, win) => {
+      if (win.tabs) {
+        acc.push(...win.tabs.map(tab => ({ id: tab.id, windowId: win.id, title: tab.title })));
+      }
+      return acc;
+    }, []);
     return tabs;
   };
 
@@ -35,7 +43,7 @@ export default defineBackground(() => {
 
   browser.runtime.onConnect.addListener((p) => {
     if (p.name === "manager") {
-      port = p;
+      port = p as chrome.runtime.Port;
       port.onDisconnect.addListener(() => {
         port = null;
       });
