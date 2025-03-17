@@ -14,7 +14,7 @@
     "compile": "tsc --noEmit",
     "postinstall": "wxt prepare",
     "lint": "eslint . --ext .ts,.tsx,.js,.mjs",
-    "lint:fix": "eslint . --ext .ts,.tsx,.js,.mjs --fix"
+    "fix:eslint": "eslint . --ext .ts,.tsx,.js,.mjs --fix"
   },
   "dependencies": {
     "react": "^19.0.0",
