@@ -20,7 +20,15 @@ const Manager = () => {
     const handleMessage = (message: Message) => {
       if (message.type === "UPDATE_TABS") {
         const groupedTabs = groupTabsByWindow(message.tabs);
-        setTabGroups(groupedTabs);
+        // Get active window ID within the message handling
+        chrome.windows.getCurrent().then(window => {
+          if (window.id !== undefined) {
+            const sortedTabGroups = sortTabGroups(groupedTabs, window.id);
+            setTabGroups(sortedTabGroups);
+          } else {
+            setTabGroups(groupedTabs); // If window.id is undefined, set without sorting
+          }
+        });
       } else if (message.type === "BACKGROUND_INITIALIZED") {
         console.log("Background script initialized");
       }
@@ -43,6 +51,21 @@ const Manager = () => {
       connection.disconnect();
     };
   }, []);
+
+  const sortTabGroups = (tabGroups: TabGroup[], activeWindowId: number | null): TabGroup[] => {
+    if (activeWindowId === null) {
+      return tabGroups; // No sorting needed if active window ID is not available
+    }
+
+    const activeWindowGroupIndex = tabGroups.findIndex(group => group.windowId === activeWindowId);
+
+    if (activeWindowGroupIndex === -1) {
+      return tabGroups; // No sorting needed if the active window group is not found
+    }
+
+    const activeWindowGroup = tabGroups.splice(activeWindowGroupIndex, 1)[0]; // Extracts the active window's group
+    return [activeWindowGroup, ...tabGroups]; // Insert the active window group at the beginning
+  };
 
   const groupTabsByWindow = (tabs: Tab[]): TabGroup[] => {
     const groups: { [windowId: number]: Tab[] } = {};
