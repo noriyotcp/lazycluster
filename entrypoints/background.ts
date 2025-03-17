@@ -17,27 +17,29 @@ export default defineBackground(() => {
     return tabs;
   };
 
+  const updateTabs = async (port: chrome.runtime.Port) => {
+    const tabs = await getTabs();
+    port.postMessage({ type: "UPDATE_TABS", tabs });
+  };
+
   // Listen for tab creation
   browser.tabs.onCreated.addListener(async () => {
-    const tabs = await getTabs();
     if (port) {
-      port.postMessage({ type: "UPDATE_TABS", tabs });
+      updateTabs(port);
     }
   });
 
   // Listen for tab updates
   browser.tabs.onUpdated.addListener(async () => {
-    const tabs = await getTabs();
     if (port) {
-      port.postMessage({ type: "UPDATE_TABS", tabs });
+      updateTabs(port);
     }
   });
 
   // Listen for tab removal
   browser.tabs.onRemoved.addListener(async () => {
-    const tabs = await getTabs();
     if (port) {
-      port.postMessage({ type: "UPDATE_TABS", tabs });
+      updateTabs(port);
     }
   });
 
