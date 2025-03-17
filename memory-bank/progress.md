@@ -11,8 +11,9 @@
 - **Popup UI Implementation:** The popup UI has been implemented with a "Window Manager" button.
 - **Manager Page Setup:** The basic structure for the main UI (manager.html) has been created as a React component in `entrypoints/manager`.
 - **Implemented initial tab list loading on manager page open using port connection.**
-- **Addressed "Could not establish connection" error.**
-- **Created ADR to document port connection refactor.**
+-   **Addressed "Could not establish connection" error.**
+-   **Created ADR to document port connection refactor.**
+-   **Resolved duplicate manager tabs issue:** The `openWindowManager` function in `entrypoints/popup/App.tsx` now prevents duplicate manager tabs from opening.
 
 ## What's Left to Build
 
@@ -54,9 +55,3 @@
 - **Ready to implement core extension functionality and UI development.**
 
 ## Known Issues
-
-- **Duplicate Manager Tabs:** Pressing the Window Manager button in the popup will repeatedly open multiple manager tabs. A manager tab should only be opened once. The behavior on subsequent clicks is as follows:
-- If a manager tab is already open on the active window
-  - The existing tab will be focused.
-- If a manager tab is already open in another window, but not in the active window 
-  - The manager tab will open in the active window
