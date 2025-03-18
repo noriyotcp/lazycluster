@@ -15,10 +15,10 @@ const Manager = () => {
 
   useEffect(() => {
     // Connect to background script
-    const connection = chrome.runtime.connect({ name: "manager" });
+    const connection = chrome.runtime.connect({ name: 'manager' });
 
     const handleMessage = (message: Message) => {
-      if (message.type === "UPDATE_TABS") {
+      if (message.type === 'UPDATE_TABS') {
         const groupedTabs = groupTabsByWindow(message.tabs);
         // Get active window ID within the message handling
         chrome.windows.getCurrent().then(window => {
@@ -29,15 +29,15 @@ const Manager = () => {
             setTabGroups(groupedTabs); // If window.id is undefined, set without sorting
           }
         });
-      } else if (message.type === "BACKGROUND_INITIALIZED") {
-        console.log("Background script initialized");
+      } else if (message.type === 'BACKGROUND_INITIALIZED') {
+        console.log('Background script initialized');
       }
     };
 
     connection.onMessage.addListener(handleMessage);
 
     // Request initial data
-    connection.postMessage({ type: "REQUEST_INITIAL_DATA" });
+    connection.postMessage({ type: 'REQUEST_INITIAL_DATA' });
 
     // Get active window id
     chrome.windows.getCurrent().then(window => {
@@ -89,9 +89,7 @@ const Manager = () => {
       <h1>Open Tabs</h1>
       {tabGroups.map((group, index) => (
         <div key={group.windowId}>
-          <h2>
-            {group.windowId === activeWindowId ? "Current Window" : `Window ${index + 1}`}
-          </h2>
+          <h2>{group.windowId === activeWindowId ? 'Current Window' : `Window ${index + 1}`}</h2>
           <ul>
             {group.tabs.map(tab => (
               <li key={tab.id}>{tab.title}</li>
@@ -101,6 +99,6 @@ const Manager = () => {
       ))}
     </div>
   );
-}
+};
 
 export default Manager;

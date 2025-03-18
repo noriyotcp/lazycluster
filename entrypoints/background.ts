@@ -19,7 +19,7 @@ export default defineBackground(() => {
 
   const updateTabs = async (port: chrome.runtime.Port) => {
     const tabs = await getTabs();
-    port.postMessage({ type: "UPDATE_TABS", tabs });
+    port.postMessage({ type: 'UPDATE_TABS', tabs });
   };
 
   // Listen for tab creation
@@ -43,19 +43,20 @@ export default defineBackground(() => {
     }
   });
 
-  browser.runtime.onConnect.addListener((p) => {
-    if (p.name === "manager") {
+  browser.runtime.onConnect.addListener(p => {
+    if (p.name === 'manager') {
       port = p as chrome.runtime.Port;
       port.onDisconnect.addListener(() => {
         port = null;
       });
 
-      port.onMessage.addListener(async (message) => {
-        if (message.type === "REQUEST_INITIAL_DATA") {
+      port.onMessage.addListener(async message => {
+        if (message.type === 'REQUEST_INITIAL_DATA') {
           const tabs = await getTabs();
-          if (port) { // Add this check
-            port.postMessage({ type: "UPDATE_TABS", tabs });
-            port.postMessage({ type: "BACKGROUND_INITIALIZED" });
+          if (port) {
+            // Add this check
+            port.postMessage({ type: 'UPDATE_TABS', tabs });
+            port.postMessage({ type: 'BACKGROUND_INITIALIZED' });
           }
         }
       });

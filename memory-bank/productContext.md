@@ -7,7 +7,7 @@ Users face significant challenges in managing browser tabs and windows, leading 
 - **Tab Clutter:** Users often end up with a large number of open tabs, making it difficult to find specific tabs and causing visual clutter.
 - **Inefficient Workflow:** Switching between numerous tabs and windows disrupts focus and reduces productivity.
 - **Resource Consumption:** Keeping many tabs open consumes significant system memory and CPU, slowing down the browser and the entire system.
-- **Limitations of Existing Tools:** Current browser features and existing extensions often fall short of providing a comprehensive and intuitive solution for effective tab and window management.  Users find them either too basic, lacking essential features, or too complex and overwhelming to use.
+- **Limitations of Existing Tools:** Current browser features and existing extensions often fall short of providing a comprehensive and intuitive solution for effective tab and window management. Users find them either too basic, lacking essential features, or too complex and overwhelming to use.
 - **Need for Simplicity:** Users desire a solution that is simple, intuitive, and easy to use, without a steep learning curve or feature overload. They want a tool that enhances their workflow without getting in the way.
 
 ## Solution
@@ -23,9 +23,9 @@ LazyCluster aims to solve these problems by providing a simple, intuitive, and e
 
 ## User Experience Goals
 
-- **Easy to Use and Understand:** The extension should be intuitive and easy to learn, even for first-time users.  Features and functions should be discoverable and self-explanatory.
+- **Easy to Use and Understand:** The extension should be intuitive and easy to learn, even for first-time users. Features and functions should be discoverable and self-explanatory.
 - **Visually Appealing and Uncluttered:** The UI should be clean, minimalist, and visually appealing, avoiding unnecessary complexity and visual noise. It should offer both light and dark themes to suit user preferences.
-- **Fast and Responsive:** The extension should be highly performant, with quick loading times and smooth interactions.  It should not introduce any noticeable delays or slowdowns to the browsing experience.
+- **Fast and Responsive:** The extension should be highly performant, with quick loading times and smooth interactions. It should not introduce any noticeable delays or slowdowns to the browsing experience.
 - **Seamless Browser Integration:** LazyCluster should integrate seamlessly with the Chrome browser, feeling like a natural extension of the browser's functionality.
-- **Customizable to User Needs:**  The extension should offer sufficient customization options to allow users to tailor it to their specific workflows and preferences, without being overwhelming.
-- **Respectful of User Privacy:**  The extension should prioritize user privacy and data security, ensuring transparency and control over data handling.
+- **Customizable to User Needs:** The extension should offer sufficient customization options to allow users to tailor it to their specific workflows and preferences, without being overwhelming.
+- **Respectful of User Privacy:** The extension should prioritize user privacy and data security, ensuring transparency and control over data handling.

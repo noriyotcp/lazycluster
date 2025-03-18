@@ -31,11 +31,11 @@ The background script now:
 
 ### Positive
 
-*   The manager page now displays the tab list immediately upon opening.
-*   The "Could not establish connection" error is resolved.
-*   The communication between the manager page and the background script is more reliable.
+- The manager page now displays the tab list immediately upon opening.
+- The "Could not establish connection" error is resolved.
+- The communication between the manager page and the background script is more reliable.
 
 ### Negative
 
-*   The code is more complex than the previous implementation.
-*   It requires a persistent connection between the manager page and the background script, which may consume more resources.
+- The code is more complex than the previous implementation.
+- It requires a persistent connection between the manager page and the background script, which may consume more resources.

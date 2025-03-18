@@ -11,38 +11,38 @@
 - **Popup UI Implementation:** The popup UI has been implemented with a "Window Manager" button.
 - **Manager Page Setup:** The basic structure for the main UI (manager.html) has been created as a React component in `entrypoints/manager`.
 - **Implemented initial tab list loading on manager page open using port connection.**
--   **Addressed "Could not establish connection" error.**
--   **Created ADR to document port connection refactor.**
--   **Resolved duplicate manager tabs issue:** The `openWindowManager` function in `entrypoints/popup/App.tsx` now prevents duplicate manager tabs from opening.
+- **Addressed "Could not establish connection" error.**
+- **Created ADR to document port connection refactor.**
+- **Resolved duplicate manager tabs issue:** The `openWindowManager` function in `entrypoints/popup/App.tsx` now prevents duplicate manager tabs from opening.
 
 ## What's Left to Build
 
 - **Core Extension Functionality:**
-    - Implement tab and window management features using Chrome Extension APIs (tab listing, searching, filtering, sorting, moving, closing, suspending, discarding).
-    - Implement session saving and restoring functionality.
-    - Implement window management features (creation, focusing, closing, optional naming).
-    - Implement keyboard shortcuts for extension actions.
+  - Implement tab and window management features using Chrome Extension APIs (tab listing, searching, filtering, sorting, moving, closing, suspending, discarding).
+  - Implement session saving and restoring functionality.
+  - Implement window management features (creation, focusing, closing, optional naming).
+  - Implement keyboard shortcuts for extension actions.
 - **User Interface (Popup UI):**
-    - Further develop the popup UI using React and Tailwind CSS (conceptual), Shadcn UI (conceptual).
-    - Implement tab and window list display with different view options (list all tabs, group by window).
-    - Implement search and filter functionality in the popup UI.
-    - Implement action buttons and UI elements for tab and window management.
-    - Integrate settings UI and Chrome Storage API.
+  - Further develop the popup UI using React and Tailwind CSS (conceptual), Shadcn UI (conceptual).
+  - Implement tab and window list display with different view options (list all tabs, group by window).
+  - Implement search and filter functionality in the popup UI.
+  - Implement action buttons and UI elements for tab and window management.
+  - Integrate settings UI and Chrome Storage API.
 - **Manager Page (Main UI):**
-    - Implement tab listing using Chrome APIs.
-    - Implement tab and window management features in the main UI.
+  - Implement tab listing using Chrome APIs.
+  - Implement tab and window management features in the main UI.
 - **Settings and Customization:**
-    - Develop settings page UI based on design documents.
-    - Implement settings for theme, tab display, keyboard shortcuts, auto-save, etc.
-    - Integrate settings with Chrome Storage API to persist user preferences.
+  - Develop settings page UI based on design documents.
+  - Implement settings for theme, tab display, keyboard shortcuts, auto-save, etc.
+  - Integrate settings with Chrome Storage API to persist user preferences.
 - **Testing and Refinement:**
-    - Thoroughly test all features and UI components in the Chrome browser.
-    - Gather user feedback and iterate on design and implementation.
-    - Address any bugs, performance issues, or usability problems.
+  - Thoroughly test all features and UI components in the Chrome browser.
+  - Gather user feedback and iterate on design and implementation.
+  - Address any bugs, performance issues, or usability problems.
 - **Chrome Web Store Deployment:**
-    - Prepare extension package for submission to the Chrome Web Store.
-    - Create store listing with descriptions, screenshots, and privacy policy.
-    - Submit extension for review and publication.
+  - Prepare extension package for submission to the Chrome Web Store.
+  - Create store listing with descriptions, screenshots, and privacy policy.
+  - Submit extension for review and publication.
 
 ## Current Status
 
