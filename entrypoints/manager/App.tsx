@@ -82,13 +82,18 @@ const Manager = () => {
   };
 
   const closeTab = useCallback((tabId: number) => {
-    chrome.tabs.remove(tabId);
-    setTabGroups(prevTabGroups =>
-      prevTabGroups.map(group => ({
-        ...group,
-        tabs: group.tabs.filter(tab => tab.id !== tabId),
-      }))
-    );
+    chrome.tabs.remove(tabId, () => {
+      if (chrome.runtime.lastError) {
+        console.error('タブの削除に失敗しました:', chrome.runtime.lastError);
+      } else {
+        setTabGroups(prevTabGroups =>
+          prevTabGroups.map(group => ({
+            ...group,
+            tabs: group.tabs.filter(tab => tab.id !== tabId),
+          }))
+        );
+      }
+    });
   }, []);
 
   const handleCloseTab = useCallback(
