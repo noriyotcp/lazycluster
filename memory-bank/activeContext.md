@@ -30,8 +30,6 @@
 
 - **API Selection:** We initially experienced issues by confusing `browser.runtime` with `chrome.runtime` APIs. In future projects, we will verify the project configuration (e.g., `wxt.config.ts`) early in the development process to ensure the correct API usage.
 
-- **Connection Timing:** The manager page did not immediately display the tab list due to connection timing issues—messages were sent before the manager was ready. We resolved this by consolidating communication through a persistent port connection, which ensures that messages are sent only after the manager page is fully connected.
-
 - **Tool Selection and Usage:** We encountered difficulties with the `replace_in_file` tool due to strict matching requirements. In cases of extensive or complex changes, using the `write_to_file` tool directly can be more reliable and save time.
 
 - **Value of PLAN MODE:** This process highlighted the critical importance of thorough planning in PLAN MODE. A more in-depth plan could have identified potential pitfalls early and reduced rework during ACT MODE.
