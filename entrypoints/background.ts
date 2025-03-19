@@ -62,4 +62,10 @@ export default defineBackground(() => {
       });
     }
   });
+
+  browser.runtime.onMessage.addListener(request => {
+    if (request.action === 'closeTab' && request.tabId) {
+      chrome.tabs.remove(request.tabId);
+    }
+  });
 });

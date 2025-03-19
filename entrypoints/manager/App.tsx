@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Tab } from '@/src/@types/types';
 import './style.css';
 
-type Message = { type: string; tabs: Tab[] };
+type Message = { type: string; tabs: Tab[]; tabId?: number };
 
 interface TabGroup {
   windowId: number;
@@ -78,11 +78,25 @@ const Manager = () => {
       }
     });
 
-    return Object.entries(groups).map(([windowId, tabs]) => ({
-      windowId: parseInt(windowId),
-      tabs,
-    }));
+    return Object.entries(groups).map(([windowId, tabs]) => ({ windowId: parseInt(windowId), tabs }));
   };
+
+  const closeTab = useCallback((tabId: number) => {
+    chrome.tabs.remove(tabId);
+    setTabGroups(prevTabGroups =>
+      prevTabGroups.map(group => ({
+        ...group,
+        tabs: group.tabs.filter(tab => tab.id !== tabId),
+      }))
+    );
+  }, []);
+
+  const handleCloseTab = useCallback(
+    (tabId: number) => {
+      closeTab(tabId);
+    },
+    [closeTab]
+  );
 
   return (
     <div>
@@ -92,7 +106,10 @@ const Manager = () => {
           <h2>{group.windowId === activeWindowId ? 'Current Window' : `Window ${index + 1}`}</h2>
           <ul>
             {group.tabs.map(tab => (
-              <li key={tab.id}>{tab.title}</li>
+              <li key={tab.id}>
+                {tab.title}
+                <button onClick={() => handleCloseTab(tab.id!)}>Close</button>
+              </li>
             ))}
           </ul>
         </div>
