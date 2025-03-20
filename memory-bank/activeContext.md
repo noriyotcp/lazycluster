@@ -35,3 +35,8 @@
 - **Value of PLAN MODE:** This process highlighted the critical importance of thorough planning in PLAN MODE. A more in-depth plan could have identified potential pitfalls early and reduced rework during ACT MODE.
 
 - **Context API and `createContext` Type Definition:** When using the Context API, it's important to consider the type definition of the context value. While it may seem safe to omit `undefined` from the type if the context is always provided within a specific component, including `undefined` and implementing an error check in the `useContext` hook can improve code safety and prevent unexpected errors if the context is accidentally used outside of its provider. This approach makes the code more robust and easier to maintain in the long run.
+- **Leverage UI Framework Features:** We initially overlooked the built-in Theme Controller component provided by daisyUI and attempted a manual implementation. Utilizing framework-provided features can significantly simplify development and improve efficiency.
+
+- **Component Responsibility Separation:** Creating dedicated, single-purpose components improves code organization and reusability. By isolating the theme-switching functionality into its own component, other components can focus on their primary responsibilities, leading to better maintainability and clearer component design.
+
+- **Importance of Iterative Improvement and Information Gathering:** Initial approaches may not always be optimal. User feedback and continuous information gathering are crucial for identifying better solutions and iteratively improving implementations.
