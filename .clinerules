@@ -2,36 +2,38 @@
 
 ## Documentation Requirements
 
--   Update relevant documentation in `/docs` when modifying features.
--   Keep `README.md` in sync with new capabilities.
--   Create ADRs in `/docs/adr` for significant architectural decisions.
+- Update relevant documentation in `/docs` when modifying features.
+- Keep `README.md` in sync with new capabilities.
+- Create ADRs in `/docs/adr` for significant architectural decisions.
 
 ## Architecture Decision Records
 
 Create ADRs in `/docs/adr` for:
 
--   Major dependency changes
--   Architectural pattern changes
--   New integration patterns
--   Data storage schema changes
+- Major dependency changes
+- Architectural pattern changes
+- New integration patterns
+- Data storage schema changes
 
 Follow the template in `/docs/adr/template.md` (create this template file).
 
 ## Code Style & Patterns
 
--   Follow project coding standards with emphasis on modular, component-based architecture (React components).
--   Use TypeScript best practices; enforce clear typing and consistent naming conventions.
--   Prefer composition over inheritance.
--   Utilize React Hooks for managing component state and side effects.
--   Follow a consistent error handling pattern.
+- Follow project coding standards with emphasis on modular, component-based architecture (React components).
+- Use TypeScript best practices; enforce clear typing and consistent naming conventions.
+- Prefer composition over inheritance.
+- Utilize React Hooks for managing component state and side effects.
+- Follow a consistent error handling pattern.
+- Define React components using arrow function syntax.
 
 ## Testing Standards
 
--   Unit tests required for core business logic.
--   Integration tests for API endpoints and extension-specific functionalities.
--   End-to-end tests for critical user flows.
+- Unit tests required for core business logic.
+- Integration tests for API endpoints and extension-specific functionalities.
+- End-to-end tests for critical user flows.
 
 ## Development Workflow
+
 - Cline helps write and review code changes
 - Pay close attention to UI feedback from the user and address it promptly.
 - Before completing a task, thoroughly test the UI to ensure that all elements are displayed correctly and that all functionalities are working as expected.
@@ -42,17 +44,21 @@ Follow the template in `/docs/adr/template.md` (create this template file).
 - When modifying tab management logic, ensure that all edge cases are handled correctly, such as tabs in different windows.
 
 ## Commit Description Guidelines
+
 Commit description should:
+
 - Suggested before committing changes
 - Be a bullet list.
 - Start with a verb.
 - Not use "I" or "We".
 
 Commit message should:
+
 - Be a single line.
 - Be created from the commit description.
 
 ## Commit Message Example
+
 - feat: Add user profile page
 - style: Update user profile page layout
 - fix: Fix user profile page layout
