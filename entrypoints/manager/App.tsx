@@ -116,7 +116,7 @@ const Manager = () => {
   }));
 
   return (
-    <div className="manager-container">
+    <div className="p-5">
       <Header
         searchQuery={searchQuery}
         onSearchQueryChange={setSearchQuery}
@@ -124,13 +124,18 @@ const Manager = () => {
         onThemeToggle={handleThemeToggle}
       />
       {filteredTabGroups.map((group, index) => (
-        <div key={group.windowId} className="window-group">
+        <div key={group.windowId} className="mb-5">
           <h2>{group.windowId === activeWindowId ? 'Current Window' : `Window ${index + 1}`}</h2>
-          <ul id="tabList">
+          <ul className="list-none">
             {group.tabs.map(tab => (
-              <li key={tab.id}>
+              <li key={tab.id} className="p-2.5 border-b border-gray-200 flex justify-between items-center">
                 <span>{tab.title}</span>
-                <button onClick={() => handleCloseTab(tab.id!)}>Close</button>
+                <button
+                  className="bg-red-500 text-white py-1 px-2.5 text-sm rounded-md"
+                  onClick={() => handleCloseTab(tab.id!)}
+                >
+                  Close
+                </button>
               </li>
             ))}
           </ul>

@@ -1,36 +1,5 @@
 @import 'tailwindcss';
 
-#tabList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-#tabList li {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-#tabList li button {
-  background-color: #f44336;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 12px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.manager-container {
-  padding: 20px;
-}
-
 .search-input {
   width: 100%;
   padding: 10px;
@@ -38,8 +7,4 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 16px;
-}
-
-.window-group {
-  margin-bottom: 20px;
 }
