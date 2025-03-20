@@ -15,7 +15,7 @@
     "postinstall": "wxt prepare",
     "lint": "eslint . --ext .ts,.tsx,.js,.mjs",
     "fix": "npm run fix:eslint && npm run fix:prettier",
-    "fix:eslint": "eslint . --ext .ts,.tsx,.js,.mjs --fix",
+    "fix:eslint": "npm run lint -- --fix",
     "fix:prettier": "prettier --write ."
   },
   "dependencies": {
