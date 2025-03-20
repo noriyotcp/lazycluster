@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Header from '../../src/components/Header';
 import WindowGroupList from '../../src/components/WindowGroupList';
 import type { Tabs } from 'webextension-polyfill';
