@@ -130,10 +130,7 @@ const Manager = () => {
             {group.tabs.map(tab => (
               <li key={tab.id} className="p-2.5 border-b border-gray-200 flex justify-between items-center">
                 <span>{tab.title}</span>
-                <button
-                  className="bg-red-500 text-white py-1 px-2.5 text-sm rounded-md"
-                  onClick={() => handleCloseTab(tab.id!)}
-                >
+                <button className="btn btn-error btn-xs" onClick={() => handleCloseTab(tab.id!)}>
                   Close
                 </button>
               </li>
