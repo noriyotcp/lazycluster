@@ -1,21 +1,18 @@
 import React from 'react';
+import { Tab } from '@/src/@types/types';
 
 interface TabItemProps {
-  tab: chrome.tabs.Tab;
+  tab: Tab;
+  handleCloseTab: (tabId: number) => void;
 }
 
-const TabItem = ({ tab }: TabItemProps) => {
-  const handleCloseTab = () => {
-    if (tab.id) {
-      chrome.tabs.remove(tab.id);
-    }
-  };
-
+const TabItem = ({ tab, handleCloseTab }: TabItemProps) => {
   return (
-    <li className="tab-item-container">
-      {tab.favIconUrl && <img src={tab.favIconUrl} alt="Favicon" className="tab-favicon" />}
-      <span className="tab-title">{tab.title}</span>
-      <button onClick={handleCloseTab}>Close</button>
+    <li className="p-2.5 border-b border-gray-200 flex justify-between items-center">
+      <span>{tab.title}</span>
+      <button className="btn btn-error btn-xs" onClick={() => handleCloseTab(tab.id!)}>
+        Close
+      </button>
     </li>
   );
 };

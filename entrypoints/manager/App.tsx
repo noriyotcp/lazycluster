@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Tab } from '@/src/@types/types';
 import Header from '../../src/components/Header';
+import WindowGroupList from '../../src/components/WindowGroupList';
 import './style.css';
 
 type Message = { type: string; tabs: Tab[]; tabId?: number };
@@ -123,21 +124,11 @@ const Manager = () => {
         theme={theme}
         onThemeToggle={handleThemeToggle}
       />
-      {filteredTabGroups.map((group, index) => (
-        <div key={group.windowId} className="mb-5">
-          <h2>{group.windowId === activeWindowId ? 'Current Window' : `Window ${index + 1}`}</h2>
-          <ul className="list-none">
-            {group.tabs.map(tab => (
-              <li key={tab.id} className="p-2.5 border-b border-gray-200 flex justify-between items-center">
-                <span>{tab.title}</span>
-                <button className="btn btn-error btn-xs" onClick={() => handleCloseTab(tab.id!)}>
-                  Close
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+      <WindowGroupList
+        filteredTabGroups={filteredTabGroups}
+        activeWindowId={activeWindowId}
+        handleCloseTab={handleCloseTab}
+      />
     </div>
   );
 };
