@@ -1,57 +1,80 @@
-# Progress: LazyCluster
+# Project Progress: LazyCluster
 
 ## What Works
 
-- **Memory Bank Initialization:** Core memory bank files (`projectbrief.md`, `productContext.md`, `activeContext.md`, `systemPatterns.md`, `techContext.md`, `progress.md`) are created and initialized with basic content.
-- **Project Context Documentation:** Research documents have been read and analyzed to understand project background, user needs, technical considerations, and design direction.
-- **Memory Bank Update:** Core memory bank files have been updated with detailed information extracted from research documents, providing a comprehensive project context.
-- **Technology Stack Defined:** Key technologies and frameworks (WXT, React, TypeScript, Vite, Chrome Extension APIs, Tailwind CSS (conceptual), Shadcn UI (conceptual)) have been selected and documented.
-- **System Architecture Outlined:** A modular system architecture consisting of Popup UI, Background Service Worker, and optional Content Scripts has been defined.
-- **Documentation Setup:** `README.md` has been updated with project overview, technologies, and development plan. `docs/adr` directory and `docs/adr/template.md` have been created for Architecture Decision Records. `.clinerules` has been updated to reflect project standards.
-- **Popup UI Implementation:** The popup UI has been implemented with a "Window Manager" button.
-- **Manager Page Setup:** The basic structure for the main UI (manager.html) has been created as a React component in `entrypoints/manager`.
-- **Added search bar to manager page:** Implemented a search bar in the manager page to filter tabs by title.
-- **Resolved duplicate manager tabs issue:** The `openWindowManager` function in `entrypoints/popup/App.tsx` now prevents duplicate manager tabs from opening.
-- **Implemented tab filtering:** The manager page now includes a search bar to filter tabs by title.
+- **Project Setup:**
+
+  - Project is initialized with WXT (Web Extension Toolkit).
+  - Basic project structure is in place, including `entrypoints` for different extension contexts (popup, manager, background, content).
+  - TypeScript, React, and Vite are configured and working correctly.
+  - Development environment is set up with Hot Module Replacement for efficient development.
+  - ESLint and Prettier are configured for linting and formatting.
+
+- **Memory Bank:**
+  - Core memory bank files are initialized: `projectbrief.md`, `productContext.md`, `activeContext.md`, `systemPatterns.md`, `techContext.md`, `progress.md`.
+  - `projectbrief.md`, `productContext.md`, `systemPatterns.md`, and `techContext.md` are drafted and updated.
+  - `activeContext.md` is being used to track current focus, recent changes, and next steps.
 
 ## What's Left to Build
 
-- **Core Extension Functionality:**
-  - Implement tab and window management features using Chrome Extension APIs (tab listing, searching, filtering, sorting, moving, closing, suspending, discarding).
-  - Implement session saving and restoring functionality.
-  - Implement window management features (creation, focusing, closing, optional naming).
-  - Implement keyboard shortcuts for extension actions.
-- **User Interface (Popup UI):**
-  - Further develop the popup UI using React and Tailwind CSS (conceptual), Shadcn UI (conceptual).
-  - Implement tab and window list display with different view options (list all tabs, group by window).
-  - Implement action buttons and UI elements for tab and window management.
-  - Integrate settings UI and Chrome Storage API.
-- **Manager Page (Main UI):**
-  - Implement tab listing using Chrome APIs.
-  - Implement tab and window management features in the main UI.
-- **Settings and Customization:**
-  - Develop settings page UI based on design documents.
-  - Implement settings for theme, tab display, keyboard shortcuts, auto-save, etc.
-  - Integrate settings with Chrome Storage API to persist user preferences.
-- **Testing and Refinement:**
-  - Thoroughly test all features and UI components in the Chrome browser.
-  - Gather user feedback and iterate on design and implementation.
-  - Address any bugs, performance issues, or usability problems.
-- **Chrome Web Store Deployment:**
-  - Prepare extension package for submission to the Chrome Web Store.
-  - Create store listing with descriptions, screenshots, and privacy policy.
-  - Submit extension for review and publication.
+- **Core Features:**
+
+  - **Window and Tab Overview (Manager Tab UI):**
+    - Implement UI to display all open windows and tabs.
+    - Implement drag and drop tab reordering within and between windows.
+    - Implement tab searching and filtering.
+    - Implement tab sorting within windows (including by domain).
+    - Implement bulk tab selection and actions (close, move, suspend).
+    - Implement management of tabs within each domain.
+  - **Tab Management Features:**
+    - Tab suspension to reduce memory usage.
+    - Tab discarding/closing with undo functionality.
+    - Ability to move tabs to new or existing windows.
+  - **Window Management Features:**
+    - Window creation and focusing.
+    - Window closing.
+    - Window naming (optional).
+  - **Session Management Features:**
+    - Saving and restoring browser sessions (windows and tabs).
+    - Opening saved sessions with tabs in a suspended state.
+    - Importing and exporting sessions in CSV/JSON format.
+    - Cloud backup and sync for saved sessions (future consideration).
+
+- **User Interface & Experience:**
+
+  - Develop the Manager Tab UI using React components.
+  - Develop the Popup UI (currently just for opening Manager Tab).
+  - Implement dark and light theme options.
+  - Implement customizable keyboard shortcuts to open the extension.
+  - Ensure clear visual feedback for actions.
+
+- **Testing:**
+
+  - Implement unit tests for core business logic.
+  - Implement integration tests for API endpoints and extension-specific functionalities.
+  - Implement end-to-end tests for critical user flows.
+
+- **Documentation:**
+  - Update relevant documentation in `/docs` when modifying features.
+  - Keep `README.md` in sync with new capabilities.
+  - Create ADRs in `/docs/adr` for significant architectural decisions.
 
 ## Current Status
 
-- **Memory bank initialized and updated with research findings.**
-- **Initial project plan and architecture defined.**
-- **Technology stack and development setup configured.**
-- **Documentation setup complete (README.md, docs/adr, .clinerules).**
-- **Popup UI implemented with "Window Manager" button.**
-- **Basic structure for main UI (manager.html) created as a React component in `entrypoints/manager`.**
-- **Added search bar to manager page:** Implemented a search bar in the manager page to filter tabs by title.
-- **Resolved duplicate manager tabs issue:** The `openWindowManager` function in `entrypoints/popup/App.tsx` now prevents duplicate manager tabs from opening.
-- **Ready to implement core extension functionality and UI development.**
+- **Planning Phase:** Initial project planning and documentation are in progress. Core memory bank files are being drafted and refined.
+- **Development Environment:** Development environment is set up and ready for implementation.
+- **Feature Prioritization:** Key features are identified and prioritized based on user needs and project goals.
+- **No major blockers identified yet.**
 
 ## Known Issues
+
+- **No testing framework is currently implemented.** This needs to be addressed as development progresses.
+- **UI development has not started yet.** Focus has been on project setup and documentation.
+
+## Next Actions
+
+1. **Finalize `progress.md` based on feedback.**
+2. **Start outlining UI structure and components for the Manager Tab UI.**
+3. **Begin implementing the basic UI structure in React.**
+4. **Set up a basic testing environment (e.g., Jest) and write initial unit tests.**
+5. **Continue to update memory bank files as development progresses.**

@@ -2,47 +2,61 @@
 
 ## System Architecture
 
-LazyCluster will adopt a modular architecture consisting of the following main components:
+LazyCluster follows a modular, component-based architecture, primarily leveraging React components for the UI and background scripts for core logic and browser API interactions. The architecture is designed to be event-driven and reactive, ensuring efficient updates and interactions between different parts of the extension.
 
-- **Popup UI (React):** The extension will feature a popup UI, displayed when the extension icon is clicked. This popup will contain a "Window Manager" button. Upon clicking this button, the extension will open a new browser tab, pin it, and load the `manager.html` page within it. This `manager.html` page, acting as the main application window, will then display a comprehensive list of all currently open tabs and windows, providing the primary interface for tab and window management. The URL for this manager tab will follow the format `chrome-extension://<extension-id>/manager.html`. This design, where the main UI resides in a pinned tab launched from the popup, is directly inspired by the user experience of the original "cluster" extension. The popup itself will primarily serve as a launcher for the main "Window Manager" tab, and may contain quick actions or status indicators in the future.
-- **Background Service Worker (TypeScript):** The core logic of the extension, responsible for interacting with Chrome APIs, managing data, and handling events. Implemented in TypeScript for robustness and maintainability.
-- **Content Scripts (Optional, TypeScript):** Potentially used for advanced features like tab summarization or similar tab detection, if needed. Content scripts would communicate with the background service worker.
+### Component Descriptions
 
-Communication between components will primarily use Chrome Runtime Messaging API. State management within the popup UI will be handled using React's built-in state management or a lightweight state management library if necessary. Data persistence will be managed using Chrome Storage API, initially focusing on `storage.local`.
+1.  **Manager Tab UI (React):**
 
-## Key Technical Decisions
+    - Built using React and TypeScript, specifically `entrypoints/manager/App.tsx`.
+    - Responsible for rendering the main user interface within a dedicated browser tab (the "manager tab").
+    - Displays a clear overview of windows and tabs, and handles all tab and window management functionalities.
+    - Composed of various UI components for displaying lists of windows and tabs, search bars, buttons, and interactive elements.
+    - Handles user interactions such as drag and drop, button clicks, and search input to manage tabs and windows.
+    - Communicates with the Background Script to fetch data and trigger actions.
 
-- **Framework: WXT:** Utilize WXT framework to streamline development, leveraging Vite for build process, HMR, and extension-specific features.
-- **UI Framework: React:** Employ React for building the popup UI due to its component-based architecture, virtual DOM, and ecosystem support.
-- **Language: TypeScript:** Adopt TypeScript for both UI and background logic to enhance code quality, maintainability, and developer experience.
-- **Build Tool: Vite:** Leverage Vite for its speed, efficient development workflow, and optimized production builds.
-- **Chrome Extension APIs:** Utilize Chrome Tabs, Windows, Storage, Commands, and Runtime APIs for core extension functionality.
+2.  **Popup UI (React):**
 
-## Design Patterns
+    - Built using React and TypeScript, specifically `entrypoints/popup/App.tsx`.
+    - Currently has a very limited role: primarily to provide a button that opens the "manager tab".
+    - This popup UI is lightweight and focused on quickly directing users to the full management interface in the manager tab.
+    - Communicates with the Background Script to request the opening of the manager tab.
 
-- **Component-Based Architecture (React):** Break down the UI into reusable and modular React components for maintainability and scalability.
-- **Event-Driven Architecture (Service Worker):** Utilize Chrome Extension event APIs (e.g., tabs.onCreated, windows.onFocusChanged) to trigger actions and manage state changes in the background service worker.
-- **Message Passing (Chrome Runtime Messaging):** Employ Chrome Runtime Messaging API for communication between popup UI and background service worker, and potentially content scripts.
-- **State Management (React Context/useState/useReducer):** Utilize React's state management features to manage UI state within the popup component efficiently.
+3.  **Background Script (background.ts):**
 
-## Component Relationships
+    - The core logic of the extension resides here.
+    - Manages interactions with Chrome Extension APIs to:
+      - Fetch window and tab data.
+      - Modify tabs (move, suspend, close, etc.).
+      - Modify windows (create, focus, close, etc.).
+      - Implement session saving and restoring logic.
+    - Handles events from both the Manager Tab UI and the Popup UI, as well as browser events (e.g., tab created, tab closed).
+    - Orchestrates communication between different parts of the extension.
 
-- **Popup UI <-> Background Service Worker:** Popup UI will send messages to the background service worker to perform actions such as:
+4.  **Content Script (content.ts - Optional):**
+    - Currently considered optional. May be used in the future if features require interaction with the content of web pages.
+    - If implemented, it would allow the extension to access and manipulate the DOM of web pages, potentially for features like tab grouping based on page content or advanced tab information extraction.
 
-  - Fetching tab and window data.
-  - Suspending/discarding tabs.
-  - Closing tabs and windows.
-  - Saving and restoring sessions.
-  - Applying user settings.
-    The background service worker will respond with data updates and action confirmations.
+### Key Design Patterns
 
-- **Background Service Worker <-> Chrome APIs:** The background service worker will directly interact with Chrome Extension APIs to:
+- **Component-Based Architecture:** The UI is built using reusable React components, promoting modularity and maintainability.
+- **Event-Driven Architecture:** Communication between components, especially between the UIs and background script, is primarily event-driven. This allows for loose coupling and reactive updates.
+- **State Management (within React UIs):** React's built-in state management or potentially a library like Zustand or Recoil (if needed for more complex state) will be used to manage UI state and data flow within both the Manager Tab UI and Popup UI.
+- **Service Worker Pattern (Background Script):** The background script acts as a service worker, running in the background and handling long-running tasks and event processing.
 
-  - Query and manipulate tabs and windows (chrome.tabs, chrome.windows).
-  - Store and retrieve extension data (chrome.storage).
-  - Register commands (chrome.commands).
-  - Manage extension lifecycle and communication (chrome.runtime).
+### Data Flow
 
-- **Content Scripts <-> Background Service Worker (Optional):** If content scripts are implemented, they will communicate with the background service worker to:
-  - Send page content for analysis (e.g., for tab summarization).
-  - Receive instructions from the background service worker.
+_(Data flow description remains largely the same, but now refers to "Manager Tab UI" instead of "Popup UI" for actions related to window and tab management)_
+
+1.  **Initial Load (Manager Tab):** When the Manager Tab UI is opened, it requests window and tab data from the Background Script.
+2.  **Data Fetching:** The Background Script uses Chrome Extension APIs to retrieve the current state of windows and tabs.
+3.  **Data Rendering:** The Background Script sends the data back to the Manager Tab UI, which renders it using React components.
+4.  **User Actions (Manager Tab):** User interactions in the Manager Tab UI (e.g., clicking a button, dragging a tab) trigger events.
+5.  **Command Handling:** These events are sent to the Background Script, which processes the commands using Chrome Extension APIs to modify tabs or windows.
+6.  **State Updates:** Changes made by the Background Script are reflected in the browser state, and the Background Script may push updates back to the Manager Tab UI to refresh the displayed data.
+
+### Considerations
+
+- **Performance:** Efficient data handling and rendering are crucial for a smooth user experience, especially with a large number of tabs and windows in the Manager Tab UI.
+- **Scalability:** The architecture should be scalable to accommodate potential future features and increased complexity, particularly within the Manager Tab UI.
+- **Maintainability:** Modularity and clear separation of concerns are essential for long-term maintainability and ease of development, especially as the Manager Tab UI becomes more feature-rich.
