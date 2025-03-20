@@ -5,14 +5,12 @@ import ThemeSwitcher from './ThemeSwitcher';
 interface HeaderProps {
   searchQuery: string;
   onSearchQueryChange: (query: string) => void;
-  theme: 'light' | 'dark';
-  onThemeToggle: () => void;
 }
 
-const Header = ({ searchQuery, onSearchQueryChange, theme, onThemeToggle }: HeaderProps) => (
+const Header = ({ searchQuery, onSearchQueryChange }: HeaderProps) => (
   <header className="manager-header-container">
     <SearchBar searchQuery={searchQuery} onSearchQueryChange={onSearchQueryChange} />
-    <ThemeSwitcher theme={theme} onThemeToggle={onThemeToggle} />
+    <ThemeSwitcher />
   </header>
 );
 

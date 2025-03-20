@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
-interface ThemeSwitcherProps {
-  theme: 'light' | 'dark';
-  onThemeToggle: () => void;
-}
+const ThemeSwitcher = () => {
+  const initialTheme = localStorage.getItem('lazycluster-theme') || 'light';
+  const [theme, setTheme] = useState<'light' | 'dark'>(initialTheme as 'light' | 'dark');
 
-const ThemeSwitcher = ({ theme, onThemeToggle }: ThemeSwitcherProps) => {
+  const toggleTheme = useCallback(() => {
+    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('lazycluster-theme', theme);
+  }, [theme]);
+
   return (
     <label className="flex cursor-pointer gap-2">
       <svg
@@ -26,7 +32,7 @@ const ThemeSwitcher = ({ theme, onThemeToggle }: ThemeSwitcherProps) => {
         type="checkbox"
         value="dracula"
         className="toggle theme-controller"
-        onChange={onThemeToggle}
+        onChange={toggleTheme}
         checked={theme === 'dark'}
       />
       <svg

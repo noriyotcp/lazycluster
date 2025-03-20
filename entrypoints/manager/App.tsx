@@ -15,11 +15,6 @@ const Manager = () => {
   const [tabGroups, setTabGroups] = useState<TabGroup[]>([]);
   const [activeWindowId, setActiveWindowId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
-  const handleThemeToggle = useCallback(() => {
-    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
-  }, []);
 
   useEffect(() => {
     // Connect to background script
@@ -118,12 +113,7 @@ const Manager = () => {
 
   return (
     <div className="p-5">
-      <Header
-        searchQuery={searchQuery}
-        onSearchQueryChange={setSearchQuery}
-        theme={theme}
-        onThemeToggle={handleThemeToggle}
-      />
+      <Header searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} />
       <WindowGroupList
         filteredTabGroups={filteredTabGroups}
         activeWindowId={activeWindowId}
