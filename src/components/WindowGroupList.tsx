@@ -10,7 +10,7 @@ interface WindowGroupListProps {
 }
 
 const WindowGroupList = ({ filteredTabGroups, activeWindowId, handleCloseTab }: WindowGroupListProps) => (
-  <ul className="window-group-list-container">
+  <>
     {filteredTabGroups.map((tabGroup, index) => (
       <WindowGroupContextProvider key={tabGroup.windowId} value={{ windowGroupNumber: index }}>
         <WindowGroup
@@ -21,7 +21,7 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, handleCloseTab }: 
         />
       </WindowGroupContextProvider>
     ))}
-  </ul>
+  </>
 );
 
 export default WindowGroupList;

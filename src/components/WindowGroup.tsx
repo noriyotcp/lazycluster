@@ -1,7 +1,7 @@
-import React from 'react';
 import WindowHeader from './WindowHeader';
 import TabList from './TabList';
 import type { Tabs } from 'webextension-polyfill';
+import WindowActions from './WindowActions';
 
 interface WindowGroupProps {
   tabGroup: {
@@ -13,9 +13,15 @@ interface WindowGroupProps {
 }
 
 const WindowGroup = ({ tabGroup, activeWindowId, handleCloseTab }: WindowGroupProps) => (
-  <div className={`window-group-container ${tabGroup.windowId === activeWindowId ? 'active-window' : ''}`}>
-    <WindowHeader windowId={tabGroup.windowId} activeWindowId={activeWindowId} />
-    <TabList tabs={tabGroup.tabs} handleCloseTab={handleCloseTab} />
+  <div className="collapse collapse-arrow bg-base-100 border-base-300 border rounded-none mt-4">
+    <input type="checkbox" defaultChecked={true} />
+    <div className="collapse-title font-semibold">
+      <WindowHeader windowId={tabGroup.windowId} activeWindowId={activeWindowId} />
+    </div>
+    <div className="collapse-content">
+      <WindowActions windowId={tabGroup.windowId} />
+      <TabList tabs={tabGroup.tabs} handleCloseTab={handleCloseTab} />
+    </div>
   </div>
 );
 
