@@ -12,6 +12,7 @@ interface TabGroup {
 const Manager = () => {
   const [tabGroups, setTabGroups] = useState<TabGroup[]>([]);
   const [activeWindowId, setActiveWindowId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
     // Connect to background script
@@ -103,16 +104,28 @@ const Manager = () => {
     [closeTab]
   );
 
+  const filteredTabGroups = tabGroups.map(group => ({
+    ...group,
+    tabs: group.tabs.filter(tab => tab.title?.toLowerCase().includes(searchQuery.toLowerCase())),
+  }));
+
   return (
-    <div>
+    <div className="manager-container">
       <h1>Open Tabs</h1>
-      {tabGroups.map((group, index) => (
-        <div key={group.windowId}>
+      <input
+        type="text"
+        placeholder="Search tabs..."
+        value={searchQuery}
+        onChange={e => setSearchQuery(e.target.value)}
+        className="search-input"
+      />
+      {filteredTabGroups.map((group, index) => (
+        <div key={group.windowId} className="window-group">
           <h2>{group.windowId === activeWindowId ? 'Current Window' : `Window ${index + 1}`}</h2>
-          <ul>
+          <ul id="tabList">
             {group.tabs.map(tab => (
               <li key={tab.id}>
-                {tab.title}
+                <span>{tab.title}</span>
                 <button onClick={() => handleCloseTab(tab.id!)}>Close</button>
               </li>
             ))}
