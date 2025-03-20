@@ -13,6 +13,12 @@
   - Component-based architecture facilitates modular UI development and reusability.
   - React Hooks are used for managing component state and side effects.
 
+  - **Styling Library:** Tailwind CSS
+
+    - Used for styling the UI components in the `manager` entrypoint.
+    - Utility-first CSS framework that allows for rapid UI development and consistent styling.
+    - Replaces traditional CSS for component styling in the `manager` entrypoint.
+
 - **Web Extension Framework:** WXT (Web Extension Toolkit)
 
   - A modern web extension framework that simplifies development, building, and packaging of browser extensions.
