@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Tab } from '@/src/@types/types';
 import Header from '../../src/components/Header';
 import WindowGroupList from '../../src/components/WindowGroupList';
+import type { Tabs } from 'webextension-polyfill';
 import './style.css';
 
-type Message = { type: string; tabs: Tab[]; tabId?: number };
+type Message = { type: string; tabs: Tabs.Tab[]; tabId?: number };
 
 interface TabGroup {
   windowId: number;
-  tabs: Tab[];
+  tabs: Tabs.Tab[];
 }
 
 const Manager = () => {
@@ -75,8 +75,8 @@ const Manager = () => {
     return [activeWindowGroup, ...tabGroups]; // Insert the active window group at the beginning
   };
 
-  const groupTabsByWindow = (tabs: Tab[]): TabGroup[] => {
-    const groups: { [windowId: number]: Tab[] } = {};
+  const groupTabsByWindow = (tabs: Tabs.Tab[]): TabGroup[] => {
+    const groups: { [windowId: number]: Tabs.Tab[] } = {};
     tabs.forEach(tab => {
       if (tab.windowId) {
         if (!groups[tab.windowId]) {

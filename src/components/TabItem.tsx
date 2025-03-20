@@ -1,8 +1,8 @@
 import React from 'react';
-import { Tab } from '@/src/@types/types';
+import type { Tabs } from 'webextension-polyfill';
 
 interface TabItemProps {
-  tab: Tab;
+  tab: Tabs.Tab;
   handleCloseTab: (tabId: number) => void;
 }
 

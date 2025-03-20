@@ -1,9 +1,9 @@
 import React from 'react';
 import WindowGroup from './WindowGroup';
-import { Tab } from '@/src/@types/types';
+import type { Tabs } from 'webextension-polyfill';
 
 interface WindowGroupListProps {
-  filteredTabGroups: { windowId: number; tabs: Tab[] }[];
+  filteredTabGroups: { windowId: number; tabs: Tabs.Tab[] }[];
   activeWindowId: number | null;
   handleCloseTab: (tabId: number) => void;
 }

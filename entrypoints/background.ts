@@ -1,4 +1,4 @@
-import { Tab } from '@/src/@types/types';
+import type { Tabs } from 'webextension-polyfill';
 
 export default defineBackground(() => {
   console.log('Hello background!', { id: browser.runtime.id });
@@ -6,11 +6,11 @@ export default defineBackground(() => {
   let port: chrome.runtime.Port | null = null;
 
   // Function to get tabs with windowId
-  const getTabs = async (): Promise<Tab[]> => {
+  const getTabs = async (): Promise<Tabs.Tab[]> => {
     const windows = await browser.windows.getAll({ populate: true });
-    const tabs: Tab[] = windows.reduce<Tab[]>((acc, win) => {
+    const tabs: Tabs.Tab[] = windows.reduce<Tabs.Tab[]>((acc, win) => {
       if (win.tabs) {
-        acc.push(...win.tabs.map(tab => ({ id: tab.id, windowId: win.id, title: tab.title })));
+        acc.push(...(win.tabs as Tabs.Tab[]));
       }
       return acc;
     }, []);

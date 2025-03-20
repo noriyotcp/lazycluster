@@ -1,12 +1,12 @@
 import React from 'react';
 import WindowHeader from './WindowHeader';
 import TabList from './TabList';
-import { Tab } from '@/src/@types/types';
+import type { Tabs } from 'webextension-polyfill';
 
 interface WindowGroupProps {
   tabGroup: {
     windowId: number;
-    tabs: Tab[];
+    tabs: Tabs.Tab[];
   };
   activeWindowId: number | null;
   handleCloseTab: (tabId: number) => void;
