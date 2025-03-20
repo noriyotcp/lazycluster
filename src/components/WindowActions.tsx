@@ -13,10 +13,10 @@ const WindowActions = ({ windowId }: WindowActionsProps) => {
 
   return (
     <div className="window-actions-container">
-      <button className="btn btn-link" onClick={handleFocusWindow}>
+      <button className="btn btn-link btn-xs" onClick={handleFocusWindow}>
         Focus
       </button>
-      <button className="btn btn-link" onClick={handleCloseWindow}>
+      <button className="btn btn-link btn-xs" onClick={handleCloseWindow}>
         Close
       </button>
     </div>

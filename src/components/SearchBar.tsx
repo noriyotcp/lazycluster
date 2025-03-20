@@ -9,7 +9,7 @@ const SearchBar = ({ searchQuery, onSearchQueryChange }: SearchBarProps) => (
     placeholder="Search tabs..."
     value={searchQuery}
     onChange={e => onSearchQueryChange(e.target.value)}
-    className="w-full p-2.5 mb-5 border border-gray-300 rounded-md text-base"
+    className="w-full p-2.5 border border-gray-300 rounded-md text-base"
   />
 );
 
