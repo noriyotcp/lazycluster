@@ -10,7 +10,9 @@
 - **Documentation Setup:** `README.md` has been updated with project overview, technologies, and development plan. `docs/adr` directory and `docs/adr/template.md` have been created for Architecture Decision Records. `.clinerules` has been updated to reflect project standards.
 - **Popup UI Implementation:** The popup UI has been implemented with a "Window Manager" button.
 - **Manager Page Setup:** The basic structure for the main UI (manager.html) has been created as a React component in `entrypoints/manager`.
+- **Added search bar to manager page:** Implemented a search bar in the manager page to filter tabs by title.
 - **Resolved duplicate manager tabs issue:** The `openWindowManager` function in `entrypoints/popup/App.tsx` now prevents duplicate manager tabs from opening.
+- **Implemented tab filtering:** The manager page now includes a search bar to filter tabs by title.
 
 ## What's Left to Build
 
@@ -22,7 +24,6 @@
 - **User Interface (Popup UI):**
   - Further develop the popup UI using React and Tailwind CSS (conceptual), Shadcn UI (conceptual).
   - Implement tab and window list display with different view options (list all tabs, group by window).
-  - Implement search and filter functionality in the popup UI.
   - Implement action buttons and UI elements for tab and window management.
   - Integrate settings UI and Chrome Storage API.
 - **Manager Page (Main UI):**
@@ -48,7 +49,9 @@
 - **Technology stack and development setup configured.**
 - **Documentation setup complete (README.md, docs/adr, .clinerules).**
 - **Popup UI implemented with "Window Manager" button.**
-- **Basic structure for main UI (manager.html) created as React component.**
+- **Basic structure for main UI (manager.html) created as a React component in `entrypoints/manager`.**
+- **Added search bar to manager page:** Implemented a search bar in the manager page to filter tabs by title.
+- **Resolved duplicate manager tabs issue:** The `openWindowManager` function in `entrypoints/popup/App.tsx` now prevents duplicate manager tabs from opening.
 - **Ready to implement core extension functionality and UI development.**
 
 ## Known Issues

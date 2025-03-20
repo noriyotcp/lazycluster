@@ -4,7 +4,7 @@ A Chrome extension for enhanced tab and window management, inspired by the origi
 
 ## Overview
 
-LazyCluster aims to provide a streamlined and intuitive interface for managing your browser tabs and windows. It allows you to easily list, search, filter, sort, move, close, suspend, and discard tabs, as well as save and restore sessions. Tabs in the manager tab are now grouped by window for better organization.
+LazyCluster aims to provide a streamlined and intuitive interface for managing your browser tabs and windows. It allows you to easily list, search, filter, sort, move, close, suspend, and discard tabs, as well as save and restore sessions. Tabs in the manager tab are now grouped by window for better organization. The manager page also includes a search bar to filter tabs by title.
 
 ## Technologies Used
 
@@ -25,9 +25,3 @@ LazyCluster aims to provide a streamlined and intuitive interface for managing y
 5.  **Settings Page:** (Future) Implement a settings page for customization.
 6.  **Testing and Debugging:** Thoroughly test all features in Chrome.
 7.  **Documentation:** Document the development process and architectural decisions.
-
-## Next Steps
-
-1.  Implement the Popup UI and the "Window Manager" button.
-2.  Create the basic structure for the main UI (manager.html).
-3.  Set up the Background Service Worker.

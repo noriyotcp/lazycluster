@@ -40,3 +40,9 @@
 - Standardize API checks at the beginning of projects to avoid misconfiguration issues.
 - Develop guidelines for selecting appropriate tools (e.g., when to use `write_to_file` versus `replace_in_file`) based on the scale of the changes.
 - Document lessons learned in a centralized location (e.g., this Active Context document) to inform and improve future development iterations.
+
+### Lessons Learned - Search Bar Implementation
+
+- **Tool Selection:** The `replace_in_file` tool proved unreliable for larger or complex changes. Using `write_to_file` directly is a safer option when facing difficulties with `replace_in_file`.
+- **Testing:** It's crucial to carefully test changes after each tool use to catch errors early.
+- **Error Handling:** Implement better error handling and validation to prevent tool failures.
