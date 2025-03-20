@@ -10,6 +10,9 @@ export default defineConfig({
       enabled: 9,
     },
   },
+  manifest: {
+    permissions: ['tabs'],
+  },
   vite: () => ({
     plugins: [tailwindcss()],
   }),

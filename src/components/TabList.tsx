@@ -8,7 +8,7 @@ interface TabListProps {
 }
 
 const TabList = ({ tabs, handleCloseTab }: TabListProps) => (
-  <ul className="list-none">
+  <ul className="list shadow-md">
     {tabs.map(tab => (
       <TabItem key={tab.id} tab={tab} handleCloseTab={handleCloseTab} />
     ))}
