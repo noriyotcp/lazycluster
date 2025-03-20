@@ -7,8 +7,8 @@ interface WindowTitleProps {
 }
 
 const WindowTitle = ({ windowId, activeWindowId }: WindowTitleProps) => {
-  const { sequenceNumber } = useWindowGroupContext();
-  const title = windowId === activeWindowId ? 'Current Window' : `Window ${sequenceNumber}`;
+  const { windowGroupNumber } = useWindowGroupContext();
+  const title = windowId === activeWindowId ? 'Current Window' : `Window ${windowGroupNumber}`;
   return <h2 className="window-title">{title}</h2>;
 };
 

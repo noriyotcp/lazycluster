@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 
 interface WindowGroupContextProps {
-  sequenceNumber: number;
+  windowGroupNumber: number;
 }
 
 const WindowGroupContext = createContext<WindowGroupContextProps | undefined>(undefined);
