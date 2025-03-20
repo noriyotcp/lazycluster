@@ -20,7 +20,7 @@ const globeIcon = () => {
 const TabItem = ({ tab, handleCloseTab }: TabItemProps) => {
   return (
     <li className="list-row p-2 items-center">
-      <div>{tab.favIconUrl ? <img className="size-4" src={tab.favIconUrl} alt="favicon" /> : globeIcon()}</div>
+      <div>{tab.favIconUrl ? <img className="size-4" src={tab.favIconUrl} alt={tab.title} /> : globeIcon()}</div>
       <span>{tab.title}</span>
       <button className="btn btn-error btn-xs" onClick={() => handleCloseTab(tab.id!)}>
         Close
