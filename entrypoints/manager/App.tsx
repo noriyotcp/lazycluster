@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Tab } from '@/src/@types/types';
+import Header from '../../src/components/Header';
 import './style.css';
 
 type Message = { type: string; tabs: Tab[]; tabId?: number };
@@ -13,6 +14,11 @@ const Manager = () => {
   const [tabGroups, setTabGroups] = useState<TabGroup[]>([]);
   const [activeWindowId, setActiveWindowId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  const handleThemeToggle = useCallback(() => {
+    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  }, []);
 
   useEffect(() => {
     // Connect to background script
@@ -111,13 +117,11 @@ const Manager = () => {
 
   return (
     <div className="manager-container">
-      <h1>Open Tabs</h1>
-      <input
-        type="text"
-        placeholder="Search tabs..."
-        value={searchQuery}
-        onChange={e => setSearchQuery(e.target.value)}
-        className="search-input"
+      <Header
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+        theme={theme}
+        onThemeToggle={handleThemeToggle}
       />
       {filteredTabGroups.map((group, index) => (
         <div key={group.windowId} className="window-group">
