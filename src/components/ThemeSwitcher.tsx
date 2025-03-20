@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const ThemeSwitcher = () => {
-  const initialTheme = localStorage.getItem('lazycluster-theme') || 'light';
-  const [theme, setTheme] = useState<'light' | 'dark'>(initialTheme as 'light' | 'dark');
+  const initialTheme = localStorage.getItem('lazycluster-theme') || 'default';
+  const [theme, setTheme] = useState<'default' | 'dark'>(initialTheme as 'default' | 'dark');
 
   const toggleTheme = useCallback(() => {
-    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+    setTheme(prevTheme => (prevTheme === 'default' ? 'dark' : 'default'));
   }, []);
 
   useEffect(() => {
