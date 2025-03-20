@@ -5,11 +5,12 @@ import WindowActions from './WindowActions';
 interface WindowHeaderProps {
   windowId: number;
   activeWindowId: number | null;
+  sequenceNumber: number;
 }
 
-const WindowHeader = ({ windowId, activeWindowId }: WindowHeaderProps) => (
+const WindowHeader = ({ windowId, activeWindowId, sequenceNumber }: WindowHeaderProps) => (
   <div className="window-header-container">
-    <WindowTitle windowId={windowId} activeWindowId={activeWindowId} />
+    <WindowTitle windowId={windowId} activeWindowId={activeWindowId} sequenceNumber={sequenceNumber} />
     <WindowActions windowId={windowId} />
   </div>
 );

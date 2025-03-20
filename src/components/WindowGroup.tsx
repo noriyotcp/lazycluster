@@ -10,11 +10,12 @@ interface WindowGroupProps {
   };
   activeWindowId: number | null;
   handleCloseTab: (tabId: number) => void;
+  sequenceNumber: number;
 }
 
-const WindowGroup = ({ tabGroup, activeWindowId, handleCloseTab }: WindowGroupProps) => (
+const WindowGroup = ({ tabGroup, activeWindowId, handleCloseTab, sequenceNumber }: WindowGroupProps) => (
   <div className={`window-group-container ${tabGroup.windowId === activeWindowId ? 'active-window' : ''}`}>
-    <WindowHeader windowId={tabGroup.windowId} activeWindowId={activeWindowId} />
+    <WindowHeader windowId={tabGroup.windowId} activeWindowId={activeWindowId} sequenceNumber={sequenceNumber} />
     <TabList tabs={tabGroup.tabs} handleCloseTab={handleCloseTab} />
   </div>
 );
