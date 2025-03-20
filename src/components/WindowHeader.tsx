@@ -1,4 +1,3 @@
-import React from 'react';
 import WindowTitle from './WindowTitle';
 
 interface WindowHeaderProps {

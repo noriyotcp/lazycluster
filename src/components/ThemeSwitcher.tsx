@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const ThemeSwitcher = () => {
   const initialTheme = localStorage.getItem('lazycluster-theme') || 'light';

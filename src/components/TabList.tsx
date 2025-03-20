@@ -1,4 +1,3 @@
-import React from 'react';
 import TabItem from './TabItem';
 import type { Tabs } from 'webextension-polyfill';
 

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useWindowGroupContext } from '../contexts/WindowGroupContext';
 
 interface WindowTitleProps {

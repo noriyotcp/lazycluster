@@ -1,4 +1,3 @@
-import React from 'react';
 import WindowGroup from './WindowGroup';
 import type { Tabs } from 'webextension-polyfill';
 import { WindowGroupContextProvider } from '../contexts/WindowGroupContext';
