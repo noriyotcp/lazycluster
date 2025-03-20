@@ -4,7 +4,7 @@ interface WindowActionsProps {
   windowId: number;
 }
 
-const WindowActions: React.FC<WindowActionsProps> = ({ windowId }) => {
+const WindowActions = ({ windowId }: WindowActionsProps) => {
   const handleFocusWindow = () => {
     chrome.windows.update(windowId, { focused: true });
   };

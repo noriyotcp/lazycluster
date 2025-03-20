@@ -5,7 +5,7 @@ interface WindowTitleProps {
   activeWindowId: number | null;
 }
 
-const WindowTitle: React.FC<WindowTitleProps> = ({ windowId, activeWindowId }) => {
+const WindowTitle = ({ windowId, activeWindowId }: WindowTitleProps) => {
   const title = windowId === activeWindowId ? 'Current Window' : `Window ${windowId}`;
   return <h2 className="window-title">{title}</h2>;
 };

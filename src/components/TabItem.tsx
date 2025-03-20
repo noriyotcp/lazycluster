@@ -4,7 +4,7 @@ interface TabItemProps {
   tab: chrome.tabs.Tab;
 }
 
-const TabItem: React.FC<TabItemProps> = ({ tab }) => {
+const TabItem = ({ tab }: TabItemProps) => {
   const handleCloseTab = () => {
     if (tab.id) {
       chrome.tabs.remove(tab.id);

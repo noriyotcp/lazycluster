@@ -6,14 +6,12 @@ interface WindowGroupListProps {
   activeWindowId: number | null;
 }
 
-const WindowGroupList: React.FC<WindowGroupListProps> = ({ filteredTabGroups, activeWindowId }) => {
-  return (
-    <ul className="window-group-list-container">
-      {filteredTabGroups.map(tabGroup => (
-        <WindowGroup key={tabGroup.windowId} tabGroup={tabGroup} activeWindowId={activeWindowId} />
-      ))}
-    </ul>
-  );
-};
+const WindowGroupList = ({ filteredTabGroups, activeWindowId }: WindowGroupListProps) => (
+  <ul className="window-group-list-container">
+    {filteredTabGroups.map(tabGroup => (
+      <WindowGroup key={tabGroup.windowId} tabGroup={tabGroup} activeWindowId={activeWindowId} />
+    ))}
+  </ul>
+);
 
 export default WindowGroupList;

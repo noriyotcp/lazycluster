@@ -5,8 +5,8 @@ interface ThemeSwitcherProps {
   onThemeToggle: () => void;
 }
 
-const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ theme, onThemeToggle }) => {
-  return <button onClick={onThemeToggle}>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</button>;
-};
+const ThemeSwitcher = ({ theme, onThemeToggle }: ThemeSwitcherProps) => (
+  <button onClick={onThemeToggle}>{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</button>
+);
 
 export default ThemeSwitcher;

@@ -10,13 +10,11 @@ interface WindowGroupProps {
   activeWindowId: number | null;
 }
 
-const WindowGroup: React.FC<WindowGroupProps> = ({ tabGroup, activeWindowId }) => {
-  return (
-    <div className={`window-group-container ${tabGroup.windowId === activeWindowId ? 'active-window' : ''}`}>
-      <WindowHeader windowId={tabGroup.windowId} activeWindowId={activeWindowId} />
-      <TabList tabs={tabGroup.tabs} />
-    </div>
-  );
-};
+const WindowGroup = ({ tabGroup, activeWindowId }: WindowGroupProps) => (
+  <div className={`window-group-container ${tabGroup.windowId === activeWindowId ? 'active-window' : ''}`}>
+    <WindowHeader windowId={tabGroup.windowId} activeWindowId={activeWindowId} />
+    <TabList tabs={tabGroup.tabs} />
+  </div>
+);
 
 export default WindowGroup;

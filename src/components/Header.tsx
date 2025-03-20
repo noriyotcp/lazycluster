@@ -9,13 +9,11 @@ interface HeaderProps {
   onThemeToggle: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchQueryChange, theme, onThemeToggle }) => {
-  return (
-    <header className="manager-header-container">
-      <SearchBar searchQuery={searchQuery} onSearchQueryChange={onSearchQueryChange} />
-      <ThemeSwitcher theme={theme} onThemeToggle={onThemeToggle} />
-    </header>
-  );
-};
+const Header = ({ searchQuery, onSearchQueryChange, theme, onThemeToggle }: HeaderProps) => (
+  <header className="manager-header-container">
+    <SearchBar searchQuery={searchQuery} onSearchQueryChange={onSearchQueryChange} />
+    <ThemeSwitcher theme={theme} onThemeToggle={onThemeToggle} />
+  </header>
+);
 
 export default Header;
