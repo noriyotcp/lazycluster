@@ -12,6 +12,7 @@ export default defineConfig({
   },
   manifest: {
     permissions: ['tabs'],
+    description: 'Organize Chrome tabs & windows. Enjoy comfortable browsing & boost productivity.',
   },
   vite: () => ({
     plugins: [tailwindcss()],
