@@ -10,9 +10,9 @@ interface WindowGroupListProps {
 }
 
 const WindowGroupList = ({ filteredTabGroups, activeWindowId, handleCloseTab, focusTab }: WindowGroupListProps) => (
-  <div className="flex flex-col flex-wrap max-h-screen gap-4">
+  <div className="columns-2 mt-4">
     {filteredTabGroups.map((tabGroup, index) => (
-      <div key={tabGroup.windowId} className="w-full md:w-1/2">
+      <div key={tabGroup.windowId} className="break-inside-avoid-column">
         <WindowGroupContextProvider key={tabGroup.windowId} value={{ windowGroupNumber: index }}>
           <WindowGroup
             key={tabGroup.windowId}

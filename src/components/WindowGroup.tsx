@@ -14,7 +14,7 @@ interface WindowGroupProps {
 }
 
 const WindowGroup = ({ tabGroup, activeWindowId, handleCloseTab, focusTab }: WindowGroupProps) => (
-  <div className="collapse collapse-arrow bg-base-100 border-base-300 border rounded-none mt-4">
+  <div className="collapse collapse-arrow bg-base-100 border-base-300 border rounded-none mb-4">
     <input type="checkbox" defaultChecked={true} />
     <div className="collapse-title font-semibold">
       <WindowHeader windowId={tabGroup.windowId} activeWindowId={activeWindowId} />
