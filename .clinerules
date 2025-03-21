@@ -40,6 +40,10 @@ Follow the template in `/docs/adr/template.md` (create this template file).
 - After making changes, always test the application to ensure that all functionalities are working as expected.
 - Before completing a task, verify that all acceptance criteria have been met.
 - After completing a task, list up the mistakes we made and what we can learn from them.
+  Learnings from this task:
+  1. SEARCH blocks in replace_in_file must exactly match the file content, including whitespace and line endings.
+  2. In PLAN MODE, remember to use plan_mode_response tool for responses.
+  3. Error messages (especially eslint and ts errors) are important hints for problem solving (Importance of error messages).
 - Memory bank files should be reviewed and updated when discovering new project patterns, after implementing significant changes, when the user requests with "update memory bank", and when context needs clarification.
 - When modifying tab management logic, ensure that all edge cases are handled correctly, such as tabs in different windows.
 
