@@ -8,7 +8,7 @@ interface HeaderProps {
 
 const Header = ({ searchQuery, onSearchQueryChange }: HeaderProps) => (
   <header>
-    <span className="flex justify-stretch items-baseline gap-x-4">
+    <span className="flex justify-between items-center gap-x-4">
       <SearchBar searchQuery={searchQuery} onSearchQueryChange={onSearchQueryChange} />
       <ThemeSwitcher />
     </span>
