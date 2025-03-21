@@ -22,7 +22,6 @@
 
 ## Next Steps
 
-- Implement the two-column layout for wider screens.
 - Implement title truncation for long site titles.
 - Implement the tab item links.
 - Implement the search field clear button.
@@ -30,10 +29,21 @@
 - Update the manifest.json description to 'lazycluster'.
 - Configure dev mode data persistence.
 
-- Outline UI structure and components for the Manager Tab UI.
-- Begin implementing the basic UI structure in React in `entrypoints/manager/App.tsx`.
-- Set up a basic testing environment (e.g., Jest) and write initial unit tests.
-- Continue to update memory bank files as development progresses.
+## Recent Changes
+
+- Implemented a responsive 2-column layout for window groups using the `column-count` CSS property.
+- Refactored `src/components/WindowGroupList.tsx` to use `columns-2` for multi-column layout.
+- Removed Flexbox implementation from `src/components/WindowGroupList.tsx`.
+- Removed `max-height` from `collapse-content` in `src/components/WindowGroup.tsx`.
+
+## Next Steps
+
+- Implement title truncation for long site titles.
+- Implement the tab item links.
+- Implement the search field clear button.
+- Investigate and fix the favicon issue in the manager tab.
+- Update the manifest.json description to 'lazycluster'.
+- Configure dev mode data persistence.
 
 ## Active Decisions
 
