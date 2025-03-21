@@ -16,6 +16,10 @@ LazyCluster aims to solve these problems by providing a simple, intuitive, and e
 
 - **Clear Tab and Window Overview:** A popup UI that provides a clear overview of all open tabs and windows, allowing users to quickly see and navigate their browser sessions.
 - **Efficient Tab Management Tools:** Features for searching, filtering, sorting, and grouping tabs, enabling users to quickly find and organize the tabs they need.
+- **Two-Column Layout:** Adapt the layout to utilize wider screens by displaying content in two columns, improving information density and usability.
+- **Truncated Titles:** Implement title truncation for long site titles to ensure they fit within a single line, improving visual clarity. The truncation should dynamically adjust based on the WindowGroup width.
+- **Tab Item Links:** Make site titles in tab items clickable, allowing users to quickly navigate to the corresponding open tab.
+- **Search Field Clear Button:** Add a clear button within the search field to quickly remove the search query.
 - **Resource Optimization Features:** Tab suspension and discarding to minimize memory and CPU usage, ensuring smooth browser performance even with many tabs open.
 - **Session Management Capabilities:** Saving and restoring entire browser sessions, allowing users to preserve and resume their work easily.
 - **Customizable User Experience:** Options for themes, display settings, and keyboard shortcuts to tailor the extension to individual user preferences.

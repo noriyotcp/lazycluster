@@ -2,7 +2,7 @@
 
 ## Overview
 
-LazyCluster is a browser extension designed to simplify tab and window management, addressing the challenges users face with tab clutter and inefficient browser workflows. It is being developed as a replacement for the popular "cluster" extension, which is no longer functional due to changes in Chrome extension best practices. LazyCluster aims to inherit the best aspects of "cluster" while incorporating user feedback and modern development practices to create a simple, intuitive, and efficient tab management solution.
+lazycluster is a browser extension designed to simplify tab and window management, addressing the challenges users face with tab clutter and inefficient browser workflows. It is being developed as a replacement for the popular "cluster" extension, which is no longer functional due to changes in Chrome extension best practices. lazycluster aims to inherit the best aspects of "cluster" while incorporating user feedback and modern development practices to create a simple, intuitive, and efficient tab management solution.
 
 ## Goals
 

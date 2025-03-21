@@ -18,6 +18,7 @@
     - Used for styling the UI components in the `manager` entrypoint.
     - Utility-first CSS framework that allows for rapid UI development and consistent styling.
     - Replaces traditional CSS for component styling in the `manager` entrypoint.
+    - A separate base CSS stylesheet is used for application-wide styles, loaded before entrypoint-specific styles to ensure consistent styling across the extension (manager and popup).
 
 - **Web Extension Framework:** WXT (Web Extension Toolkit)
 
@@ -74,3 +75,6 @@
 - **Performance:** Need to ensure the extension is performant and does not introduce significant overhead to browser performance, especially with a large number of tabs and windows.
 - **Security:** Adhering to web extension security best practices to prevent vulnerabilities and ensure user privacy.
 - **Manifest Permissions:** Requesting only necessary permissions in the manifest to minimize security risks and user privacy concerns.
+- **Favicon:** Ensuring the extension's favicon is correctly displayed in the manager tab.
+- **Manifest Description:** The manifest.json description will be updated to accurately reflect the extension's purpose as 'lazycluster'.
+- **Dev Mode Data Persistence:** Utilizing WXT's configuration options to persist data during development mode for easier testing and debugging.

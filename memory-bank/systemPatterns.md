@@ -11,8 +11,10 @@ LazyCluster follows a modular, component-based architecture, primarily leveragin
     - Built using React and TypeScript, specifically `entrypoints/manager/App.tsx`.
     - Responsible for rendering the main user interface within a dedicated browser tab (the "manager tab").
     - Displays a clear overview of windows and tabs, and handles all tab and window management functionalities.
-    - Composed of various UI components for displaying lists of windows and tabs, search bars, buttons, and interactive elements.
+    - Implements a two-column layout on wider screens to improve information density.
+    - Composed of various UI components for displaying lists of windows and tabs, search bars, buttons, interactive elements, and a clear button in the search field.
     - Handles user interactions such as drag and drop, button clicks, and search input to manage tabs and windows.
+    - Includes a WindowGroup component with a collapse/expand feature.
     - Communicates with the Background Script to fetch data and trigger actions.
 
 2.  **Popup UI (React):**
@@ -40,6 +42,7 @@ LazyCluster follows a modular, component-based architecture, primarily leveragin
 ### Key Design Patterns
 
 - **Component-Based Architecture:** The UI is built using reusable React components, promoting modularity and maintainability.
+- **Base CSS Styles:** Application-wide styles are defined to ensure a consistent look and feel across the extension, loaded before entrypoint-specific styles.
 - **Event-Driven Architecture:** Communication between components, especially between the UIs and background script, is primarily event-driven. This allows for loose coupling and reactive updates.
 - **State Management (within React UIs):** React's built-in state management or potentially a library like Zustand or Recoil (if needed for more complex state) will be used to manage UI state and data flow within both the Manager Tab UI and Popup UI.
 - **Service Worker Pattern (Background Script):** The background script acts as a service worker, running in the background and handling long-running tasks and event processing.
