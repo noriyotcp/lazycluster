@@ -106,6 +106,15 @@ const Manager = () => {
     [closeTab]
   );
 
+  const focusTab = useCallback((tabId: number, windowId: number) => {
+    chrome.tabs.update(tabId, { active: true }, () => {
+      if (chrome.runtime.lastError) {
+        console.error('タブのフォーカスに失敗しました:', chrome.runtime.lastError);
+      }
+    });
+    chrome.windows.update(windowId, { focused: true });
+  }, []);
+
   const filteredTabGroups = tabGroups.map(group => ({
     ...group,
     tabs: group.tabs.filter(tab => tab.title?.toLowerCase().includes(searchQuery.toLowerCase())),
@@ -118,6 +127,7 @@ const Manager = () => {
         filteredTabGroups={filteredTabGroups}
         activeWindowId={activeWindowId}
         handleCloseTab={handleCloseTab}
+        focusTab={focusTab}
       />
     </div>
   );

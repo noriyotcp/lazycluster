@@ -3,6 +3,7 @@ import type { Tabs } from 'webextension-polyfill';
 interface TabItemProps {
   tab: Tabs.Tab;
   handleCloseTab: (tabId: number) => void;
+  focusTab: (tabId: number, windowId: number) => void;
 }
 
 const globeIcon = () => {
@@ -17,11 +18,20 @@ const globeIcon = () => {
   );
 };
 
-const TabItem = ({ tab, handleCloseTab }: TabItemProps) => {
+const TabItem = ({ tab, handleCloseTab, focusTab }: TabItemProps) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (tab.id && tab.windowId) {
+      focusTab(tab.id, tab.windowId);
+    }
+  };
+
   return (
     <li className="list-row p-2 items-center rounded-none even:bg-base-200">
       <div>{tab.favIconUrl ? <img className="size-4" src={tab.favIconUrl} alt={tab.title} /> : globeIcon()}</div>
-      <span>{tab.title}</span>
+      <a className="cursor-pointer" onClick={handleClick}>
+        <span>{tab.title}</span>
+      </a>
       <button className="btn btn-error btn-xs" onClick={() => handleCloseTab(tab.id!)}>
         Close
       </button>

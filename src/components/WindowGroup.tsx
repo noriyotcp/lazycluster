@@ -10,9 +10,10 @@ interface WindowGroupProps {
   };
   activeWindowId: number | null;
   handleCloseTab: (tabId: number) => void;
+  focusTab: (tabId: number, windowId: number) => void;
 }
 
-const WindowGroup = ({ tabGroup, activeWindowId, handleCloseTab }: WindowGroupProps) => (
+const WindowGroup = ({ tabGroup, activeWindowId, handleCloseTab, focusTab }: WindowGroupProps) => (
   <div className="collapse collapse-arrow bg-base-100 border-base-300 border rounded-none mt-4">
     <input type="checkbox" defaultChecked={true} />
     <div className="collapse-title font-semibold">
@@ -20,7 +21,7 @@ const WindowGroup = ({ tabGroup, activeWindowId, handleCloseTab }: WindowGroupPr
     </div>
     <div className="collapse-content">
       <WindowActions windowId={tabGroup.windowId} />
-      <TabList tabs={tabGroup.tabs} handleCloseTab={handleCloseTab} />
+      <TabList tabs={tabGroup.tabs} handleCloseTab={handleCloseTab} focusTab={focusTab} />
     </div>
   </div>
 );

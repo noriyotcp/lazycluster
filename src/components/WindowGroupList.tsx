@@ -6,9 +6,10 @@ interface WindowGroupListProps {
   filteredTabGroups: { windowId: number; tabs: Tabs.Tab[] }[];
   activeWindowId: number | null;
   handleCloseTab: (tabId: number) => void;
+  focusTab: (tabId: number, windowId: number) => void;
 }
 
-const WindowGroupList = ({ filteredTabGroups, activeWindowId, handleCloseTab }: WindowGroupListProps) => (
+const WindowGroupList = ({ filteredTabGroups, activeWindowId, handleCloseTab, focusTab }: WindowGroupListProps) => (
   <>
     {filteredTabGroups.map((tabGroup, index) => (
       <WindowGroupContextProvider key={tabGroup.windowId} value={{ windowGroupNumber: index }}>
@@ -17,6 +18,7 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, handleCloseTab }: 
           tabGroup={tabGroup}
           activeWindowId={activeWindowId}
           handleCloseTab={handleCloseTab}
+          focusTab={focusTab}
         />
       </WindowGroupContextProvider>
     ))}
