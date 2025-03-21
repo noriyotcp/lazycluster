@@ -123,12 +123,14 @@ const Manager = () => {
   return (
     <div className="p-5">
       <Header searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} />
-      <WindowGroupList
-        filteredTabGroups={filteredTabGroups}
-        activeWindowId={activeWindowId}
-        handleCloseTab={handleCloseTab}
-        focusTab={focusTab}
-      />
+      <div className="grid md:grid-cols-2 gap-4">
+        <WindowGroupList
+          filteredTabGroups={filteredTabGroups}
+          activeWindowId={activeWindowId}
+          handleCloseTab={handleCloseTab}
+          focusTab={focusTab}
+        />
+      </div>
     </div>
   );
 };
