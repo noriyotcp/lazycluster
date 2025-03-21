@@ -1,5 +1,11 @@
 # Development Guidelines
 
+## Role
+
+- Document the development guidelines for the project.
+- Provide best practices and conventions for the codebase.
+- Ensure code quality and maintainability.
+
 1.  **Unified Type Definition Management:**  
     Consolidate all type definitions in one location (e.g., src/@types) and consistently import them using aliases throughout the project.  
     → Prevents build errors caused by duplicate or inconsistent type definitions.

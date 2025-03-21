@@ -1,5 +1,12 @@
 # Project Progress: LazyCluster
 
+## Role
+
+- Track what works.
+- Track what's left to build.
+- Document the current status.
+- Note any known issues.
+
 ## What Works
 
 - **Project Setup:**

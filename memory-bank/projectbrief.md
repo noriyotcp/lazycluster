@@ -1,10 +1,15 @@
 # Project Brief: LazyCluster
 
+## Role
+
+- Provide a high-level overview of the project.
+- Define the project's goals and key features.
+- Serve as the foundation document that shapes all other files in the Memory Bank.
+- Act as the source of truth for project scope.
+
 ## Overview
 
 lazycluster is a browser extension designed to simplify tab and window management, addressing the challenges users face with tab clutter and inefficient browser workflows. It is being developed as a replacement for the popular "cluster" extension, which is no longer functional due to changes in Chrome extension best practices. lazycluster aims to inherit the best aspects of "cluster" while incorporating user feedback and modern development practices to create a simple, intuitive, and efficient tab management solution.
-
-## Goals
 
 - **Efficient Tab and Window Management:** Provide users with tools to effectively organize and manage a large number of open tabs and browser windows.
 - **Enhanced User Productivity:** Improve user workflow by enabling quick navigation, tab grouping, session saving and restoring, and efficient tab searching and filtering.
@@ -35,11 +40,6 @@ Based on the analysis of "cluster" and user needs, LazyCluster will include the 
   - Opening saved sessions with tabs in a suspended state.
   - Importing and exporting sessions in CSV/JSON format.
   - Potentially, cloud backup and sync for saved sessions (future consideration).
-- **User Interface & Experience:**
-  - Simple and intuitive popup UI.
-  - Dark and light theme options.
-  - Customizable keyboard shortcuts to open the extension.
-  - Clear visual feedback for actions.
 - **Privacy:**
   - No sharing of user data with third-party services.
   - Minimal data storage, only with user permission.

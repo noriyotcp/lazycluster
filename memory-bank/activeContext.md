@@ -1,5 +1,12 @@
 # Active Context: LazyCluster
 
+## Role
+
+- Track the current work focus.
+- Document recent changes.
+- Outline next steps.
+- Record active decisions and considerations.
+
 ## Current Focus
 
 - Outlining UI structure and components for the Manager Tab UI.

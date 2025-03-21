@@ -1,6 +1,19 @@
 # Product Context: LazyCluster
 
+## Role
+
+- Explain why this project exists.
+- Describe the problems it solves.
+- Outline how it should work.
+- Define the user experience goals.
+
 ## Problem
+
+- **Efficient Tab Management Tools:** Features for searching, filtering, sorting, and grouping tabs, enabling users to quickly find and organize the tabs they need.
+- **Two-Column Layout:** Adapt the layout to utilize wider screens by displaying content in two columns, improving information density and usability.
+- **Truncated Titles:** Implement title truncation for long site titles to ensure they fit within a single line, improving visual clarity. The truncation should dynamically adjust based on the WindowGroup width.
+- **Tab Item Links:** Make site titles in tab items clickable, allowing users to quickly navigate to the corresponding open tab.
+- **Search Field Clear Button:** Add a clear button within the search field to quickly remove the search query.
 
 Users face significant challenges in managing browser tabs and windows, leading to:
 
@@ -24,6 +37,10 @@ LazyCluster aims to solve these problems by providing a simple, intuitive, and e
 - **Session Management Capabilities:** Saving and restoring entire browser sessions, allowing users to preserve and resume their work easily.
 - **Customizable User Experience:** Options for themes, display settings, and keyboard shortcuts to tailor the extension to individual user preferences.
 - **Focus on Simplicity and Usability:** A design philosophy that prioritizes ease of use and intuitive interaction, avoiding feature overload and complexity.
+- **Simple and intuitive popup UI.**
+- **Dark and light theme options.**
+- **Customizable keyboard shortcuts to open the extension.**
+- **Clear visual feedback for actions.**
 
 ## User Experience Goals
 

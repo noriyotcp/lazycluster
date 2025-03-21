@@ -1,5 +1,12 @@
 # System Patterns: LazyCluster
 
+## Role
+
+- Describe the system architecture.
+- Explain key technical decisions.
+- Document design patterns in use.
+- Outline component relationships.
+
 ## System Architecture
 
 LazyCluster follows a modular, component-based architecture, primarily leveraging React components for the UI and background scripts for core logic and browser API interactions. The architecture is designed to be event-driven and reactive, ensuring efficient updates and interactions between different parts of the extension.
@@ -10,11 +17,6 @@ LazyCluster follows a modular, component-based architecture, primarily leveragin
 
     - Built using React and TypeScript, specifically `entrypoints/manager/App.tsx`.
     - Responsible for rendering the main user interface within a dedicated browser tab (the "manager tab").
-    - Displays a clear overview of windows and tabs, and handles all tab and window management functionalities.
-    - Implements a two-column layout on wider screens to improve information density.
-    - Composed of various UI components for displaying lists of windows and tabs, search bars, buttons, interactive elements, and a clear button in the search field.
-    - Handles user interactions such as drag and drop, button clicks, and search input to manage tabs and windows.
-    - Includes a WindowGroup component with a collapse/expand feature.
     - Communicates with the Background Script to fetch data and trigger actions.
 
 2.  **Popup UI (React):**

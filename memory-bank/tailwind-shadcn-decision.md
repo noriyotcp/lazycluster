@@ -1,5 +1,11 @@
 ## Tailwind CSS vs. shadcn/ui: Which to Adopt First?
 
+## Role
+
+- Document the decision-making process for choosing between Tailwind CSS and shadcn/ui.
+- Outline the pros and cons of each approach.
+- Provide recommendations based on project needs and priorities.
+
 When considering styling for a project, a common question arises: Should Tailwind CSS be adopted before shadcn/ui, or vice versa? Let's explore the pros and cons of each approach to help make an informed decision.
 
 ### Flowchart of Considerations

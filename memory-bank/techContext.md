@@ -1,5 +1,11 @@
 # Technology Context: LazyCluster
 
+## Role
+
+- Document the technologies used in the project.
+- Describe the development setup.
+- Outline technical constraints and considerations.
+
 ## Technologies Used
 
 - **Primary Language:** TypeScript
