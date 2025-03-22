@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import type { Tabs } from 'webextension-polyfill';
+import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 
 interface TabItemProps {
   tab: Tabs.Tab;
@@ -19,6 +21,10 @@ const globeIcon = () => {
 };
 
 const TabItem = ({ tab, handleCloseTab, focusTab }: TabItemProps) => {
+  const { selectedTabIds, addTabToSelection, removeTabFromSelection } = useTabSelectionContext();
+  const isTabSelected = selectedTabIds.includes(tab.id!);
+  const [isChecked, setIsChecked] = useState(isTabSelected);
+
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     if (tab.id && tab.windowId) {
@@ -26,8 +32,18 @@ const TabItem = ({ tab, handleCloseTab, focusTab }: TabItemProps) => {
     }
   };
 
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      addTabToSelection(tab.id!);
+    } else {
+      removeTabFromSelection(tab.id!);
+    }
+    setIsChecked(e.target.checked);
+  };
+
   return (
     <li className="list-row p-2 items-center rounded-none even:bg-base-200">
+      <input type="checkbox" className="checkbox" checked={isChecked} onChange={handleCheckboxChange} />
       <div>{tab.favIconUrl ? <img className="size-4" src={tab.favIconUrl} alt={tab.title} /> : globeIcon()}</div>
       <a className="cursor-pointer truncate" onClick={handleClick}>
         <span>{tab.title}</span>
