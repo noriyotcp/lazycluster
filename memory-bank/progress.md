@@ -9,6 +9,8 @@
 
 ## What Works
 
+(List of features that are working)
+
 - **Project Setup:**
   - Project is initialized with WXT (Web Extension Toolkit).
   - Basic project structure is in place, including `entrypoints` for different extension contexts (popup, manager, background, content).
@@ -27,6 +29,8 @@
   - Implemented tab focusing via Chrome Extension API.
 
 ## What's Left to Build
+
+(List of major features to be built)
 
 - **Core Features:**
 
@@ -68,6 +72,8 @@
 
 ## Current Status
 
+(Brief description of the project's current status, development phase, milestone achievements, etc.)
+
 - Initial project planning and documentation are in progress. Core memory bank files are being drafted and refined.
 - Development environment is set up and ready for implementation.
 - Key features are identified and prioritized based on user needs and project goals.
@@ -81,10 +87,14 @@
 
 ## Known Issues
 
+(List of known issues or problems that need to be addressed for the entire project)
+
 - No testing framework is currently implemented. This needs to be addressed as development progresses.
 - UI development has not started yet. Focus has been on project setup and documentation.
 
 ## Lessons Learned
+
+(Summary of lessons learned throughout the project)
 
 - **UI Layout Implementation:**
   - We learned that `column-count` is a simple and effective way to create multi-column layouts, and that it can be a better choice than Flexbox or Grid for certain use cases.
@@ -96,6 +106,8 @@
 - **Handling replace_in_file failures:** When `replace_in_file` fails multiple times, it is more efficient to use `write_to_file` as a fallback.
 
 ## Next Actions
+
+(List of next actions for the entire project, such as feature implementation or major tasks)
 
 - Start outlining UI structure and components for the Manager Tab UI.
 - Begin implementing the basic UI structure in React.

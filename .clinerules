@@ -44,7 +44,7 @@ Follow the template in `/docs/adr/template.md` (create this template file).
   1. SEARCH blocks in replace_in_file must exactly match the file content, including whitespace and line endings.
   2. In PLAN MODE, remember to use plan_mode_response tool for responses.
   3. Error messages (especially eslint and ts errors) are important hints for problem solving (Importance of error messages).
-  4. When executing commands using the `execute_command` tool, do not escape `&&` (use `&&` instead of `&&`).
+  4. When executing commands using the `execute_command` tool, ensure the command line is correctly outputting `&&` instead of `&&`.
 - Memory bank files should be reviewed and updated when discovering new project patterns, after implementing significant changes, when the user requests with "update memory bank", and when context needs clarification.
 - When modifying tab management logic, ensure that all edge cases are handled correctly, such as tabs in different windows.
 
