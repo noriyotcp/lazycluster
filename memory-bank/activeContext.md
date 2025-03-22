@@ -19,6 +19,10 @@
 - Refactored `src/components/WindowGroupList.tsx` to use `columns-2` for multi-column layout.
 - Removed Flexbox implementation from `src/components/WindowGroupList.tsx`.
 - Removed `max-height` from `collapse-content` in `src/components/WindowGroup.tsx`.
+- Implemented bulk tab selection using checkboxes in `src/components/TabItem.tsx`.
+- Added a trash icon to `src/components/Header.tsx` to trigger the close action for selected tabs.
+- Implemented `TabSelectionContext` in `src/contexts/TabSelectionContext.tsx` to manage the state of selected tabs.
+- Connected `TabItem` and `Header` components to `TabSelectionContext` to enable bulk tab closing functionality.
 
 ## Next Steps
 

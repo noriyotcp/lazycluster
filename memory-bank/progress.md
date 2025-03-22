@@ -63,6 +63,12 @@
   - Improve UI/UX (e.g., highlight matched text, selectable filtering conditions, display number of search results).
   - Optimize performance for large numbers of tabs.
 
+- **Bulk Tab Selection Improvements:**
+
+  - タブアイテム内のタイトルを左寄せにする
+  - ヘッダーのゴミ箱アイコンの位置調整
+  - WindowActions にタブグループ内 bulk selection 機能を追加
+
 - **User Interface & Experience:**
 
   - Develop the Manager Tab UI using React components.
