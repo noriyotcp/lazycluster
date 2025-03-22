@@ -5,7 +5,7 @@ interface SearchBarProps {
 
 const SearchBar = ({ searchQuery, onSearchQueryChange }: SearchBarProps) => (
   <input
-    type="text"
+    type="search"
     placeholder="Search tabs..."
     value={searchQuery}
     onChange={e => onSearchQueryChange(e.target.value)}
