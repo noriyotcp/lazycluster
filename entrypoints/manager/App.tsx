@@ -115,10 +115,12 @@ const Manager = () => {
     chrome.windows.update(windowId, { focused: true });
   }, []);
 
-  const filteredTabGroups = tabGroups.map(group => ({
-    ...group,
-    tabs: group.tabs.filter(tab => tab.title?.toLowerCase().includes(searchQuery.toLowerCase())),
-  }));
+  const filteredTabGroups = tabGroups
+    .map((group, index) => ({ ...group, windowGroupNumber: index })) // 元の順番を保持した番号を追加
+    .map(group => ({
+      ...group,
+      tabs: group.tabs.filter(tab => tab.title?.toLowerCase().includes(searchQuery.toLowerCase())),
+    }));
 
   return (
     <div className="p-5">

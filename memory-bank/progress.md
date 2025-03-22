@@ -36,8 +36,10 @@
 
   - Implement UI to display all open windows and tabs.
   - Implement drag and drop tab reordering within and between windows.
-  - Implement tab searching and filtering.
   - Implement tab sorting within windows (including by domain).
+  - Implemented tab searching and filtering.
+    - Fixed issue where empty WindowGroups were displayed after filtering.
+    - Fixed issue where Window numbers were incorrect after filtering.
   - Implement bulk tab selection and actions (close, move, suspend).
   - Implement management of tabs within each domain.
   - Tab suspension to reduce memory usage.
