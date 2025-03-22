@@ -21,12 +21,18 @@
   - Core memory bank files are initialized: `projectbrief.md`, `productContext.md`, `activeContext.md`, `systemPatterns.md`, `techContext.md`, `progress.md`.
   - `projectbrief.md`, `productContext.md`, `systemPatterns.md`, and `techContext.md` are drafted and updated.
 - **UI Layout:**
+
   - Implemented a responsive 2-column layout for window groups using `column-count` CSS property.
   - Refactored `src/components/WindowGroupList.tsx` to use `columns-2` for multi-column layout.
   - Removed Flexbox implementation from `src/components/WindowGroupList.tsx`.
   - Removed `max-height` from `collapse-content` in `src/components/WindowGroup.tsx`.
   - Implemented title truncation for long site titles.
   - Implemented tab focusing via Chrome Extension API.
+
+- **Tab Searching and Filtering:**
+  - Implemented tab searching and filtering.
+  - Fixed issue where empty WindowGroups were displayed after filtering.
+  - Fixed issue where Window numbers were incorrect after filtering.
 
 ## What's Left to Build
 
@@ -37,9 +43,6 @@
   - Implement UI to display all open windows and tabs.
   - Implement drag and drop tab reordering within and between windows.
   - Implement tab sorting within windows (including by domain).
-  - Implemented tab searching and filtering.
-    - Fixed issue where empty WindowGroups were displayed after filtering.
-    - Fixed issue where Window numbers were incorrect after filtering.
   - Implement bulk tab selection and actions (close, move, suspend).
   - Implement management of tabs within each domain.
   - Tab suspension to reduce memory usage.
@@ -52,6 +55,13 @@
   - Opening saved sessions with tabs in a suspended state.
   - Importing and exporting sessions in CSV/JSON format.
   - Cloud backup and sync for saved sessions (future consideration).
+
+- **Tab Searching and Filtering Improvements:**
+
+  - Improve search logic (e.g., word-based matching, fuzzy search, regular expression search).
+  - Expand filtering capabilities (e.g., domain, title, URL, pinned state, audible state).
+  - Improve UI/UX (e.g., highlight matched text, selectable filtering conditions, display number of search results).
+  - Optimize performance for large numbers of tabs.
 
 - **User Interface & Experience:**
 
