@@ -13,24 +13,6 @@
 
 ## Recent Changes
 
-- Initialized memory bank core files: `projectbrief.md`, `productContext.md`, `activeContext.md`, `systemPatterns.md`, `techContext.md`, `progress.md`.
-- Updated `projectbrief.md` with detailed project overview, goals, and key features.
-- Updated `productContext.md` with detailed problem description, solution overview, and user experience goals.
-- Updated `systemPatterns.md` with system architecture and component relationships.
-- Updated `techContext.md` with technology stack and development setup, including base CSS styles, favicon information, manifest description, and dev mode data persistence.
-- Updated `progress.md` with current project status and next actions.
-
-## Next Steps
-
-- Implement title truncation for long site titles.
-- Implement the tab item links.
-- Implement the search field clear button.
-- Investigate and fix the favicon issue in the manager tab.
-- Update the manifest.json description to 'lazycluster'.
-- Configure dev mode data persistence.
-
-## Recent Changes
-
 - Implemented a responsive 2-column layout for window groups using the `column-count` CSS property.
 - Refactored `src/components/WindowGroupList.tsx` to use `columns-2` for multi-column layout.
 - Removed Flexbox implementation from `src/components/WindowGroupList.tsx`.
