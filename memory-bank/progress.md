@@ -65,9 +65,26 @@
 
 - **Bulk Tab Selection Improvements:**
 
-  - タブアイテム内のタイトルを左寄せにする
-  - ヘッダーのゴミ箱アイコンの位置調整
-  - WindowActions にタブグループ内 bulk selection 機能を追加
+1. タブアイテム内のタイトルを左寄せにする (src/components/TabItem.tsx)
+
+- チェックボックス追加によって右寄せになってしまったタイトルを、favcon のすぐ右横に左寄せで配置するように CSS を調整する。
+  必要に応じて、既存の CSS クラスを修正するか、新しいスタイルを適用する。
+
+2. ヘッダーのゴミ箱アイコン位置調整 (src/components/Header.tsx)
+
+- ThemeSwitcher のすぐ左横にゴミ箱アイコンが来るように、Header の flexbox レイアウトや spacing を調整する。
+- 現在、ThemeSwitcher とゴミ箱アイコンの間が離れている原因を特定し、適切な CSS を適用する。
+- WindowActions に「Close Tabs」ボタンと bulk selection 機能を追加 (src/components/WindowActions.tsx)
+
+3. WindowActions にタブグループ内 bulk selection 機能を追加
+
+- WindowActions.tsx に「Close Tabs」ボタンを「Close Window」ボタンの右横に追加する。
+- ボタンのデザインは既存の「Focus」「Close」ボタンと統一する。
+- handleCloseTabsInWindow 関数を実装し、「Close Tabs」ボタンのクリック時に実行されるように設定する。
+- handleCloseTabsInWindow 関数内では、useTabSelectionContext から選択されているタブID (selectedTabIds) を取得する。
+- 現在のタブグループ (Window) 内のタブID のみを取得する処理を追加する (必要に応じて)。
+- chrome.tabs.remove API を使用して、選択されたタブを閉じる。
+- ボタンの表示テキストを「Close」→「Close Window」、「新規追加ボタン」→「Close Tabs」に変更する。
 
 - **User Interface & Experience:**
 
