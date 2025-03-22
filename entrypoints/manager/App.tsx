@@ -123,15 +123,17 @@ const Manager = () => {
     }));
 
   return (
-    <div className="p-5">
+    <>
       <Header searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} />
-      <WindowGroupList
-        filteredTabGroups={filteredTabGroups}
-        activeWindowId={activeWindowId}
-        handleCloseTab={handleCloseTab}
-        focusTab={focusTab}
-      />
-    </div>
+      <div className="p-5 pt-0">
+        <WindowGroupList
+          filteredTabGroups={filteredTabGroups}
+          activeWindowId={activeWindowId}
+          handleCloseTab={handleCloseTab}
+          focusTab={focusTab}
+        />
+      </div>
+    </>
   );
 };
 
