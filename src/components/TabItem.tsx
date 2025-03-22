@@ -29,7 +29,7 @@ const TabItem = ({ tab, handleCloseTab, focusTab }: TabItemProps) => {
   return (
     <li className="list-row p-2 items-center rounded-none even:bg-base-200">
       <div>{tab.favIconUrl ? <img className="size-4" src={tab.favIconUrl} alt={tab.title} /> : globeIcon()}</div>
-      <a className="cursor-pointer" onClick={handleClick}>
+      <a className="cursor-pointer truncate" onClick={handleClick}>
         <span>{tab.title}</span>
       </a>
       <button className="btn btn-error btn-xs" onClick={() => handleCloseTab(tab.id!)}>

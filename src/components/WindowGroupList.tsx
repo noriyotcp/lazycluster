@@ -10,7 +10,7 @@ interface WindowGroupListProps {
 }
 
 const WindowGroupList = ({ filteredTabGroups, activeWindowId, handleCloseTab, focusTab }: WindowGroupListProps) => (
-  <div className="columns-2 mt-4">
+  <div className="md:columns-2 mt-4">
     {filteredTabGroups
       .filter(group => group.tabs.length > 0)
       .map(tabGroup => (
