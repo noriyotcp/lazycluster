@@ -28,11 +28,6 @@
 
 (List specific next steps related to the current focus)
 
-- Implementing the search field clear button.
-- Investigating and fixing the favicon issue in the manager tab.
-- Updating the manifest.json description to 'lazycluster'.
-- Configuring dev mode data persistence.
-
 ## Active Decisions
 
 (Record active decisions made in the current context)
@@ -47,3 +42,4 @@
 
 - **Tool Selection and Usage:** We encountered difficulties with the `replace_in_file` tool due to strict matching requirements. In cases of extensive or complex changes, using the `write_to_file` tool directly can be more reliable and save time.
 - **Value of PLAN MODE:** This process highlighted the critical importance of thorough planning in PLAN MODE. A more in-depth plan could have identified potential pitfalls early and reduced rework during ACT MODE.
+- **Incorrect Next Steps:** The Next Steps in `activeContext.md` included tasks that were not actually needed. In the future, we should confirm with the user before updating the Next Steps.
