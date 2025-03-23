@@ -2,6 +2,15 @@
 
 A Chrome extension for enhanced tab and window management, inspired by the original "cluster" extension.
 
+## Features
+
+- **Bulk Tab Selection and Actions:**
+  - **Global Bulk Close:**
+    - Select tabs across multiple windows and close them all at once using the "trash" icon in the header.
+  - **Window-Specific Bulk Close:**
+    - Select tabs within a specific window and close them using the "Close Tabs" button in the Window Actions of each window group.
+  - Use checkboxes in each tab item to select tabs for bulk close actions.
+
 ## Overview
 
 LazyCluster aims to provide a streamlined and intuitive interface for managing your browser tabs and windows. It allows you to easily list, search, filter, sort, move, close, suspend, and discard tabs, as well as save and restore sessions. Tabs in the manager tab are now grouped by window for better organization. The manager page also includes a search bar to filter tabs by title.
