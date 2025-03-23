@@ -5,10 +5,19 @@ interface WindowActionsProps {
 }
 
 const WindowActions = ({ windowId }: WindowActionsProps) => {
-  const { selectedTabIds, clearSelection } = useTabSelectionContext();
+  const { selectedTabIds, clearSelection, addWindowTabsToSelection, removeWindowTabsFromSelection } =
+    useTabSelectionContext();
 
   const handleFocusWindow = () => {
     chrome.windows.update(windowId, { focused: true });
+  };
+
+  const handleBulkSelectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      addWindowTabsToSelection(windowId);
+    } else {
+      removeWindowTabsFromSelection(windowId);
+    }
   };
 
   const handleCloseWindow = () => {
@@ -39,7 +48,13 @@ const WindowActions = ({ windowId }: WindowActionsProps) => {
   };
 
   return (
-    <div className="window-actions-container">
+    <div className="window-actions-container pl-2">
+      <input
+        id={`bulk-select-tabs-on-window-${windowId}`}
+        className="checkbox checkbox-xs"
+        type="checkbox"
+        onChange={handleBulkSelectChange}
+      />
       <button className="btn btn-link btn-xs" onClick={handleFocusWindow}>
         Focus
       </button>

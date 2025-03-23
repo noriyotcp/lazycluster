@@ -49,6 +49,10 @@ LazyCluster follows a modular, component-based architecture, primarily leveragin
 - **State Management (within React UIs):** React's built-in state management or potentially a library like Zustand or Recoil (if needed for more complex state) will be used to manage UI state and data flow within both the Manager Tab UI and Popup UI.
 - **Service Worker Pattern (Background Script):** The background script acts as a service worker, running in the background and handling long-running tasks and event processing.
 
+### Component Relationships
+
+- **State Synchronization between WindowActions and TabItem:** To ensure UI consistency, the TabItem component subscribes to the TabSelectionContext and updates its `isChecked` state based on the `selectedTabIds`. This allows the TabItem's checkbox to reflect the selection state when tabs are selected/deselected via the WindowActions component.
+
 ### Data Flow
 
 _(Data flow description remains largely the same, but now refers to "Manager Tab UI" instead of "Popup UI" for actions related to window and tab management)_

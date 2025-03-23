@@ -5,6 +5,8 @@ interface TabSelectionContextProps {
   addTabToSelection: (tabId: number) => void;
   removeTabFromSelection: (tabId: number) => void;
   clearSelection: () => void;
+  addWindowTabsToSelection: (windowId: number) => void;
+  removeWindowTabsFromSelection: (windowId: number) => void;
 }
 
 const TabSelectionContext = createContext<TabSelectionContextProps | undefined>(undefined);
@@ -32,11 +34,33 @@ export const TabSelectionContextProvider = ({ children }: { children: React.Reac
     setSelectedTabIds([]);
   };
 
+  const addWindowTabsToSelection = async (windowId: number) => {
+    try {
+      const tabs = await chrome.tabs.query({ windowId });
+      const tabIds = tabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
+      setSelectedTabIds(prevSelectedTabIds => [...new Set([...prevSelectedTabIds, ...tabIds])]);
+    } catch (error) {
+      console.error('Error adding window tabs to selection:', error);
+    }
+  };
+
+  const removeWindowTabsFromSelection = async (windowId: number) => {
+    try {
+      const tabs = await chrome.tabs.query({ windowId });
+      const tabIds = tabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
+      setSelectedTabIds(prevSelectedTabIds => prevSelectedTabIds.filter(id => !tabIds.includes(id)));
+    } catch (error) {
+      console.error('Error removing window tabs from selection:', error);
+    }
+  };
+
   const value: TabSelectionContextProps = {
     selectedTabIds,
     addTabToSelection,
     removeTabFromSelection,
     clearSelection,
+    addWindowTabsToSelection,
+    removeWindowTabsFromSelection,
   };
 
   return <TabSelectionContext.Provider value={value}>{children}</TabSelectionContext.Provider>;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Tabs } from 'webextension-polyfill';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 
@@ -22,8 +22,11 @@ const globeIcon = () => {
 
 const TabItem = ({ tab, handleCloseTab, focusTab }: TabItemProps) => {
   const { selectedTabIds, addTabToSelection, removeTabFromSelection } = useTabSelectionContext();
-  const isTabSelected = selectedTabIds.includes(tab.id!);
-  const [isChecked, setIsChecked] = useState(isTabSelected);
+  const [isChecked, setIsChecked] = useState(false);
+
+  useEffect(() => {
+    setIsChecked(selectedTabIds.includes(tab.id!));
+  }, [selectedTabIds, tab.id]);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
