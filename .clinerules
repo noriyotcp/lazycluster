@@ -45,9 +45,12 @@ Follow the template in `/docs/adr/template.md` (create this template file).
   2. In PLAN MODE, remember to use plan_mode_response tool for responses.
   3. Error messages (especially eslint and ts errors) are important hints for problem solving (Importance of error messages).
   4. When executing commands using the `execute_command` tool, ensure the command line is correctly outputting `&&` instead of `&&`.
+  5. Be careful when using file operations: Repeatedly using `replace_in_file` may break code.
+  6. Error messages are treasure trove: Error messages are powerful hints for problem solving.
+  7. write_to_file is the last resort: `write_to_file` is effective as a last resort if `replace_in_file` is NG.
 - Memory bank files should be reviewed and updated when discovering new project patterns, after implementing significant changes, when the user requests with "update memory bank", and when context needs clarification.
 - When modifying tab management logic, ensure that all edge cases are handled correctly, such as tabs in different windows.
-- If `replace_in_file` fails, consider using `write_to_file` as a fallback.
+- If `replace_in_file` fails, consider using `write_to_file` to rewrite the entire file.
 - UI misalignment can be caused by unexpected CSS scope.
 - Leaving TODO comments can help clarify areas that need further modification.
 - The SEARCH block in `replace_in_file` must exactly match the file content.
