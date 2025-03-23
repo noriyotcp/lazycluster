@@ -43,12 +43,18 @@ const TabItem = ({ tab, handleCloseTab, focusTab }: TabItemProps) => {
 
   return (
     <li className="list-row p-2 items-center rounded-none even:bg-base-200">
-      <input type="checkbox" className="checkbox" checked={isChecked} onChange={handleCheckboxChange} />
+      <input
+        id={`tab-${tab.id}`}
+        type="checkbox"
+        className="checkbox checkbox-xs"
+        checked={isChecked}
+        onChange={handleCheckboxChange}
+      />
       <div>{tab.favIconUrl ? <img className="size-4" src={tab.favIconUrl} alt={tab.title} /> : globeIcon()}</div>
-      <a className="list-col-grow cursor-pointer truncate" onClick={handleClick}>
+      <a href="#" className="list-col-grow cursor-pointer focus-visible:outline-1 truncate" onClick={handleClick}>
         <span>{tab.title}</span>
       </a>
-      <button className="btn btn-error btn-xs" onClick={() => handleCloseTab(tab.id!)}>
+      <button className="btn btn-outline btn-error btn-xs" onClick={() => handleCloseTab(tab.id!)}>
         Close
       </button>
     </li>
