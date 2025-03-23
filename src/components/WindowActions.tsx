@@ -2,9 +2,10 @@ import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 
 interface WindowActionsProps {
   windowId: number;
+  isCheckedAllTabs: boolean;
 }
 
-const WindowActions = ({ windowId }: WindowActionsProps) => {
+const WindowActions = ({ windowId, isCheckedAllTabs }: WindowActionsProps) => {
   const { selectedTabIds, clearSelection, addWindowTabsToSelection, removeWindowTabsFromSelection } =
     useTabSelectionContext();
 
@@ -54,6 +55,7 @@ const WindowActions = ({ windowId }: WindowActionsProps) => {
         className="checkbox checkbox-xs"
         type="checkbox"
         onChange={handleBulkSelectChange}
+        checked={isCheckedAllTabs}
       />
       <button className="btn btn-link btn-xs" onClick={handleFocusWindow}>
         Focus
