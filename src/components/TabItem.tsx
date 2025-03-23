@@ -45,7 +45,7 @@ const TabItem = ({ tab, handleCloseTab, focusTab }: TabItemProps) => {
   };
 
   return (
-    <li className="list-row p-2 items-center rounded-none even:bg-base-200">
+    <li tabIndex={0} className="list-row p-2 items-center rounded-none even:bg-base-200">
       <input
         id={`tab-${tab.id}`}
         type="checkbox"
