@@ -15,10 +15,10 @@ interface WindowGroupProps {
 }
 
 const WindowGroup = ({ tabGroup, activeWindowId, handleCloseTab, focusTab }: WindowGroupProps) => {
-  const [isCheckedAllTabs, setIsCheckedAllTabs] = useState(false);
+  const [isAnyTabCheckedInGroup, setIsAnyTabCheckedInGroup] = useState(false);
 
-  const handleCheckAllTabsChange = useCallback((checked: boolean) => {
-    setIsCheckedAllTabs(checked);
+  const handleAnyTabCheckChange = useCallback((checked: boolean) => {
+    setIsAnyTabCheckedInGroup(checked);
   }, []);
 
   return (
@@ -28,12 +28,12 @@ const WindowGroup = ({ tabGroup, activeWindowId, handleCloseTab, focusTab }: Win
         <WindowHeader windowId={tabGroup.windowId} activeWindowId={activeWindowId} />
       </div>
       <div className="collapse-content">
-        <WindowActions windowId={tabGroup.windowId} isCheckedAllTabs={isCheckedAllTabs} />
+        <WindowActions windowId={tabGroup.windowId} isAnyTabCheckedInGroup={isAnyTabCheckedInGroup} />
         <TabList
           tabs={tabGroup.tabs}
           handleCloseTab={handleCloseTab}
           focusTab={focusTab}
-          onAnyTabCheckChange={handleCheckAllTabsChange}
+          onAnyTabCheckChange={handleAnyTabCheckChange}
         />
       </div>
     </div>
