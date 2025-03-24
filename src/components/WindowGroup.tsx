@@ -33,7 +33,7 @@ const WindowGroup = ({ tabGroup, activeWindowId, handleCloseTab, focusTab }: Win
           tabs={tabGroup.tabs}
           handleCloseTab={handleCloseTab}
           focusTab={focusTab}
-          onCheckAllTabsChange={handleCheckAllTabsChange}
+          onAnyTabCheckChange={handleCheckAllTabsChange}
         />
       </div>
     </div>
