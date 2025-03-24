@@ -48,6 +48,8 @@ Follow the template in `/docs/adr/template.md` (create this template file).
   5. Be careful when using file operations: Repeatedly using `replace_in_file` may break code.
   6. Error messages are treasure trove: Error messages are powerful hints for problem solving.
   7. write_to_file is the last resort: `write_to_file` is effective as a last resort if `replace_in_file` is NG.
+  8. Naming is hard: Naming is a challenging task, especially when the logic evolves. It's important to choose names that accurately reflect the current logic and are consistent across the codebase.
+  9. Component Hierarchy and Prop Drilling complicate naming: Deep component hierarchies and prop drilling can make naming more difficult. Consider using Context API or other state management solutions to simplify prop flow and improve naming clarity.
 - Memory bank files should be reviewed and updated when discovering new project patterns, after implementing significant changes, when the user requests with "update memory bank", and when context needs clarification.
 - When modifying tab management logic, ensure that all edge cases are handled correctly, such as tabs in different windows.
 - If `replace_in_file` fails, consider using `write_to_file` to rewrite the entire file.

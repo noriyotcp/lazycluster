@@ -104,6 +104,7 @@
 - Removed `max-height` from `collapse-content` in `src/components/WindowGroup.tsx`.
 - Implemented title truncation for long site titles.
 - Implemented tab focusing via Chrome Extension API.
+- Refactored prop and state names related to bulk tab selection for improved clarity and consistency across components.
 
 ## Known Issues
 
@@ -124,6 +125,9 @@
 - **Component Responsibility Separation:** Creating dedicated, single-purpose components improves code organization and reusability. By isolating the theme-switching functionality into its own component, other components can focus on their primary responsibilities, leading to better maintainability and clearer component design.
 - **Importance of Iterative Improvement and Information Gathering:** Initial approaches may not always be optimal. User feedback and continuous information gathering are crucial for identifying better solutions and iteratively improving implementations.
 - **Handling replace_in_file failures:** When `replace_in_file` fails multiple times, it is more efficient to use `write_to_file` as a fallback.
+- **Naming Conventions:** The importance of choosing clear and accurate names for props and states, especially when dealing with complex logic and component hierarchies. Inconsistent or misleading names can lead to confusion and rework.
+- **Iterative Naming Refinement:** Naming is not always straightforward and may require iterative refinement as the code evolves and logic becomes clearer. Be prepared to revisit and adjust names as needed.
+- **Prop Drilling and Context API:** Prop drilling can complicate component relationships and make naming more challenging. Context API can be a valuable tool to simplify prop flow and improve code organization in such cases.
 
 ## Next Actions
 

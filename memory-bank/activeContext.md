@@ -23,6 +23,10 @@
 - Added a trash icon to `src/components/Header.tsx` to trigger the close action for selected tabs.
 - Implemented `TabSelectionContext` in `src/contexts/TabSelectionContext.tsx` to manage the state of selected tabs.
 - Connected `TabItem` and `Header` components to `TabSelectionContext` to enable bulk tab closing functionality.
+- Refactored prop name `onCheckAllTabsChange` to `onAnyTabCheckChange` in `TabList` component for better clarity.
+- Renamed prop `isCheckedAllTabs` to `isAnyTabCheckedInGroup` in `WindowActions` component to align with actual functionality.
+- Renamed state `isCheckedAllTabs` to `isAnyTabCheckedInGroup` in `WindowGroup` component for consistency.
+- Updated codebase to use new prop and state names, ensuring consistent naming and improved code readability.
 
 ## Next Steps
 
