@@ -12,11 +12,11 @@ interface TabListProps {
 const TabList = ({ tabs, handleCloseTab, focusTab, onCheckAllTabsChange }: TabListProps) => {
   const { selectedTabIds } = useTabSelectionContext();
 
-  const isCheckedAllTabs = tabs.every(tab => selectedTabIds.includes(tab.id!));
+  const isAnyTabChecked = tabs.some(tab => selectedTabIds.includes(tab.id!));
 
   useEffect(() => {
-    onCheckAllTabsChange(isCheckedAllTabs);
-  }, [isCheckedAllTabs, onCheckAllTabsChange]);
+    onCheckAllTabsChange(isAnyTabChecked);
+  }, [isAnyTabChecked, onCheckAllTabsChange]);
 
   return (
     <ul className="list shadow-md">
