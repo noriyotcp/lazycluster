@@ -6,10 +6,9 @@ interface WindowGroupListProps {
   filteredTabGroups: { windowId: number; tabs: Tabs.Tab[]; windowGroupNumber: number }[];
   activeWindowId: number | null;
   handleCloseTab: (tabId: number) => void;
-  focusTab: (tabId: number, windowId: number) => void;
 }
 
-const WindowGroupList = ({ filteredTabGroups, activeWindowId, handleCloseTab, focusTab }: WindowGroupListProps) => (
+const WindowGroupList = ({ filteredTabGroups, activeWindowId, handleCloseTab }: WindowGroupListProps) => (
   <div className="md:columns-2 mt-4">
     {filteredTabGroups
       .filter(group => group.tabs.length > 0)
@@ -21,7 +20,7 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, handleCloseTab, fo
               tabGroup={tabGroup}
               activeWindowId={activeWindowId}
               handleCloseTab={handleCloseTab}
-              focusTab={focusTab}
+              // focusTab={focusTab} // focusTab を削除
             />
           </WindowGroupContextProvider>
         </div>

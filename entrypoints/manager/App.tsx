@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Header from '../../src/components/Header';
 import WindowGroupList from '../../src/components/WindowGroupList';
 import type { Tabs } from 'webextension-polyfill';
+import { TabFocusProvider } from '../../src/contexts/TabFocusContext'; // 新しい Context をインポート
 import './style.css';
 
 type Message = { type: string; tabs: Tabs.Tab[]; tabId?: number };
@@ -106,34 +107,26 @@ const Manager = () => {
     [closeTab]
   );
 
-  const focusTab = useCallback((tabId: number, windowId: number) => {
-    chrome.tabs.update(tabId, { active: true }, () => {
-      if (chrome.runtime.lastError) {
-        console.error('タブのフォーカスに失敗しました:', chrome.runtime.lastError);
-      }
-    });
-    chrome.windows.update(windowId, { focused: true });
-  }, []);
-
   const filteredTabGroups = tabGroups
-    .map((group, index) => ({ ...group, windowGroupNumber: index })) // 元の順番を保持した番号を追加
+    .map((group, index) => ({ ...group, windowGroupNumber: index }))
     .map(group => ({
       ...group,
       tabs: group.tabs.filter(tab => tab.title?.toLowerCase().includes(searchQuery.toLowerCase())),
     }));
 
   return (
-    <>
+    <TabFocusProvider>
+      {' '}
+      {/* TabFocusProvider でラップするよん */}
       <Header searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} />
       <div className="p-5 pt-0">
         <WindowGroupList
           filteredTabGroups={filteredTabGroups}
           activeWindowId={activeWindowId}
           handleCloseTab={handleCloseTab}
-          focusTab={focusTab}
         />
       </div>
-    </>
+    </TabFocusProvider>
   );
 };
 

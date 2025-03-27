@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import type { Tabs } from 'webextension-polyfill';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
+import { useTabFocusContext } from '../../src/contexts/TabFocusContext';
 
 interface TabItemProps {
   tab: Tabs.Tab;
   handleCloseTab: (tabId: number) => void;
-  focusTab: (tabId: number, windowId: number) => void;
 }
 
 const globeIcon = () => {
@@ -20,7 +20,7 @@ const globeIcon = () => {
   );
 };
 
-const TabItem = ({ tab, handleCloseTab, focusTab }: TabItemProps) => {
+const TabItem = ({ tab, handleCloseTab }: TabItemProps) => {
   const { selectedTabIds, addTabToSelection, removeTabFromSelection } = useTabSelectionContext();
   const [isChecked, setIsChecked] = useState(false);
 
@@ -28,10 +28,12 @@ const TabItem = ({ tab, handleCloseTab, focusTab }: TabItemProps) => {
     setIsChecked(selectedTabIds.includes(tab.id!));
   }, [selectedTabIds, tab.id]);
 
+  const { focusActiveTab } = useTabFocusContext();
+
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     if (tab.id && tab.windowId) {
-      focusTab(tab.id, tab.windowId);
+      focusActiveTab(tab.id, tab.windowId);
     }
   };
 

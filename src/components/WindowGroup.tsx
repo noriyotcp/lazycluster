@@ -11,10 +11,8 @@ interface WindowGroupProps {
   };
   activeWindowId: number | null;
   handleCloseTab: (tabId: number) => void;
-  focusTab: (tabId: number, windowId: number) => void;
 }
-
-const WindowGroup = ({ tabGroup, activeWindowId, handleCloseTab, focusTab }: WindowGroupProps) => {
+const WindowGroup = ({ tabGroup, activeWindowId, handleCloseTab }: WindowGroupProps) => {
   const [isAnyTabCheckedInGroup, setIsAnyTabCheckedInGroup] = useState(false);
 
   const handleAnyTabCheckChange = useCallback((checked: boolean) => {
@@ -29,12 +27,7 @@ const WindowGroup = ({ tabGroup, activeWindowId, handleCloseTab, focusTab }: Win
       </div>
       <div className="collapse-content">
         <WindowActions windowId={tabGroup.windowId} isAnyTabCheckedInGroup={isAnyTabCheckedInGroup} />
-        <TabList
-          tabs={tabGroup.tabs}
-          handleCloseTab={handleCloseTab}
-          focusTab={focusTab}
-          onAnyTabCheckChange={handleAnyTabCheckChange}
-        />
+        <TabList tabs={tabGroup.tabs} handleCloseTab={handleCloseTab} onAnyTabCheckChange={handleAnyTabCheckChange} />
       </div>
     </div>
   );
