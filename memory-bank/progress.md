@@ -42,6 +42,9 @@
   - Add "Close Tabs" button and bulk selection functionality to WindowActions (src/components/WindowActions.tsx)
   - Add bulk selection functionality within tab groups to WindowActions
 
+- **Tab Management:**
+  - Implemented tab movement tracking by adding listeners for tab movement events (onMoved, onAttached, onDetached) in background script.
+
 ## What's Left to Build
 
 (List of major features to be built)

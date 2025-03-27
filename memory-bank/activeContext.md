@@ -42,7 +42,10 @@
 
 ## Lessons Learned
 
-(Record specific lessons learned during the current sprint or task)
+- Added event listeners for tab movement enabled the UI to reflect tab reordering.
+- Recognized the importance of explicitly defining requirements for expected behaviors.
+- A review of the original "cluster" implementation could have prevented oversights.
+- Established the need to integrate unit and E2E testing to catch such issues early.
 
 - **Tool Selection and Usage:** We encountered difficulties with the `replace_in_file` tool due to strict matching requirements. In cases of extensive or complex changes, using the `write_to_file` tool directly can be more reliable and save time.
 - **Value of PLAN MODE:** This process highlighted the critical importance of thorough planning in PLAN MODE. A more in-depth plan could have identified potential pitfalls early and reduced rework during ACT MODE.

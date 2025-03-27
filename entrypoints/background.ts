@@ -43,6 +43,27 @@ export default defineBackground(() => {
     }
   });
 
+  // Listen for tab movement within a window
+  browser.tabs.onMoved.addListener(async () => {
+    if (port) {
+      updateTabs(port);
+    }
+  });
+
+  // Listen for tab attachment (moved into a window)
+  browser.tabs.onAttached.addListener(async () => {
+    if (port) {
+      updateTabs(port);
+    }
+  });
+
+  // Listen for tab detachment (moved out of a window)
+  browser.tabs.onDetached.addListener(async () => {
+    if (port) {
+      updateTabs(port);
+    }
+  });
+
   browser.runtime.onConnect.addListener(p => {
     if (p.name === 'manager') {
       port = p as chrome.runtime.Port;
