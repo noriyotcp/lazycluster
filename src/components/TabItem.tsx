@@ -54,7 +54,7 @@ const TabItem = ({ tab, handleCloseTab, focusTab }: TabItemProps) => {
         onChange={handleCheckboxChange}
       />
       <div>{tab.favIconUrl ? <img className="size-4" src={tab.favIconUrl} alt={tab.title} /> : globeIcon()}</div>
-      <a href="#" className="list-col-grow cursor-pointer focus-visible:outline-1 truncate" onClick={handleClick}>
+      <a href={tab.url} className="list-col-grow cursor-pointer focus-visible:outline-1 truncate" onClick={handleClick}>
         <span>{tab.title}</span>
       </a>
       <button className="btn btn-outline btn-error btn-xs" onClick={() => handleCloseTab(tab.id!)}>
