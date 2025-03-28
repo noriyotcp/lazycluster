@@ -23,12 +23,11 @@ const globeIcon = () => {
 const TabItem = ({ tab, handleCloseTab }: TabItemProps) => {
   const { selectedTabIds, addTabToSelection, removeTabFromSelection } = useTabSelectionContext();
   const [isChecked, setIsChecked] = useState(false);
+  const { focusActiveTab } = useTabFocusContext();
 
   useEffect(() => {
     setIsChecked(selectedTabIds.includes(tab.id!));
   }, [selectedTabIds, tab.id]);
-
-  const { focusActiveTab } = useTabFocusContext();
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
