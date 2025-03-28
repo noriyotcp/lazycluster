@@ -9,6 +9,8 @@ A Chrome extension for enhanced tab and window management, inspired by the origi
     - Select tabs across multiple windows and close them all at once using the "trash" icon in the header.
   - **Window-Specific Bulk Close:**
     - Select tabs within a specific window and close them using the "Close Tabs" button in the Window Actions of each window group.
+  - **Keyboard Navigation:**
+    - Navigate through the tab list using 'j' (next), 'k' (previous), 'gg' (top), and 'G' (bottom) keys.
   - **Window Bulk Select:**
     - Checkbox in Window Actions to select/deselect all tabs within the window group.
   - Use checkboxes in each tab item to select tabs for bulk close actions.
