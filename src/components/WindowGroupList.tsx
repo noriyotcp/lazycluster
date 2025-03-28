@@ -20,7 +20,7 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, handleCloseTab }: 
               tabGroup={tabGroup}
               activeWindowId={activeWindowId}
               handleCloseTab={handleCloseTab}
-              // focusTab={focusTab} // focusTab を削除
+              // focusTab={focusTab} // Removed focusTab
             />
           </WindowGroupContextProvider>
         </div>

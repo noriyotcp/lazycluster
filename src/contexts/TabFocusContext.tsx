@@ -9,14 +9,14 @@ const TabFocusContext = createContext<TabFocusContextType | undefined>(undefined
 export const TabFocusProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const focusActiveTab = useCallback(async (tabId: number, windowId: number) => {
     try {
-      // まず対象のウィンドウをフォーカスする
+      // First, focus the target window
       await chrome.windows.update(windowId, { focused: true });
-      // 次に対象のタブをアクティブにする
+      // Then, activate the target tab
       await chrome.tabs.update(tabId, { active: true });
       console.log(`Focused tab ${tabId} in window ${windowId}`);
     } catch (error) {
       console.error(`Error focusing tab ${tabId} in window ${windowId}:`, error);
-      // エラーハンドリングをここに追加することもできるよん
+      // Additional error handling can be added here
     }
   }, []);
 
