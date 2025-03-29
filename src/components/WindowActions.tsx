@@ -49,24 +49,32 @@ const WindowActions = ({ windowId, isAnyTabCheckedInGroup }: WindowActionsProps)
   };
 
   return (
-    <div className="window-actions-container pl-2">
-      <input
-        id={`bulk-select-tabs-on-window-${windowId}`}
-        className="checkbox checkbox-xs"
-        type="checkbox"
-        onChange={handleBulkSelectChange}
-        checked={isAnyTabCheckedInGroup}
-      />
-      <button className="btn btn-link btn-xs" onClick={handleFocusWindow}>
-        Focus
-      </button>
-      <button className="btn btn-link btn-xs" onClick={handleCloseWindow}>
-        Close Window
-      </button>
-      <button className="btn btn-link btn-xs" onClick={handleCloseTabsInWindow}>
-        Close Tabs
-      </button>
-    </div>
+    <>
+      <ul className="list shadow-md">
+        <li className="list-row p-2 items-center rounded-none gap-1.5">
+          <div>
+            <input
+              id={`bulk-select-tabs-on-window-${windowId}`}
+              className="checkbox checkbox-xs"
+              type="checkbox"
+              onChange={handleBulkSelectChange}
+              checked={isAnyTabCheckedInGroup}
+            />
+          </div>
+          <div className="list-grow">
+            <button className="btn btn-link btn-xs" onClick={handleFocusWindow}>
+              Focus
+            </button>
+            <button className="btn btn-link btn-xs" onClick={handleCloseWindow}>
+              Close Window
+            </button>
+            <button className="btn btn-link btn-xs" onClick={handleCloseTabsInWindow}>
+              Close Tabs
+            </button>
+          </div>
+        </li>
+      </ul>
+    </>
   );
 };
 
