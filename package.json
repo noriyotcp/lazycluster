@@ -16,7 +16,10 @@
     "lint": "eslint . --ext .ts,.tsx,.js,.mjs",
     "fix": "npm run fix:eslint && npm run fix:prettier",
     "fix:eslint": "npm run lint -- --fix",
-    "fix:prettier": "prettier --write ."
+    "fix:prettier": "prettier --write .",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.14",
