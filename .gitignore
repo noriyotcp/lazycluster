@@ -31,3 +31,4 @@ web-ext.config.ts
 /blob-report/
 /playwright/.cache/
 tests-examples/
+user-data-dir/
