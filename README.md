@@ -2,6 +2,24 @@
 
 A Chrome extension for enhanced tab and window management, inspired by the original "cluster" extension.
 
+## E2E Testing
+
+This project uses Playwright for end-to-end testing.
+
+### Setup
+
+- Configure `fixtures.ts` with the correct extension path.
+- Use `path.resolve` to dynamically resolve the extension path.
+
+### Error Handling
+
+- Be aware of `__dirname` errors when resolving paths.
+- Check for test timeouts and adjust configurations accordingly.
+
+### Test Examples
+
+- `popup-display.spec.ts` provides an example of testing the popup UI.
+
 ## Features
 
 - **Bulk Tab Selection and Actions:**
