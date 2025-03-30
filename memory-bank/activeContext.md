@@ -46,7 +46,4 @@
 - Recognized the importance of explicitly defining requirements for expected behaviors.
 - A review of the original "cluster" implementation could have prevented oversights.
 - Established the need to integrate unit and E2E testing to catch such issues early.
-
-- **Tool Selection and Usage:** We encountered difficulties with the `replace_in_file` tool due to strict matching requirements. In cases of extensive or complex changes, using the `write_to_file` tool directly can be more reliable and save time.
-- **Value of PLAN MODE:** This process highlighted the critical importance of thorough planning in PLAN MODE. A more in-depth plan could have identified potential pitfalls early and reduced rework during ACT MODE.
 - **Incorrect Next Steps:** The Next Steps in `activeContext.md` included tasks that were not actually needed. In the future, we should confirm with the user before updating the Next Steps.
