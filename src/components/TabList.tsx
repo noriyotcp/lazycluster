@@ -1,15 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import TabItem from './TabItem';
-import type { Tabs } from 'webextension-polyfill';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 
 interface TabListProps {
-  tabs: Tabs.Tab[];
-  handleCloseTab: (tabId: number) => void;
+  tabs: chrome.tabs.Tab[];
   onAnyTabCheckChange: (checked: boolean) => void;
 }
 
-const TabList = ({ tabs, handleCloseTab, onAnyTabCheckChange }: TabListProps) => {
+const TabList = ({ tabs, onAnyTabCheckChange }: TabListProps) => {
   const { selectedTabIds } = useTabSelectionContext();
 
   const isAnyTabChecked = tabs.some(tab => selectedTabIds.includes(tab.id!));
@@ -70,7 +68,7 @@ const TabList = ({ tabs, handleCloseTab, onAnyTabCheckChange }: TabListProps) =>
   return (
     <ul ref={listRef} className="list shadow-md" onKeyDown={handleKeyDown}>
       {tabs.map(tab => (
-        <TabItem key={tab.id} tab={tab} handleCloseTab={handleCloseTab} />
+        <TabItem key={tab.id} tab={tab} />
       ))}
     </ul>
   );

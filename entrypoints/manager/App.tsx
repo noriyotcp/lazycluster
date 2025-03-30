@@ -1,19 +1,15 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import Header from '../../src/components/Header';
 import WindowGroupList from '../../src/components/WindowGroupList';
 import type { Tabs } from 'webextension-polyfill';
 import { TabFocusProvider } from '../../src/contexts/TabFocusContext';
+import { TabGroupProvider, useTabGroupContext } from '../../src/contexts/TabGroupContext';
 import './style.css';
 
 type Message = { type: string; tabs: Tabs.Tab[]; tabId?: number };
 
-interface TabGroup {
-  windowId: number;
-  tabs: Tabs.Tab[];
-}
-
 const Manager = () => {
-  const [tabGroups, setTabGroups] = useState<TabGroup[]>([]);
+  const { tabGroups, updateTabGroups } = useTabGroupContext();
   const [activeWindowId, setActiveWindowId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -23,16 +19,7 @@ const Manager = () => {
 
     const handleMessage = (message: Message) => {
       if (message.type === 'UPDATE_TABS') {
-        const groupedTabs = groupTabsByWindow(message.tabs);
-        // Get active window ID within the message handling
-        chrome.windows.getCurrent().then(window => {
-          if (window.id !== undefined) {
-            const sortedTabGroups = sortTabGroups(groupedTabs, window.id);
-            setTabGroups(sortedTabGroups);
-          } else {
-            setTabGroups(groupedTabs); // If window.id is undefined, set without sorting
-          }
-        });
+        updateTabGroups(message.tabs as chrome.tabs.Tab[]); // Type casting
       } else if (message.type === 'BACKGROUND_INITIALIZED') {
         console.log('Background script initialized');
       }
@@ -54,78 +41,37 @@ const Manager = () => {
       connection.onMessage.removeListener(handleMessage);
       connection.disconnect();
     };
-  }, []);
+  }, [updateTabGroups]);
 
-  const sortTabGroups = (tabGroups: TabGroup[], activeWindowId: number | null): TabGroup[] => {
-    if (activeWindowId === null) {
-      return tabGroups; // No sorting needed if active window ID is not available
-    }
-
-    const activeWindowGroupIndex = tabGroups.findIndex(group => group.windowId === activeWindowId);
-
-    if (activeWindowGroupIndex === -1) {
-      return tabGroups; // No sorting needed if the active window group is not found
-    }
-
-    const activeWindowGroup = tabGroups.splice(activeWindowGroupIndex, 1)[0]; // Extracts the active window's group
-    return [activeWindowGroup, ...tabGroups]; // Insert the active window group at the beginning
-  };
-
-  const groupTabsByWindow = (tabs: Tabs.Tab[]): TabGroup[] => {
-    const groups: { [windowId: number]: Tabs.Tab[] } = {};
-    tabs.forEach(tab => {
-      if (tab.windowId) {
-        if (!groups[tab.windowId]) {
-          groups[tab.windowId] = [];
-        }
-        groups[tab.windowId].push(tab);
-      }
-    });
-
-    return Object.entries(groups).map(([windowId, tabs]) => ({ windowId: parseInt(windowId), tabs }));
-  };
-
-  const closeTab = useCallback((tabId: number) => {
-    chrome.tabs.remove(tabId, () => {
-      if (chrome.runtime.lastError) {
-        console.error('タブの削除に失敗しました:', chrome.runtime.lastError);
-      } else {
-        setTabGroups(prevTabGroups =>
-          prevTabGroups.map(group => ({
-            ...group,
-            tabs: group.tabs.filter(tab => tab.id !== tabId),
-          }))
-        );
-      }
-    });
-  }, []);
-
-  const handleCloseTab = useCallback(
-    (tabId: number) => {
-      closeTab(tabId);
-    },
-    [closeTab]
-  );
-
+  // filteredTabGroups is derived from Context's tabGroups, ensuring chrome.tabs.Tab type
   const filteredTabGroups = tabGroups
     .map((group, index) => ({ ...group, windowGroupNumber: index }))
     .map(group => ({
       ...group,
-      tabs: group.tabs.filter(tab => tab.title?.toLowerCase().includes(searchQuery.toLowerCase())),
-    }));
+      tabs: group.tabs.filter(tab => tab.title?.toLowerCase().includes(searchQuery.toLowerCase())) as chrome.tabs.Tab[],
+    })) satisfies { windowId: number; tabs: chrome.tabs.Tab[]; windowGroupNumber: number }[]; // Enforce chrome.tabs.Tab[] type
 
   return (
-    <TabFocusProvider>
-      <Header searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} />
-      <div className="p-5 pt-0">
-        <WindowGroupList
-          filteredTabGroups={filteredTabGroups}
-          activeWindowId={activeWindowId}
-          handleCloseTab={handleCloseTab}
-        />
-      </div>
-    </TabFocusProvider>
+    <TabGroupProvider>
+      <TabFocusProvider>
+        <Header searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} />
+        <div className="p-5 pt-0">
+          <WindowGroupList
+            filteredTabGroups={filteredTabGroups}
+            activeWindowId={activeWindowId}
+          />
+        </div>
+      </TabFocusProvider>
+    </TabGroupProvider>
   );
 };
 
-export default Manager;
+// TODO: We need to wrap the Manager component with a TabGroupProvider, so consider whether to wrap it here or in main.tsx.
+// This time we will wrap it in main.tsx. Therefore, delete TabGroupProvider in this file.
+const WrappedManager = () => (
+  <TabGroupProvider>
+    <Manager />
+  </TabGroupProvider>
+);
+
+export default WrappedManager;

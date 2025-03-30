@@ -1,18 +1,16 @@
 import { useState, useCallback } from 'react';
 import WindowHeader from './WindowHeader';
 import TabList from './TabList';
-import type { Tabs } from 'webextension-polyfill';
 import WindowActions from './WindowActions';
 
 interface WindowGroupProps {
   tabGroup: {
     windowId: number;
-    tabs: Tabs.Tab[];
+    tabs: chrome.tabs.Tab[];
   };
   activeWindowId: number | null;
-  handleCloseTab: (tabId: number) => void;
 }
-const WindowGroup = ({ tabGroup, activeWindowId, handleCloseTab }: WindowGroupProps) => {
+const WindowGroup = ({ tabGroup, activeWindowId }: WindowGroupProps) => {
   const [isAnyTabCheckedInGroup, setIsAnyTabCheckedInGroup] = useState(false);
 
   const handleAnyTabCheckChange = useCallback((checked: boolean) => {
@@ -27,7 +25,7 @@ const WindowGroup = ({ tabGroup, activeWindowId, handleCloseTab }: WindowGroupPr
       </div>
       <div className="collapse-content">
         <WindowActions windowId={tabGroup.windowId} isAnyTabCheckedInGroup={isAnyTabCheckedInGroup} />
-        <TabList tabs={tabGroup.tabs} handleCloseTab={handleCloseTab} onAnyTabCheckChange={handleAnyTabCheckChange} />
+        <TabList tabs={tabGroup.tabs} onAnyTabCheckChange={handleAnyTabCheckChange} />
       </div>
     </div>
   );

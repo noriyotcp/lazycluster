@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import type { Tabs } from 'webextension-polyfill';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useTabFocusContext } from '../../src/contexts/TabFocusContext';
+import { useTabGroupContext } from '../../src/contexts/TabGroupContext';
 
 interface TabItemProps {
-  tab: Tabs.Tab;
-  handleCloseTab: (tabId: number) => void;
+  tab: chrome.tabs.Tab;
 }
 
 const globeIcon = () => {
@@ -20,10 +19,11 @@ const globeIcon = () => {
   );
 };
 
-const TabItem = ({ tab, handleCloseTab }: TabItemProps) => {
+const TabItem = ({ tab }: TabItemProps) => {
   const { selectedTabIds, addTabToSelection, removeTabFromSelection } = useTabSelectionContext();
   const [isChecked, setIsChecked] = useState(false);
   const { focusActiveTab } = useTabFocusContext();
+  const { updateTabGroups } = useTabGroupContext();
 
   useEffect(() => {
     setIsChecked(selectedTabIds.includes(tab.id!));
@@ -45,6 +45,18 @@ const TabItem = ({ tab, handleCloseTab }: TabItemProps) => {
     setIsChecked(e.target.checked);
   };
 
+  const handleCloseButtonClick = () => {
+    chrome.tabs.remove(tab.id!, () => {
+      if (chrome.runtime.lastError) {
+        console.error('Failed to close tab:', chrome.runtime.lastError);
+      } else {
+        chrome.tabs.query({}, tabs => {
+          updateTabGroups(tabs);
+        });
+      }
+    });
+  };
+
   return (
     <li tabIndex={0} className="list-row p-2 items-center rounded-none even:bg-base-200">
       <input
@@ -58,7 +70,7 @@ const TabItem = ({ tab, handleCloseTab }: TabItemProps) => {
       <a href={tab.url} className="list-col-grow cursor-pointer focus-visible:outline-1 truncate" onClick={handleClick}>
         <span>{tab.title}</span>
       </a>
-      <button className="btn btn-outline btn-error btn-xs" onClick={() => handleCloseTab(tab.id!)}>
+      <button className="btn btn-outline btn-error btn-xs" onClick={handleCloseButtonClick}>
         Close
       </button>
     </li>
