@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Header from '../../src/components/Header';
 import WindowGroupList from '../../src/components/WindowGroupList';
 import type { Tabs } from 'webextension-polyfill';
-import { TabFocusProvider } from '../../src/contexts/TabFocusContext'; // 新しい Context をインポート
+import { TabFocusProvider } from '../../src/contexts/TabFocusContext';
 import './style.css';
 
 type Message = { type: string; tabs: Tabs.Tab[]; tabId?: number };
@@ -116,8 +116,6 @@ const Manager = () => {
 
   return (
     <TabFocusProvider>
-      {' '}
-      {/* TabFocusProvider でラップするよん */}
       <Header searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} />
       <div className="p-5 pt-0">
         <WindowGroupList
