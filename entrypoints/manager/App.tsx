@@ -3,7 +3,7 @@ import Header from '../../src/components/Header';
 import WindowGroupList from '../../src/components/WindowGroupList';
 import type { Tabs } from 'webextension-polyfill';
 import { TabFocusProvider } from '../../src/contexts/TabFocusContext';
-import { TabGroupProvider, useTabGroupContext } from '../../src/contexts/TabGroupContext';
+import { useTabGroupContext } from '../../src/contexts/TabGroupContext';
 import './style.css';
 
 type Message = { type: string; tabs: Tabs.Tab[]; tabId?: number };
@@ -52,26 +52,13 @@ const Manager = () => {
     })) satisfies { windowId: number; tabs: chrome.tabs.Tab[]; windowGroupNumber: number }[]; // Enforce chrome.tabs.Tab[] type
 
   return (
-    <TabGroupProvider>
-      <TabFocusProvider>
-        <Header searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} />
-        <div className="p-5 pt-0">
-          <WindowGroupList
-            filteredTabGroups={filteredTabGroups}
-            activeWindowId={activeWindowId}
-          />
-        </div>
-      </TabFocusProvider>
-    </TabGroupProvider>
+    <TabFocusProvider>
+      <Header searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} />
+      <div className="p-5 pt-0">
+        <WindowGroupList filteredTabGroups={filteredTabGroups} activeWindowId={activeWindowId} />
+      </div>
+    </TabFocusProvider>
   );
 };
 
-// TODO: We need to wrap the Manager component with a TabGroupProvider, so consider whether to wrap it here or in main.tsx.
-// This time we will wrap it in main.tsx. Therefore, delete TabGroupProvider in this file.
-const WrappedManager = () => (
-  <TabGroupProvider>
-    <Manager />
-  </TabGroupProvider>
-);
-
-export default WrappedManager;
+export default Manager;
