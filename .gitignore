@@ -30,5 +30,5 @@ web-ext.config.ts
 /playwright-report/
 /blob-report/
 /playwright/.cache/
-tests-examples/
 user-data-dir/
+storageState.json
