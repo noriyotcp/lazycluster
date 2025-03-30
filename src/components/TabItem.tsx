@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useTabFocusContext } from '../../src/contexts/TabFocusContext';
-import { useTabGroupContext } from '../../src/contexts/TabGroupContext';
 
 interface TabItemProps {
   tab: chrome.tabs.Tab;
@@ -23,7 +22,6 @@ const TabItem = ({ tab }: TabItemProps) => {
   const { selectedTabIds, addTabToSelection, removeTabFromSelection } = useTabSelectionContext();
   const [isChecked, setIsChecked] = useState(false);
   const { focusActiveTab } = useTabFocusContext();
-  const { updateTabGroups } = useTabGroupContext();
 
   useEffect(() => {
     setIsChecked(selectedTabIds.includes(tab.id!));
@@ -49,10 +47,6 @@ const TabItem = ({ tab }: TabItemProps) => {
     chrome.tabs.remove(tab.id!, () => {
       if (chrome.runtime.lastError) {
         console.error('Failed to close tab:', chrome.runtime.lastError);
-      } else {
-        chrome.tabs.query({}, tabs => {
-          updateTabGroups(tabs);
-        });
       }
     });
   };
