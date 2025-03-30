@@ -50,13 +50,16 @@ Follow the template in `/docs/adr/template.md` (create this template file).
   7. write_to_file is the last resort: `write_to_file` is effective as a last resort if `replace_in_file` is NG.
   8. Naming is hard: Naming is a challenging task, especially when the logic evolves. It's important to choose names that accurately reflect the current logic and are consistent across the codebase.
   9. Component Hierarchy and Prop Drilling complicate naming: Deep component hierarchies and prop drilling can make naming more difficult. Consider using Context API or other state management solutions to simplify prop flow and improve naming clarity.
+  10. **Event Listener Awareness:** When using event listeners (e.g., `chrome.tabs.onRemoved`), ensure that you understand the event flow and avoid redundant updates.
 - Memory bank files should be reviewed and updated when discovering new project patterns, after implementing significant changes, when the user requests with "update memory bank", and when context needs clarification.
 - When modifying tab management logic, ensure that all edge cases are handled correctly, such as tabs in different windows.
 - If `replace_in_file` fails, consider using `write_to_file` to rewrite the entire file.
 - UI misalignment can be caused by unexpected CSS scope.
-- Leaving TODO comments can help clarify areas that need further modification.
 - The SEARCH block in `replace_in_file` must exactly match the file content.
 - `chrome.tabs.get` API can be used to get tab information from tab ID.
+- When writing code comments, include a “Why not” explanation to highlight the rationale behind non-obvious decisions. Comments should not simply state what the code does; instead, they must provide insight into why a particular approach was chosen—especially for complex or non-intuitive parts of the code.
+  - This follows Takuto Wada’s recommendation from https://x.com/t_wada/status/904916106153828352 and aligns with best practices described in [the Swimm article](https://swimm.io/learn/code-collaboration/comments-in-code-best-practices-and-mistakes-to-avoid), ensuring that comments add real value for future maintainers.
+  - Code comments should be written in English.
 
 ## Commit Description Guidelines
 
