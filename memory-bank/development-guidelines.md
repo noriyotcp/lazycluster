@@ -20,5 +20,33 @@
 4.  **Continuous Documentation Updates:**  
     Keep internal documents (e.g., ADRs, progress notes) updated with lessons learned and best practices gleaned from development experience.
 
-5.  **Regular Code Reviews and Revisions:**  
+5.  **Regular Code Reviews and Revisions:**
     Periodically review and update these guidelines to ensure they stay relevant as the project evolves.
+
+## React Components
+
+### Avoid Using `React.FC`
+
+When defining React functional components, avoid using `React.FC`. Instead, explicitly type the props and return type.
+
+**Why?**
+
+- `React.FC` implicitly includes `children`, which may not always be desired.
+- It can interfere with `defaultProps` and other static properties.
+- It's less explicit and can be less readable than typing props directly.
+
+**Instead:**
+
+```typescript
+interface MyComponentProps {
+  name: string;
+}
+
+const MyComponent = ({ name }: MyComponentProps): JSX.Element => {
+  return <div>Hello, {name}!</div>;
+};
+```
+
+**Reference:**
+
+- [TypeScript + React: Why I don't use React.FC](https://fettblog.eu/typescript-react-why-i-dont-use-react-fc/)
