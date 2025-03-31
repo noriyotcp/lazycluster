@@ -12,7 +12,7 @@ interface TabGroupContextProps {
 
 const TabGroupContext = createContext<TabGroupContextProps | undefined>(undefined);
 
-export const TabGroupProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const TabGroupProvider = ({ children }: { children: React.ReactNode }): React.ReactElement => {
   const [tabGroups, setTabGroups] = useState<TabGroup[]>([]);
 
   const updateTabGroups = useCallback((updatedTabs: chrome.tabs.Tab[]) => {

@@ -6,7 +6,7 @@ interface TabFocusContextType {
 
 const TabFocusContext = createContext<TabFocusContextType | undefined>(undefined);
 
-export const TabFocusProvider: React.FC<PropsWithChildren> = ({ children }) => {
+export const TabFocusProvider = ({ children }: PropsWithChildren): React.ReactElement => {
   const focusActiveTab = useCallback(async (tabId: number, windowId: number) => {
     try {
       // First, focus the target window

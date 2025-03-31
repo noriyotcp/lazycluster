@@ -40,7 +40,7 @@ By leveraging the `useContext()` hook from the React Context API, we can elimina
 
     const TabSelectionContext = createContext<TabSelectionContextType | undefined>(undefined);
 
-    export const TabSelectionProvider: React.FC<PropsWithChildren> = ({ children }) => {
+    export const TabSelectionProvider = ({ children }: PropsWithChildren): React.ReactElement => {
       const [selectedTabIds, setSelectedTabIds] = useState<number[]>([]);
       const [isBulkCheckboxActive, setBulkCheckboxActive] = useState<boolean>(false); // Added state to manage bulk checkbox state
 
