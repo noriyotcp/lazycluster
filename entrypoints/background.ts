@@ -36,6 +36,8 @@ export default defineBackground(() => {
 
   // Listen for tab removal
   browser.tabs.onRemoved.addListener(async () => {
+    console.log('onRemoved: ', port);
+
     if (port) {
       updateTabs(port);
     }
@@ -63,9 +65,13 @@ export default defineBackground(() => {
   });
 
   browser.runtime.onConnect.addListener(p => {
+    console.log('onConnect', new Date());
+    console.dir(p);
     if (p.name === 'manager') {
       port = p as chrome.runtime.Port;
       port.onDisconnect.addListener(() => {
+        console.log('onDisconnect', new Date());
+        console.dir(port);
         port = null;
       });
 
