@@ -23,6 +23,7 @@ This project uses Playwright for end-to-end testing.
 ## Features
 
 - **Bulk Tab Selection and Actions:**
+
   - **Global Bulk Close:**
     - Select tabs across multiple windows and close them all at once using the "trash" icon in the header.
   - **Window-Specific Bulk Close:**
@@ -32,6 +33,8 @@ This project uses Playwright for end-to-end testing.
   - **Window Bulk Select:**
     - Checkbox in Window Actions to select/deselect all tabs within the window group.
   - Use checkboxes in each tab item to select tabs for bulk close actions.
+
+- **Tab Hover Domain Display:** When hovering over a tab, the tab's domain is displayed as a clickable link, enabling access even when the title is truncated.
 
 ## Overview
 

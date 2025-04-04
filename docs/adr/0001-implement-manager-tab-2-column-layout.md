@@ -14,7 +14,7 @@ The manager tab in LazyCluster displays a list of open and saved windows. On wid
 
 ## Decision
 
-Implement a responsive 2-column layout for the WindowGroupList component in the manager tab. This layout will be activated when the browser window is wider than a certain breakpoint (md:). We will use Tailwind CSS grid layout to achieve this.
+Implement a responsive 2-column layout for the WindowGroupList component in the manager tab. This layout will be activated when the browser window is wider than a certain breakpoint (lg:). We will use Tailwind CSS grid layout to achieve this.
 
 ## Consequences
 
