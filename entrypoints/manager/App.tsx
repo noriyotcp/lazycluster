@@ -48,7 +48,12 @@ const Manager = () => {
     .map((group, index) => ({ ...group, windowGroupNumber: index }))
     .map(group => ({
       ...group,
-      tabs: group.tabs.filter(tab => tab.title?.toLowerCase().includes(searchQuery.toLowerCase())) as chrome.tabs.Tab[],
+      tabs: group.tabs.filter(tab =>
+        ['title', 'url'].some(target => {
+          const value = (tab as Tabs.Tab)[target as keyof Tabs.Tab];
+          return typeof value === 'string' && value.toLowerCase().includes(searchQuery.toLowerCase());
+        })
+      ) as chrome.tabs.Tab[],
     })) satisfies { windowId: number; tabs: chrome.tabs.Tab[]; windowGroupNumber: number }[]; // Enforce chrome.tabs.Tab[] type
 
   return (
