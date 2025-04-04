@@ -2,6 +2,14 @@ import { useState, useEffect } from 'react';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useTabFocusContext } from '../../src/contexts/TabFocusContext';
 
+const extractDomain = (url: string): string => {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return '';
+  }
+};
+
 interface TabItemProps {
   tab: chrome.tabs.Tab;
 }
@@ -52,7 +60,7 @@ const TabItem = ({ tab }: TabItemProps) => {
   };
 
   return (
-    <li tabIndex={0} className="list-row p-2 items-center rounded-none even:bg-base-200">
+    <li tabIndex={0} className="list-row p-2 items-center rounded-none even:bg-base-200 group/tabitem">
       <input
         id={`tab-${tab.id}`}
         type="checkbox"
@@ -61,9 +69,16 @@ const TabItem = ({ tab }: TabItemProps) => {
         onChange={handleCheckboxChange}
       />
       <div>{tab.favIconUrl ? <img className="size-4" src={tab.favIconUrl} alt={tab.title} /> : globeIcon()}</div>
-      <a href={tab.url} className="list-col-grow cursor-pointer focus-visible:outline-1 truncate" onClick={handleClick}>
-        <span>{tab.title}</span>
-      </a>
+      <span className="list-col-grow cursor-pointer focus-visible:outline-1 truncate">
+        <a href={tab.url} onClick={handleClick}>
+          <span>{tab.title}</span>
+        </a>
+      </span>
+      <span className="hidden group-hover/tabitem:inline text-gray-500">
+        <a href={tab.url} onClick={handleClick}>
+          {extractDomain(tab.url || '')}
+        </a>
+      </span>
       <button className="btn btn-outline btn-error btn-xs" onClick={handleCloseButtonClick}>
         Close
       </button>
