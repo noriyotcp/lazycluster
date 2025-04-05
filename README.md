@@ -38,9 +38,9 @@ This project uses Playwright for end-to-end testing.
 
 ## Overview
 
-LazyCluster aims to provide a streamlined and intuitive interface for managing your browser tabs and windows. It allows you to easily list, search, and close tabs. Tabs in the manager tab are now grouped by window for better organization. The manager page also includes a search bar to filter tabs by title and URL and now features a responsive 2-column layout for window groups.
+LazyCluster aims to provide a streamlined and intuitive interface for managing your browser tabs and windows. It allows you to easily list, search, and close tabs. Tabs in the manager tab are now grouped by window for better organization. The manager page also includes a search bar to filter tabs by title and URL, and now features a responsive 2-column layout for window groups that activates at the `lg:` breakpoint.
 The header is now sticky, always staying at the top of the page for easy access to search and theme switch and bulk tab closing.
-**The manager page now features a responsive 2-column layout for window groups, implemented using the `column-count` CSS property.**
+**The manager page now features a responsive 2-column layout for window groups, implemented using Tailwind CSS grid.**
 
 ## Technologies Used
 

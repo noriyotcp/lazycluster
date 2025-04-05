@@ -1,142 +1,79 @@
-# Project Progress: LazyCluster
+# Project Progress and Status
 
-## Role
+_(Keep track of project progress, milestones, and current status. Note what's working, what's left to build, and any known issues.)_
 
-- Track what works.
-- Track what's left to build.
-- Document the current status.
-- Note any known issues.
+## Overall Progress
 
-## What Works
+- Basic extension setup and popup UI: **Done**
+- Manager page implementation: **In Progress**
+- Background service worker logic: **In Progress**
+- Settings page: **To Do**
+- E2E testing: **In Progress**
+- Documentation: **In Progress**
 
-(List of features that are working)
+## What's Working
 
-- **Project Setup:**
-  - Project is initialized with WXT (Web Extension Toolkit).
-  - Basic project structure is in place, including `entrypoints` for different extension contexts (popup, manager, background, content).
-  - TypeScript, React, and Vite are configured and working correctly.
-  - Development environment is set up with Hot Module Replacement for efficient development.
-  - ESLint and Prettier are configured for linting and formatting.
-- **Memory Bank:**
-  - Core memory bank files are initialized: `projectbrief.md`, `productContext.md`, `activeContext.md`, `systemPatterns.md`, `techContext.md`, `progress.md`.
-  - `projectbrief.md`, `productContext.md`, `systemPatterns.md`, and `techContext.md` are drafted and updated.
-- **UI Layout:**
-
-  - Implemented a responsive 2-column layout for window groups using `column-count` CSS property.
-  - Refactored `src/components/WindowGroupList.tsx` to use `columns-2` for multi-column layout.
-  - Removed Flexbox implementation from `src/components/WindowGroupList.tsx`.
-  - Removed `max-height` from `collapse-content` in `src/components/WindowGroup.tsx`.
-  - Implemented title truncation for long site titles.
-  - Implemented tab focusing via Chrome Extension API.
-
-- **Tab Searching and Filtering:**
-
-  - Implemented tab searching and filtering.
-  - Fixed issue where empty WindowGroups were displayed after filtering.
-  - Fixed issue where Window numbers were incorrect after filtering.
-
-- **Bulk Tab Selection Improvements:**
-
-  - Align tab item title to the left (src/components/TabItem.tsx)
-  - Adjust trash icon position in header (src/components/Header.tsx)
-  - Add "Close Tabs" button and bulk selection functionality to WindowActions (src/components/WindowActions.tsx)
-  - Add bulk selection functionality within tab groups to WindowActions
-
-- **Tab Management:**
-  - Implemented tab movement tracking by adding listeners for tab movement events (onMoved, onAttached, onDetached) in background script.
+- Tab listing and grouping by window.
+- Basic UI layout and styling.
+- Theme switching functionality.
+- Bulk tab selection and closing.
+- Keyboard navigation in TabList.
+- URL search functionality.
+- Tab hover domain display.
+- Responsive 2-column layout using Tailwind CSS Grid.
 
 ## What's Left to Build
 
-(List of major features to be built)
-
-- **Core Features:**
-
-  - Implement UI to display all open windows and tabs.
-  - Implement drag and drop tab reordering within and between windows.
-  - Implement tab sorting within windows (including by domain).
-  - Implement bulk tab selection and actions (close, move, suspend).
-  - Implement management of tabs within each domain.
-  - Tab suspension to reduce memory usage.
-  - Tab discarding/closing with undo functionality.
-  - Ability to move tabs to new or existing windows.
-  - Window creation and focusing.
-  - Window closing.
-  - Window naming (optional).
-  - Saving and restoring browser sessions (windows and tabs).
-  - Opening saved sessions with tabs in a suspended state.
-  - Importing and exporting sessions in CSV/JSON format.
-  - Cloud backup and sync for saved sessions (future consideration).
-
-- **Tab Searching and Filtering Improvements:**
-
-  - Improve search logic (e.g., word-based matching, fuzzy search, regular expression search).
-  - Expand filtering capabilities (e.g., domain, title, URL, pinned state, audible state).
-  - Improve UI/UX (e.g., highlight matched text, selectable filtering conditions, display number of search results).
-  - Optimize performance for large numbers of tabs.
-
-- **User Interface & Experience:**
-
-  - Develop the Manager Tab UI using React components.
-  - Develop the Popup UI (currently just for opening Manager Tab).
-  - Implement dark and light theme options.
-  - Implement customizable keyboard shortcuts to open the extension.
-  - Ensure clear visual feedback for actions.
-
-- **Testing:**
-
-  - Implement unit tests for core business logic.
-  - Implement integration tests for API endpoints and extension-specific functionalities.
-  - Implement end-to-end tests for critical user flows.
-
-- **Documentation:**
-  - Update relevant documentation in `/docs` when modifying features.
-  - Keep `README.md` in sync with new capabilities.
-  - Create ADRs in `/docs/adr` for significant architectural decisions.
+- Implement settings page for user customization.
+- Explore possibilities for cross-device window synchronization.
+- Add more advanced tab management features.
+- Implement comprehensive E2E tests.
+- Finalize documentation and project cleanup.
 
 ## Current Status
 
-(Brief description of the project's current status, development phase, milestone achievements, etc.)
-
-- Initial project planning and documentation are in progress. Core memory bank files are being drafted and refined.
+- Documentation updates are currently in progress.
+- Code refactoring and UI improvements are ongoing.
+- Core features are functional and being tested.
 - Development environment is set up and ready for implementation.
 - Key features are identified and prioritized based on user needs and project goals.
 - No major blockers identified yet.
-- Refactored `src/components/WindowGroupList.tsx` to use `columns-2` for multi-column layout.
-- Removed Flexbox implementation from `src/components/WindowGroupList.tsx`.
-- Removed `max-height` from `collapse-content` in `src/components/WindowGroup.tsx`.
-- Implemented title truncation for long site titles.
-- Implemented tab focusing via Chrome Extension API.
-- Refactored prop and state names related to bulk tab selection for improved clarity and consistency across components.
+
+## Recent Milestones
+
+- Implemented a responsive 2-column layout for window groups using Tailwind CSS grid.
+- Adjusted layout breakpoints to `lg` for better responsiveness.
+- Added URL search functionality to the search bar.
+- Implemented tab hover domain display.
+- Refactored provider components to use `React.ReactElement` type for better type safety.
+- Removed redundant `updateTabGroups()` call in `TabItem` to avoid double updating.
+- Implemented keyboard navigation for TabList component using native `onKeyDown` event handler.
+- Added event listeners for tab movement tracking.
 
 ## Known Issues
 
-(List of known issues or problems that need to be addressed for the entire project)
-
-- No testing framework is currently implemented. This needs to be addressed as development progresses.
-- UI development has not started yet. Focus has been on project setup and documentation.
+- Minor UI alignment issues in certain scenarios.
+- Potential performance bottlenecks with large numbers of tabs (Need further review and testing).
+- Need to implement more robust error handling and user feedback mechanisms.
 
 ## Lessons Learned
 
-(Summary of lessons learned throughout the project)
-
-- **UI Layout Implementation:**
-  - We learned that `column-count` is a simple and effective way to create multi-column layouts, and that it can be a better choice than Flexbox or Grid for certain use cases.
-- **API Selection:** We initially experienced issues by confusing `browser.runtime` with `chrome.runtime` APIs. In future projects, we will verify the project configuration (e.g., `wxt.config.ts`) early in the development process to ensure the correct API usage.
-- **Context API and `createContext` Type Definition:** When using the Context API, it's important to consider the type definition of the context value. While it may seem safe to omit `undefined` from the type if the context is always provided within a specific component, including `undefined` and implementing an error check in the `useContext` hook can improve code safety and prevent unexpected errors if the context is accidentally used outside of its provider. This approach makes the code more robust and easier to maintain in the long run.
-- **Leverage UI Framework Features:** We initially overlooked the built-in Theme Controller component provided by daisyUI and attempted a manual implementation. Utilizing framework-provided features can significantly simplify development and improve efficiency.
-- **Component Responsibility Separation:** Creating dedicated, single-purpose components improves code organization and reusability. By isolating the theme-switching functionality into its own component, other components can focus on their primary responsibilities, leading to better maintainability and clearer component design.
-- **Importance of Iterative Improvement and Information Gathering:** Initial approaches may not always be optimal. User feedback and continuous information gathering are crucial for identifying better solutions and iteratively improving implementations.
-- **Value of PLAN MODE:** Thorough planning in PLAN MODE is critical. A more in-depth plan can identify potential pitfalls early and reduce rework during ACT MODE.
-- **Handling replace_in_file failures:** When `replace_in_file` fails multiple times, it is more efficient to use `write_to_file` as a fallback.
-- **Naming Conventions:** The importance of choosing clear and accurate names for props and states, especially when dealing with complex logic and component hierarchies. Inconsistent or misleading names can lead to confusion and rework.
-- **Iterative Naming Refinement:** Naming is not always straightforward and may require iterative refinement as the code evolves and logic becomes clearer. Be prepared to revisit and adjust names as needed.
-- **Prop Drilling and Context API:** Prop drilling can complicate component relationships and make naming more challenging. Context API can be a valuable tool to simplify prop flow and improve code organization in such cases.
+- Added event listeners for tab movement enabled the UI to reflect tab reordering.
+- Recognized the importance of explicitly defining requirements for expected behaviors.
+- A review of the original "cluster" implementation could have prevented oversights.
+- Established the need to integrate unit and E2E testing to catch such issues early.
+- Leverage UI Framework Features: We initially overlooked the built-in Theme Controller component provided by daisyUI and attempted a manual implementation. Utilizing framework-provided features can significantly simplify development and improve efficiency.
+- Component Responsibility Separation: Creating dedicated single-purpose components improves code organization and reusability. By isolating the theme-switching functionality into its own component other components can focus on their primary responsibilities leading to better maintainability and clearer component design.
+- Importance of Iterative Improvement and Information Gathering: Initial approaches may not always be optimal. User feedback and continuous information gathering are crucial for identifying better solutions and iteratively improving implementations.
+- Value of PLAN MODE: Thorough planning in PLAN MODE is critical. A more in-depth plan can identify potential pitfalls early and reduce rework during ACT MODE.
+- Handling replace_in_file failures: When `replace_in_file` fails multiple times it is more efficient to use `write_to_file` as a fallback.
+- Naming Conventions: The importance of choosing clear and accurate names for props and states especially when dealing with complex logic and component hierarchies. Inconsistent or misleading names can lead to confusion and rework.
+- Iterative Naming Refinement: Naming is not always straightforward and may require iterative refinement as the code evolves and logic becomes clearer. Be prepared to revisit and adjust names as needed.
+- Prop Drilling and Context API: Prop drilling can complicate component relationships and make naming more challenging. Context API can be a valuable tool to simplify prop flow and improve code organization in such cases.
 
 ## Next Actions
 
-(List of next actions for the entire project, such as feature implementation or major tasks)
-
-- Start outlining UI structure and components for the Manager Tab UI.
-- Begin implementing the basic UI structure in React.
-- Set up a basic testing environment (e.g., Jest) and write initial unit tests.
-- Continue to update memory bank files as development progresses.
+- Continue updating documentation files.
+- Address known issues and potential performance bottlenecks.
+- Implement E2E tests for UI components.
+- Explore settings page implementation.

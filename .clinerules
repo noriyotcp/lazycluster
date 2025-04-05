@@ -48,6 +48,7 @@ Follow the template in `/docs/adr/template.md` (create this template file).
 - When writing code comments, include a “Why not” explanation to highlight the rationale behind non-obvious decisions. Comments should not simply state what the code does; instead, they must provide insight into why a particular approach was chosen—especially for complex or non-intuitive parts of the code.
   - This follows Takuto Wada’s recommendation from https://x.com/t_wada/status/904916106153828352 and aligns with best practices described in [the Swimm article](https://swimm.io/learn/code-collaboration/comments-in-code-best-practices-and-mistakes-to-avoid), ensuring that comments add real value for future maintainers.
   - Code comments should be written in English.
+  - All documentation must be written exclusively in English.
 
 ## Commit Description Guidelines
 

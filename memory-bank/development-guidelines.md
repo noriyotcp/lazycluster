@@ -50,3 +50,5 @@ const MyComponent = ({ name }: MyComponentProps): JSX.Element => {
 **Reference:**
 
 - [TypeScript + React: Why I don't use React.FC](https://fettblog.eu/typescript-react-why-i-dont-use-react-fc/)
+
+**Note:** In this project, define functional components without using React.FC to ensure explicit prop definitions and to avoid unintended inclusion of the children prop.

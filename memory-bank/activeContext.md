@@ -1,48 +1,80 @@
-# Active Context: LazyCluster
+# Active Context: Current Tasks and Status
 
-## Role
+_(Document tasks, goals, and active context for the current project. This helps maintain focus and track progress.)_
 
-- Track the current work focus.
-- Document recent changes.
-- Outline next steps.
-- Record active decisions and considerations.
+## Focus for Today
 
-## Current Focus
+- Update documentation to reflect recent code changes.
 
-(Define the current work focus)
+## Current Sprint Goals
+
+- Improve user interface and user experience of the extension.
+- Enhance tab management functionalities.
+- Ensure code quality and maintainability.
+
+## Tasks in Progress
+
+- Updating documentation for recent changes.
+  - Update ADR documents to reflect the use of Tailwind CSS Grid for the 2-column layout.
+  - Update README.md to include new features and updates.
+  - Update other relevant documentation files as needed.
+
+## Next Steps
+
+- Update `memory-bank/progress.md` with the latest progress and lessons learned.
+- Review and update `memory-bank/development-guidelines.md` to discourage the use of React.FC.
+- Update `memory-bank/useContext-usage.md` to reflect provider component refactoring.
+- Consider adding E2E tests for UI components.
+
+## Blockers
+
+- None at the moment.
+
+## Decisions Made
+
+- Implemented responsive 2-column layout for window groups using Tailwind CSS Grid.
+- Adjusted layout breakpoints to `lg` for better responsiveness.
+- Added URL search functionality to the search bar.
+- Displayed domain on tab hover for better user experience.
+- Refactored provider components to use `React.ReactElement` type for better type safety.
+- Removed redundant `updateTabGroups()` call in `TabItem` to avoid double updating.
+- Implemented keyboard navigation for TabList component using native `onKeyDown` event handler.
+
+## Current Status
+
+- Documentation updates are in progress.
+- Code refactoring and improvements are ongoing.
+- Core features are implemented and functional.
+
+## Long-Term Goals
+
+- Implement settings page for user customization.
+- Explore possibilities of synchronizing saved windows across devices.
+- Improve performance and stability of the extension.
+
+## Unresolved Questions
+
+- How to best handle edge cases in tab management logic?
+- What are the most effective strategies for E2E testing of UI components?
+- How to implement cross-device synchronization of saved windows?
+
+## Working Assumptions
+
+- User feedback is crucial for iterative improvement.
+- Maintaining code quality and documentation is essential for long-term maintainability.
+- Performance optimization should be considered throughout the development process.
+
+## Future Considerations
+
+- Explore possibilities of integrating with cloud services for data backup and synchronization.
+- Investigate possibilities of adding more advanced tab management features, such as tab grouping and archiving.
+- Consider user interface enhancements based on user feedback and usability testing.
 
 ## Recent Changes
 
 (Document recent changes made)
 
-- Refactored `src/components/WindowGroupList.tsx` to use `columns-2` for multi-column layout.
-- Removed Flexbox implementation from `src/components/WindowGroupList.tsx`.
-- Removed `max-height` from `collapse-content` in `src/components/WindowGroup.tsx`.
-- Implemented bulk tab selection using checkboxes in `src/components/TabItem.tsx`.
-- Added a trash icon to `src/components/Header.tsx` to trigger the close action for selected tabs.
-- Implemented `TabSelectionContext` in `src/contexts/TabSelectionContext.tsx` to manage the state of selected tabs.
-- Connected `TabItem` and `Header` components to `TabSelectionContext` to enable bulk tab closing functionality.
-- Refactored prop name `onCheckAllTabsChange` to `onAnyTabCheckChange` in `TabList` component for better clarity.
-- Renamed prop `isCheckedAllTabs` to `isAnyTabCheckedInGroup` in `WindowActions` component to align with actual functionality.
-- Renamed state `isCheckedAllTabs` to `isAnyTabCheckedInGroup` in `WindowGroup` component for consistency.
-- Updated codebase to use new prop and state names, ensuring consistent naming and improved code readability.
-
-## Next Steps
-
-(List specific next steps related to the current focus)
-
-## Active Decisions
-
-(Record active decisions made in the current context)
-
-- **Framework Selection:** Decided to use WXT (Web Extension Toolkit) as the preferred framework for development due to its Vite integration, HMR, and Chrome Extension specific features.
-- **Technology Stack:** Confirmed technology stack: React, TypeScript, Vite, Chrome Extension APIs.
-- **Design Principle:** Affirmed "Simple is the best" as the guiding design and development principle.
-
-## Lessons Learned
-
-- Added event listeners for tab movement enabled the UI to reflect tab reordering.
-- Recognized the importance of explicitly defining requirements for expected behaviors.
-- A review of the original "cluster" implementation could have prevented oversights.
-- Established the need to integrate unit and E2E testing to catch such issues early.
-- **Incorrect Next Steps:** The Next Steps in `activeContext.md` included tasks that were not actually needed. In the future, we should confirm with the user before updating the Next Steps.
+- Implemented a responsive 2-column layout for window groups using Tailwind CSS grid.
+- Adjusted layout breakpoints to `lg` for better responsiveness.
+- Added URL search functionality to the search bar.
+- Implemented tab hover domain display in `src/components/TabItem.tsx`.
