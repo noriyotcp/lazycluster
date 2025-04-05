@@ -101,7 +101,6 @@
 - Development environment is set up and ready for implementation.
 - Key features are identified and prioritized based on user needs and project goals.
 - No major blockers identified yet.
-- Implemented a responsive 2-column layout for window groups using the `column-count` CSS property.
 - Refactored `src/components/WindowGroupList.tsx` to use `columns-2` for multi-column layout.
 - Removed Flexbox implementation from `src/components/WindowGroupList.tsx`.
 - Removed `max-height` from `collapse-content` in `src/components/WindowGroup.tsx`.
