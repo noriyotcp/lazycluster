@@ -60,7 +60,10 @@ const TabItem = ({ tab }: TabItemProps) => {
   };
 
   return (
-    <li tabIndex={0} className="list-row p-2 items-center rounded-none even:bg-base-200 group/tabitem">
+    <li
+      tabIndex={0}
+      className="list-row p-2 items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem"
+    >
       <input
         id={`tab-${tab.id}`}
         type="checkbox"
@@ -70,7 +73,7 @@ const TabItem = ({ tab }: TabItemProps) => {
       />
       <div>{tab.favIconUrl ? <img className="size-4" src={tab.favIconUrl} alt={tab.title} /> : globeIcon()}</div>
       <a
-        className="list-col-grow cursor-pointer focus-visible:outline-1 truncate hover:underline"
+        className="list-col-grow cursor-pointer focus:outline-1 truncate hover:underline"
         href={tab.url}
         onClick={handleClick}
       >
