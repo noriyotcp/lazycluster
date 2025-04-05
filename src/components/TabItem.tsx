@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useTabFocusContext } from '../../src/contexts/TabFocusContext';
 
@@ -30,6 +30,7 @@ const TabItem = ({ tab }: TabItemProps) => {
   const { selectedTabIds, addTabToSelection, removeTabFromSelection } = useTabSelectionContext();
   const [isChecked, setIsChecked] = useState(false);
   const { focusActiveTab } = useTabFocusContext();
+  const checkboxRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setIsChecked(selectedTabIds.includes(tab.id!));
@@ -51,6 +52,17 @@ const TabItem = ({ tab }: TabItemProps) => {
     setIsChecked(e.target.checked);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLLIElement>) => {
+    if (e.key === ' ') {
+      e.preventDefault();
+      if (checkboxRef.current) {
+        // Simulate a click event on the checkbox
+        // This ensures the onChange handler and state updates are triggered correctly
+        checkboxRef.current.click();
+      }
+    }
+  };
+
   const handleCloseButtonClick = () => {
     chrome.tabs.remove(tab.id!, () => {
       if (chrome.runtime.lastError) {
@@ -63,6 +75,7 @@ const TabItem = ({ tab }: TabItemProps) => {
     <li
       tabIndex={0}
       className="list-row p-2 items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem"
+      onKeyDown={handleKeyDown}
     >
       <input
         id={`tab-${tab.id}`}
@@ -70,6 +83,7 @@ const TabItem = ({ tab }: TabItemProps) => {
         className="checkbox checkbox-xs"
         checked={isChecked}
         onChange={handleCheckboxChange}
+        ref={checkboxRef}
       />
       <div>{tab.favIconUrl ? <img className="size-4" src={tab.favIconUrl} alt={tab.title} /> : globeIcon()}</div>
       <a
