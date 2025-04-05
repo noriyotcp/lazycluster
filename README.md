@@ -30,6 +30,7 @@ This project uses Playwright for end-to-end testing.
     - Select tabs within a specific window and close them using the "Close Tabs" button in the Window Actions of each window group.
   - **Keyboard Navigation:**
     - Navigate through the tab list using 'j' (next), 'k' (previous), 'gg' (top), and 'G' (bottom) keys.
+    - Toggle the checkbox of a focused tab item using the spacebar.
   - **Window Bulk Select:**
     - Checkbox in Window Actions to select/deselect all tabs within the window group.
   - Use checkboxes in each tab item to select tabs for bulk close actions.
