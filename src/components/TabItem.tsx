@@ -69,16 +69,16 @@ const TabItem = ({ tab }: TabItemProps) => {
         onChange={handleCheckboxChange}
       />
       <div>{tab.favIconUrl ? <img className="size-4" src={tab.favIconUrl} alt={tab.title} /> : globeIcon()}</div>
-      <span className="list-col-grow cursor-pointer focus-visible:outline-1 truncate">
-        <a href={tab.url} onClick={handleClick}>
-          <span>{tab.title}</span>
-        </a>
-      </span>
-      <span className="hidden group-hover/tabitem:inline text-gray-500">
-        <a href={tab.url} onClick={handleClick}>
-          {extractDomain(tab.url || '')}
-        </a>
-      </span>
+      <a
+        className="list-col-grow cursor-pointer focus-visible:outline-1 truncate hover:underline"
+        href={tab.url}
+        onClick={handleClick}
+      >
+        {tab.title}
+      </a>
+      <a className="hidden group-hover/tabitem:inline text-gray-500 underline" href={tab.url} onClick={handleClick}>
+        {extractDomain(tab.url || '')}
+      </a>
       <button className="btn btn-outline btn-error btn-xs" onClick={handleCloseButtonClick}>
         Close
       </button>
