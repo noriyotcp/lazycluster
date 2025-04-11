@@ -21,6 +21,7 @@ _(Keep track of project progress, milestones, and current status. Note what's wo
 - URL search functionality.
 - Tab hover domain display.
 - Responsive 2-column layout using Tailwind CSS Grid.
+- Focus search bar on '/' key press in manager tab.
 
 ## What's Left to Build
 
@@ -49,6 +50,7 @@ _(Keep track of project progress, milestones, and current status. Note what's wo
 - Removed redundant `updateTabGroups()` call in `TabItem` to avoid double updating.
 - Implemented keyboard navigation for TabList component using native `onKeyDown` event handler.
 - Added event listeners for tab movement tracking.
+- Implemented focusing the search bar when the '/' key is pressed in the manager tab.
 
 ## Known Issues
 

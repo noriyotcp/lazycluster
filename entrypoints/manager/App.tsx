@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Header from '../../src/components/Header';
 import WindowGroupList from '../../src/components/WindowGroupList';
 import type { Tabs } from 'webextension-polyfill';
@@ -12,9 +12,9 @@ const Manager = () => {
   const { tabGroups, updateTabGroups } = useTabGroupContext();
   const [activeWindowId, setActiveWindowId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const searchBarRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Connect to background script
     const connection = chrome.runtime.connect({ name: 'manager' });
 
     const handleMessage = (message: Message) => {
@@ -27,23 +27,33 @@ const Manager = () => {
 
     connection.onMessage.addListener(handleMessage);
 
-    // Request initial data
     connection.postMessage({ type: 'REQUEST_INITIAL_DATA' });
 
-    // Get active window id
     chrome.windows.getCurrent().then(window => {
       if (window.id !== undefined) {
         setActiveWindowId(window.id);
       }
     });
 
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === '/') {
+        // Focus on the search bar if it's not already focused.
+        if (document.activeElement?.id !== 'search-bar') {
+          searchBarRef.current?.focus();
+          event.preventDefault(); // Prevent the default '/' input - Why: To prevent the '/' from being entered into the search bar.
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
     return () => {
       connection.onMessage.removeListener(handleMessage);
       connection.disconnect();
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [updateTabGroups]);
 
-  // filteredTabGroups is derived from Context's tabGroups, ensuring chrome.tabs.Tab type
   const filteredTabGroups = tabGroups
     .map((group, index) => ({ ...group, windowGroupNumber: index }))
     .map(group => ({
@@ -54,11 +64,11 @@ const Manager = () => {
           return typeof value === 'string' && value.toLowerCase().includes(searchQuery.toLowerCase());
         })
       ) as chrome.tabs.Tab[],
-    })) satisfies { windowId: number; tabs: chrome.tabs.Tab[]; windowGroupNumber: number }[]; // Enforce chrome.tabs.Tab[] type
+    })) satisfies { windowId: number; tabs: chrome.tabs.Tab[]; windowGroupNumber: number }[]; // Enforce chrome.tabs.Tab[] type.
 
   return (
     <TabFocusProvider>
-      <Header searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} />
+      <Header searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} searchBarRef={searchBarRef} />
       <div className="p-5 pt-0">
         <WindowGroupList filteredTabGroups={filteredTabGroups} activeWindowId={activeWindowId} />
       </div>

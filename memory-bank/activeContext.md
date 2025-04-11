@@ -39,6 +39,7 @@ _(Document tasks, goals, and active context for the current project. This helps 
 - Refactored provider components to use `React.ReactElement` type for better type safety.
 - Removed redundant `updateTabGroups()` call in `TabItem` to avoid double updating.
 - Implemented keyboard navigation for TabList component using native `onKeyDown` event handler.
+- Implemented focusing the search bar when the '/' key is pressed in the manager tab.
 
 ## Current Status
 
@@ -78,3 +79,4 @@ _(Document tasks, goals, and active context for the current project. This helps 
 - Adjusted layout breakpoints to `lg` for better responsiveness.
 - Added URL search functionality to the search bar.
 - Implemented tab hover domain display in `src/components/TabItem.tsx`.
+- Added functionality to focus the search bar when the '/' key is pressed in the manager tab (`entrypoints/manager/App.tsx`, `src/components/Header.tsx`, `src/components/SearchBar.tsx`).

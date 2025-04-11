@@ -40,4 +40,29 @@ test.describe('Manager Tab E2E Tests', () => {
         .waitFor({ state: 'hidden', timeout: 10000 });
     }
   });
+
+  // New test case for slash key focus
+  test('should focus search bar when "/" key is pressed', async ({ page, extensionId }) => {
+    // Open the manager tab
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+
+    // Wait for the page to load (e.g., wait for the header)
+    await page.locator('header').waitFor({ state: 'visible' });
+
+    const searchBar = page.locator('#search-bar');
+
+    // Verify search bar is not focused initially
+    await expect(searchBar).not.toBeFocused();
+
+    // Press '/' key using page.keyboard.press
+    await page.keyboard.press('/');
+
+    // Verify search bar is now focused
+    await expect(searchBar).toBeFocused();
+
+    // Verify pressing '/' again while focused doesn't change focus (and allows typing '/')
+    await searchBar.press('/');
+    await expect(searchBar).toBeFocused();
+    await expect(searchBar).toHaveValue('/');
+  });
 });

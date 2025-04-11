@@ -1,3 +1,4 @@
+import React from 'react';
 import SearchBar from './SearchBar';
 import ThemeSwitcher from './ThemeSwitcher';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
@@ -5,9 +6,10 @@ import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 interface HeaderProps {
   searchQuery: string;
   onSearchQueryChange: (query: string) => void;
+  searchBarRef: React.RefObject<HTMLInputElement | null>;
 }
 
-const Header = ({ searchQuery, onSearchQueryChange }: HeaderProps) => {
+const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps) => {
   const { selectedTabIds, clearSelection } = useTabSelectionContext();
 
   const handleCloseSelectedTabs = async () => {
@@ -22,7 +24,7 @@ const Header = ({ searchQuery, onSearchQueryChange }: HeaderProps) => {
   return (
     <header className="sticky top-0 z-50 bg-(--color-base-100) shadow-md p-5 pt-2.5 pb-2.5">
       <span className="flex justify-between items-center gap-x-4">
-        <SearchBar searchQuery={searchQuery} onSearchQueryChange={onSearchQueryChange} />
+        <SearchBar searchQuery={searchQuery} onSearchQueryChange={onSearchQueryChange} ref={searchBarRef} />
         <div className="flex items-center gap-x-4">
           <button className="btn btn-ghost" onClick={handleCloseSelectedTabs}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
