@@ -80,3 +80,4 @@ _(Document tasks, goals, and active context for the current project. This helps 
 - Added URL search functionality to the search bar.
 - Implemented tab hover domain display in `src/components/TabItem.tsx`.
 - Added functionality to focus the search bar when the '/' key is pressed in the manager tab (`entrypoints/manager/App.tsx`, `src/components/Header.tsx`, `src/components/SearchBar.tsx`).
+- Added toast error notification feature integrated in `TabItem` component.
