@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useTabFocusContext } from '../../src/contexts/TabFocusContext';
+import { useToast } from './ToastProvider';
 
 const extractDomain = (url: string): string => {
   try {
@@ -31,6 +32,7 @@ const TabItem = ({ tab }: TabItemProps) => {
   const [isChecked, setIsChecked] = useState(false);
   const { focusActiveTab } = useTabFocusContext();
   const checkboxRef = useRef<HTMLInputElement>(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
     setIsChecked(selectedTabIds.includes(tab.id!));
@@ -66,6 +68,7 @@ const TabItem = ({ tab }: TabItemProps) => {
   const handleCloseButtonClick = () => {
     chrome.tabs.remove(tab.id!, () => {
       if (chrome.runtime.lastError) {
+        showToast(<span>Failed to close tab</span>);
         console.error('Failed to close tab:', chrome.runtime.lastError);
       }
     });
