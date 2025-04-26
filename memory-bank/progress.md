@@ -75,6 +75,8 @@ _(Keep track of project progress, milestones, and current status. Note what's wo
 
 ## Next Actions
 
+- Keep scroll position when refreshing the page using localStorage
+  - Reconsider `localStorage` key naming
 - Continue updating documentation files.
 - Address known issues and potential performance bottlenecks.
 - Implement E2E tests for UI components.
