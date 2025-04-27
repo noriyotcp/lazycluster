@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useTabFocusContext } from '../../src/contexts/TabFocusContext';
 import { useToast } from './ToastProvider';
+import Alert from './Alert';
 
 const extractDomain = (url: string): string => {
   try {
@@ -68,7 +69,7 @@ const TabItem = ({ tab }: TabItemProps) => {
   const handleCloseButtonClick = () => {
     chrome.tabs.remove(tab.id!, () => {
       if (chrome.runtime.lastError) {
-        showToast(<span>Failed to close tab</span>);
+        showToast(<Alert message="Failed to close tab" />);
         console.error('Failed to close tab:', chrome.runtime.lastError);
       }
     });
