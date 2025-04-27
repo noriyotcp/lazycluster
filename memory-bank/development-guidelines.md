@@ -52,3 +52,27 @@ const MyComponent = ({ name }: MyComponentProps): JSX.Element => {
 - [TypeScript + React: Why I don't use React.FC](https://fettblog.eu/typescript-react-why-i-dont-use-react-fc/)
 
 **Note:** In this project, define functional components without using React.FC to ensure explicit prop definitions and to avoid unintended inclusion of the children prop.
+
+## Toast and Alert Components Update
+
+- The ToastProvider and Toast components have been restructured to improve compatibility with daisyUI's toast stacking behavior.
+- ToastContainer now wraps toasts in a container div with appropriate daisyUI classes to ensure proper stacking.
+- The Toast component returns only the content without an extra wrapper div, allowing the container to manage stacking.
+- An Alert component was extracted to provide a reusable alert UI, which is used within ToastProvider to display error messages and notifications.
+- The ToastProvider injects an `onClose` prop into Alert components to allow for controlled dismissal of toasts.
+- TabItem component now uses the Alert component for displaying toast messages on tab close failures.
+
+## Tailwind CSS Safelist Enhancement
+
+- Added a safelist of Tailwind CSS color classes in `tailwind.config.js` to prevent tree-shaking from removing dynamically applied color styles.
+- Alert-specific classes (`alert-error`, `alert-success`, `alert-warning`, `alert-info`) are included in the safelist to ensure consistent styling.
+- This change prevents visual breakage caused by missing CSS for dynamically generated class names.
+
+## Recommendations for Documentation Updates
+
+- Update README.md or relevant user-facing documentation to describe the new Alert component and its usage within toasts.
+- Document the need for safelisting dynamic Tailwind CSS classes to avoid styling issues.
+- Include examples of how to use the ToastProvider and Alert components together for consistent UI feedback.
+- Note the improved toast stacking behavior and how it affects UI layout.
+
+These guidelines help maintain UI consistency and prevent common styling pitfalls related to dynamic class usage in Tailwind CSS.
