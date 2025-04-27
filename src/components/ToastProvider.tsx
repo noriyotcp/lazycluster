@@ -76,10 +76,13 @@ interface ToastContainerProps {
 
 const ToastContainer = ({ toasts, hideToast }: ToastContainerProps): React.ReactElement => {
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col space-y-2">
-      {toasts.map(toast => (
-        <Toast key={toast.id} toast={toast} hideToast={hideToast} />
-      ))}
+    // Container div with daisyUI toast classes to stack toasts properly
+    <div className="fixed bottom-4 right-4 z-50">
+      <div className="toast toast-center">
+        {toasts.map(toast => (
+          <Toast key={toast.id} toast={toast} hideToast={hideToast} />
+        ))}
+      </div>
     </div>
   );
 };
@@ -96,7 +99,7 @@ interface ToastProps {
  * which allows the Alert component to call back to hide the toast.
  * Otherwise, it renders the content as is.
  */
-const Toast = ({ toast, hideToast }: ToastProps): React.ReactElement => {
+const Toast = ({ toast, hideToast }: ToastProps): React.ReactNode => {
   const handleClose = () => {
     hideToast(toast.id);
   };
@@ -109,5 +112,6 @@ const Toast = ({ toast, hideToast }: ToastProps): React.ReactElement => {
     ? React.cloneElement(toast.content, { onClose: handleClose })
     : toast.content;
 
-  return <div className="toast toast-center">{contentWithOnClose}</div>;
+  // Return only the content without extra wrapper div to allow stacking by container
+  return contentWithOnClose;
 };
