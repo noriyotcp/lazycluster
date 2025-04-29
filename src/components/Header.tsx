@@ -2,6 +2,8 @@ import React from 'react';
 import SearchBar from './SearchBar';
 import ThemeSwitcher from './ThemeSwitcher';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
+import { useToast } from '../../src/components/ToastProvider';
+import Alert from '../../src/components/Alert';
 
 interface HeaderProps {
   searchQuery: string;
@@ -11,12 +13,14 @@ interface HeaderProps {
 
 const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps) => {
   const { selectedTabIds, clearSelection } = useTabSelectionContext();
+  const { showToast } = useToast();
 
   const handleCloseSelectedTabs = async () => {
     try {
       await chrome.tabs.remove(selectedTabIds);
       clearSelection();
     } catch (error) {
+      showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
       console.error('Error closing tabs:', error);
     }
   };

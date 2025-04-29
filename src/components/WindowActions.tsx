@@ -1,4 +1,6 @@
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
+import { useToast } from '../../src/components/ToastProvider';
+import Alert from '../../src/components/Alert';
 
 interface WindowActionsProps {
   windowId: number;
@@ -8,6 +10,7 @@ interface WindowActionsProps {
 const WindowActions = ({ windowId, isAnyTabCheckedInGroup }: WindowActionsProps) => {
   const { selectedTabIds, clearSelection, addWindowTabsToSelection, removeWindowTabsFromSelection } =
     useTabSelectionContext();
+  const { showToast } = useToast();
 
   const handleFocusWindow = () => {
     chrome.windows.update(windowId, { focused: true });
@@ -43,7 +46,9 @@ const WindowActions = ({ windowId, isAnyTabCheckedInGroup }: WindowActionsProps)
 
       await chrome.tabs.remove(tabIdsInWindow);
       clearSelection();
+      showToast(<Alert message="Selected tabs closed successfully." />);
     } catch (error) {
+      showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
       console.error('Error closing tabs:', error);
     }
   };

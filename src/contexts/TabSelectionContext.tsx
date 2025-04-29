@@ -1,4 +1,6 @@
 import { createContext, useContext, useState } from 'react';
+import { useToast } from '../components/ToastProvider';
+import Alert from '../components/Alert';
 
 interface TabSelectionContextProps {
   selectedTabIds: number[];
@@ -34,12 +36,19 @@ export const TabSelectionContextProvider = ({ children }: { children: React.Reac
     setSelectedTabIds([]);
   };
 
+  const { showToast } = useToast();
+
   const addWindowTabsToSelection = async (windowId: number) => {
     try {
       const tabs = await chrome.tabs.query({ windowId });
       const tabIds = tabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
       setSelectedTabIds(prevSelectedTabIds => [...new Set([...prevSelectedTabIds, ...tabIds])]);
     } catch (error) {
+      showToast(
+        <Alert
+          message={`Error adding window tabs to selection: ${error instanceof Error ? error.message : String(error)}`}
+        />
+      );
       console.error('Error adding window tabs to selection:', error);
     }
   };
@@ -50,6 +59,11 @@ export const TabSelectionContextProvider = ({ children }: { children: React.Reac
       const tabIds = tabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
       setSelectedTabIds(prevSelectedTabIds => prevSelectedTabIds.filter(id => !tabIds.includes(id)));
     } catch (error) {
+      showToast(
+        <Alert
+          message={`Error removing window tabs from selection: ${error instanceof Error ? error.message : String(error)}`}
+        />
+      );
       console.error('Error removing window tabs from selection:', error);
     }
   };

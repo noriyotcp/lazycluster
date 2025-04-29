@@ -4,7 +4,6 @@ import WindowGroupList from '../../src/components/WindowGroupList';
 import type { Tabs } from 'webextension-polyfill';
 import { TabFocusProvider } from '../../src/contexts/TabFocusContext';
 import { useTabGroupContext } from '../../src/contexts/TabGroupContext';
-import { ToastProvider } from '../../src/components/ToastProvider'; // Add this import
 import './style.css';
 
 type Message = { type: string; tabs: Tabs.Tab[]; tabId?: number };
@@ -68,14 +67,12 @@ const Manager = () => {
     })) satisfies { windowId: number; tabs: chrome.tabs.Tab[]; windowGroupNumber: number }[]; // Enforce chrome.tabs.Tab[] type.
 
   return (
-    <ToastProvider>
-      <TabFocusProvider>
-        <Header searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} searchBarRef={searchBarRef} />
-        <div className="p-5 pt-0">
-          <WindowGroupList filteredTabGroups={filteredTabGroups} activeWindowId={activeWindowId} />
-        </div>
-      </TabFocusProvider>
-    </ToastProvider>
+    <TabFocusProvider>
+      <Header searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} searchBarRef={searchBarRef} />
+      <div className="p-5 pt-0">
+        <WindowGroupList filteredTabGroups={filteredTabGroups} activeWindowId={activeWindowId} />
+      </div>
+    </TabFocusProvider>
   );
 };
 
