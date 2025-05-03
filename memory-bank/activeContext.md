@@ -40,12 +40,14 @@ _(Document tasks, goals, and active context for the current project. This helps 
 - Removed redundant `updateTabGroups()` call in `TabItem` to avoid double updating.
 - Implemented keyboard navigation for TabList component using native `onKeyDown` event handler.
 - Implemented focusing the search bar when the '/' key is pressed in the manager tab.
+- Implemented client-side reconnection logic using a custom hook (`useBackgroundConnection`) to improve connection stability between the manager UI and the background script.
 
 ## Current Status
 
 - Documentation updates are in progress.
 - Code refactoring and improvements are ongoing.
 - Core features are implemented and functional.
+- Connection stability between the manager UI and background script has been improved with client-side reconnection logic.
 
 ## Long-Term Goals
 
@@ -81,3 +83,6 @@ _(Document tasks, goals, and active context for the current project. This helps 
 - Implemented tab hover domain display in `src/components/TabItem.tsx`.
 - Added functionality to focus the search bar when the '/' key is pressed in the manager tab (`entrypoints/manager/App.tsx`, `src/components/Header.tsx`, `src/components/SearchBar.tsx`).
 - Added toast error notification feature integrated in `TabItem` component.
+- Refactored `entrypoints/background.ts` to extract connection handling logic into a `connect` function.
+- Created `src/hooks/useBackgroundConnection.ts` custom hook to manage persistent connection to the background script with automatic reconnection.
+- Refactored `entrypoints/manager/App.tsx` to utilize the `useBackgroundConnection` hook, replacing the previous direct connection logic.

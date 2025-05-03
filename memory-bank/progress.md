@@ -22,6 +22,7 @@ _(Keep track of project progress, milestones, and current status. Note what's wo
 - Tab hover domain display.
 - Responsive 2-column layout using Tailwind CSS Grid.
 - Focus search bar on '/' key press in manager tab.
+- Client-side automatic reconnection to the background script, improving connection stability.
 
 ## What's Left to Build
 
@@ -51,6 +52,9 @@ _(Keep track of project progress, milestones, and current status. Note what's wo
 - Implemented keyboard navigation for TabList component using native `onKeyDown` event handler.
 - Added event listeners for tab movement tracking.
 - Implemented focusing the search bar when the '/' key is pressed in the manager tab.
+- Refactored background script connection logic in `entrypoints/background.ts` by extracting it into a `connect` function.
+- Implemented client-side reconnection logic using the `useBackgroundConnection` custom hook in `src/hooks/useBackgroundConnection.ts`.
+- Refactored `entrypoints/manager/App.tsx` to use `useBackgroundConnection` for improved connection management.
 
 ## Known Issues
 
@@ -72,6 +76,8 @@ _(Keep track of project progress, milestones, and current status. Note what's wo
 - Naming Conventions: The importance of choosing clear and accurate names for props and states especially when dealing with complex logic and component hierarchies. Inconsistent or misleading names can lead to confusion and rework.
 - Iterative Naming Refinement: Naming is not always straightforward and may require iterative refinement as the code evolves and logic becomes clearer. Be prepared to revisit and adjust names as needed.
 - Prop Drilling and Context API: Prop drilling can complicate component relationships and make naming more challenging. Context API can be a valuable tool to simplify prop flow and improve code organization in such cases.
+- Client vs. Background Connection Responsibility: Understanding the distinct roles of client-side scripts (initiating connections, handling reconnects) and background scripts (listening for connections) is crucial for designing robust communication patterns in Chrome extensions. Background scripts typically don't initiate reconnections themselves.
+- Importance of Client-Side Connection Management: Implementing connection management (including automatic reconnection) on the client-side (e.g., using a custom hook like `useBackgroundConnection`) is essential for maintaining a stable connection to the background script, especially when the background script might be suspended and restarted by the browser.
 
 ## Next Actions
 

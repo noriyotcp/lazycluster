@@ -35,6 +35,7 @@ LazyCluster follows a modular, component-based architecture, primarily leveragin
       - Modify windows (create, focus, close, etc.).
       - Implement session saving and restoring logic.
     - Handles events from both the Manager Tab UI and the Popup UI, as well as browser events (e.g., tab created, tab closed).
+    - Listens for connections from the Manager Tab UI (`chrome.runtime.onConnect`).
     - Orchestrates communication between different parts of the extension.
 
 4.  **Content Script (content.ts - Optional):**
@@ -48,21 +49,26 @@ LazyCluster follows a modular, component-based architecture, primarily leveragin
 - **Event-Driven Architecture:** Communication between components, especially between the UIs and background script, is primarily event-driven. This allows for loose coupling and reactive updates.
 - **State Management (within React UIs):** React's built-in state management or potentially a library like Zustand or Recoil (if needed for more complex state) will be used to manage UI state and data flow within both the Manager Tab UI and Popup UI.
 - **Service Worker Pattern (Background Script):** The background script acts as a service worker, running in the background and handling long-running tasks and event processing.
+- **Persistent Connection with Reconnect (Manager UI):** The Manager Tab UI uses a custom React hook (`useBackgroundConnection`) to establish and maintain a persistent connection (`chrome.runtime.Port`) to the background script. This hook automatically handles reconnection attempts if the connection is lost (e.g., due to the background script being suspended and restarted).
 
 ### Component Relationships
 
+- **Manager UI <-> Background Script:** Communication happens via a persistent `chrome.runtime.Port` established by the Manager UI. The `useBackgroundConnection` hook manages this connection and its lifecycle, including reconnection. Messages are exchanged for requesting data, sending commands, and receiving updates.
+- **Popup UI <-> Background Script:** Communication likely uses short-lived messages (`chrome.runtime.sendMessage`) or potentially a short-lived port connection, primarily to trigger the opening of the Manager Tab.
 - **State Synchronization between WindowActions and TabItem:** To ensure UI consistency, the TabItem component subscribes to the TabSelectionContext and updates its `isChecked` state based on the `selectedTabIds`. This allows the TabItem's checkbox to reflect the selection state when tabs are selected/deselected via the WindowActions component.
 
 ### Data Flow
 
-_(Data flow description remains largely the same, but now refers to "Manager Tab UI" instead of "Popup UI" for actions related to window and tab management)_
-
-1.  **Initial Load (Manager Tab):** When the Manager Tab UI is opened, it requests window and tab data from the Background Script.
-2.  **Data Fetching:** The Background Script uses Chrome Extension APIs to retrieve the current state of windows and tabs.
-3.  **Data Rendering:** The Background Script sends the data back to the Manager Tab UI, which renders it using React components.
-4.  **User Actions (Manager Tab):** User interactions in the Manager Tab UI (e.g., clicking a button, dragging a tab) trigger events.
-5.  **Command Handling:** These events are sent to the Background Script, which processes the commands using Chrome Extension APIs to modify tabs or windows.
-6.  **State Updates:** Changes made by the Background Script are reflected in the browser state, and the Background Script may push updates back to the Manager Tab UI to refresh the displayed data.
+1.  **Connection Establishment (Manager Tab):** The Manager Tab UI, using `useBackgroundConnection`, establishes a persistent connection (`chrome.runtime.Port`) to the Background Script.
+2.  **Initial Data Request (Manager Tab):** Once the connection is established, the Manager Tab UI sends a message (`REQUEST_INITIAL_DATA`) to the Background Script via the port.
+3.  **Data Fetching (Background):** The Background Script receives the request, uses Chrome Extension APIs to retrieve the current state of windows and tabs.
+4.  **Data Transmission (Background -> Manager):** The Background Script sends the tab/window data back to the Manager Tab UI via the established port (`UPDATE_TABS` message).
+5.  **Data Rendering (Manager Tab):** The Manager Tab UI receives the data and renders it using React components.
+6.  **User Actions (Manager Tab):** User interactions trigger commands sent to the Background Script via the port using the `sendMessage` function from `useBackgroundConnection`.
+7.  **Command Handling (Background):** The Background Script receives commands, processes them using Chrome Extension APIs.
+8.  **Browser Event Triggered Updates (Background):** Browser events (like tab creation/removal) trigger the Background Script to fetch updated tab data.
+9.  **Push Updates (Background -> Manager):** The Background Script sends updated tab data (`UPDATE_TABS`) to the connected Manager Tab UI via the port.
+10. **Reconnection:** If the connection drops, `useBackgroundConnection` in the Manager Tab UI automatically attempts to re-establish the connection and repeats the initial data request upon success.
 
 ### Considerations
 
