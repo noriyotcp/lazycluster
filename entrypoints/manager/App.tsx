@@ -1,12 +1,18 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react'; // Add useCallback
 import Header from '../../src/components/Header';
 import WindowGroupList from '../../src/components/WindowGroupList';
 import type { Tabs } from 'webextension-polyfill';
 import { TabFocusProvider } from '../../src/contexts/TabFocusContext';
 import { useTabGroupContext } from '../../src/contexts/TabGroupContext';
+import { useBackgroundConnection } from '../../src/hooks/useBackgroundConnection'; // Import the hook
 import './style.css';
 
-type Message = { type: string; tabs: Tabs.Tab[]; tabId?: number };
+// Define a more specific message type based on BaseMessage from the hook
+interface BackgroundMessage {
+  type: 'UPDATE_TABS' | 'BACKGROUND_INITIALIZED' | 'REQUEST_INITIAL_DATA'; // Known types
+  tabs?: chrome.tabs.Tab[]; // Make tabs optional as it's not always present
+  payload?: unknown; // Keep payload flexible if needed
+}
 
 const Manager = () => {
   const { tabGroups, updateTabGroups } = useTabGroupContext();
@@ -14,21 +20,33 @@ const Manager = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const searchBarRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const connection = chrome.runtime.connect({ name: 'manager' });
-
-    const handleMessage = (message: Message) => {
-      if (message.type === 'UPDATE_TABS') {
-        updateTabGroups(message.tabs as chrome.tabs.Tab[]); // Type casting
+  // Define the message handler using useCallback to maintain reference stability
+  const handleBackgroundMessage = useCallback(
+    (message: BackgroundMessage) => {
+      console.log('Received message from background:', message); // Log received messages
+      if (message.type === 'UPDATE_TABS' && message.tabs) {
+        updateTabGroups(message.tabs); // Use the updated tabs
       } else if (message.type === 'BACKGROUND_INITIALIZED') {
         console.log('Background script initialized');
       }
-    };
+      // No need to handle REQUEST_INITIAL_DATA here, it's sent from client
+    },
+    [updateTabGroups]
+  ); // Dependency array includes updateTabGroups
 
-    connection.onMessage.addListener(handleMessage);
+  // Use the custom hook to manage the connection
+  const { sendMessage, isConnected } = useBackgroundConnection<BackgroundMessage>('manager', handleBackgroundMessage);
 
-    connection.postMessage({ type: 'REQUEST_INITIAL_DATA' });
+  // Effect to request initial data once connected
+  useEffect(() => {
+    if (isConnected) {
+      console.log('Connection established, requesting initial data...');
+      sendMessage({ type: 'REQUEST_INITIAL_DATA' });
+    }
+  }, [isConnected, sendMessage]);
 
+  // Effect for getting current window ID and setting up keydown listener
+  useEffect(() => {
     chrome.windows.getCurrent().then(window => {
       if (window.id !== undefined) {
         setActiveWindowId(window.id);
@@ -47,12 +65,11 @@ const Manager = () => {
 
     document.addEventListener('keydown', handleKeyDown);
 
+    // Cleanup keydown listener
     return () => {
-      connection.onMessage.removeListener(handleMessage);
-      connection.disconnect();
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [updateTabGroups]);
+  }, []); // Empty dependency array, runs once on mount
 
   const filteredTabGroups = tabGroups
     .map((group, index) => ({ ...group, windowGroupNumber: index }))
