@@ -64,7 +64,7 @@ export default defineBackground(() => {
     }
   });
 
-  browser.runtime.onConnect.addListener(p => {
+  const connect = (p: chrome.runtime.Port) => {
     console.log('onConnect', new Date());
     console.dir(p);
     if (p.name === 'manager') {
@@ -86,7 +86,9 @@ export default defineBackground(() => {
         }
       });
     }
-  });
+  };
+
+  browser.runtime.onConnect.addListener(connect);
 
   browser.runtime.onMessage.addListener(request => {
     if (request.action === 'closeTab' && request.tabId) {
