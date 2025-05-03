@@ -34,18 +34,18 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
   }, [messageHandler]);
 
   const connect = useCallback(() => {
-    console.log(`Attempting to connect to background script with port name: ${portName}`);
+    console.log(`${new Date()} - Attempting to connect to background script with port name: ${portName}`);
     try {
       portRef.current = chrome.runtime.connect({ name: portName });
 
       if (chrome.runtime.lastError) {
-        console.error('Connection failed:', chrome.runtime.lastError.message);
+        console.error(`${new Date()} - Connection failed:`, chrome.runtime.lastError.message);
         portRef.current = null;
         scheduleReconnect();
         return;
       }
 
-      console.log('Successfully connected to background script.');
+      console.log(`${new Date()} - Successfully connected to background script.`);
       setIsConnected(true); // Update connection status
 
       portRef.current.onMessage.addListener((message: T) => {
@@ -56,15 +56,15 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
 
       portRef.current.onDisconnect.addListener(() => {
         setIsConnected(false); // Update connection status
-        console.log('Port disconnected.');
+        console.log(`${new Date()} - Port disconnected.`);
         if (chrome.runtime.lastError) {
-          console.error('Disconnect error:', chrome.runtime.lastError.message);
+          console.error(`${new Date()} - Disconnect error:`, chrome.runtime.lastError.message);
         }
         portRef.current = null;
         scheduleReconnect();
       });
     } catch (error) {
-      console.error('Error establishing connection:', error);
+      console.error(`${new Date()} - Error establishing connection:`, error);
       portRef.current = null;
       scheduleReconnect();
     }
@@ -74,7 +74,7 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
     if (reconnectTimerRef.current) {
       clearTimeout(reconnectTimerRef.current); // Clear existing timer if any
     }
-    console.log(`Scheduling reconnect in ${RECONNECT_DELAY}ms...`);
+    console.log(`${new Date()} - Scheduling reconnect in ${RECONNECT_DELAY}ms...`);
     reconnectTimerRef.current = setTimeout(() => {
       connect();
     }, RECONNECT_DELAY);
@@ -84,7 +84,7 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
     (message: T) => {
       // Use the generic type T
       if (!portRef.current) {
-        console.warn('Cannot send message: Port is not connected.');
+        console.warn(`${new Date()} - Cannot send message: Port is not connected.`);
         // Optionally, queue the message or attempt to reconnect immediately
         // connect(); // Uncomment to attempt immediate reconnect on send failure
         return;
@@ -92,7 +92,7 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
       try {
         portRef.current.postMessage(message);
       } catch (error) {
-        console.error('Error sending message:', error);
+        console.error(`${new Date()} - Error sending message:`, error);
         // Handle potential disconnect on send error
         if (error instanceof Error && error.message.includes('disconnected port')) {
           portRef.current = null;
@@ -112,12 +112,12 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
         clearTimeout(reconnectTimerRef.current);
       }
       if (portRef.current) {
-        console.log('Disconnecting port on component unmount.');
+        console.log(`${new Date()} - Disconnecting port on component unmount.`);
         try {
           portRef.current.disconnect();
         } catch (e) {
           // Ignore errors during disconnect on unmount, as the port might already be invalid
-          console.warn('Error during disconnect on unmount (ignoring):', e);
+          console.warn(`${new Date()} - Error during disconnect on unmount (ignoring):`, e);
         }
         portRef.current = null;
       }

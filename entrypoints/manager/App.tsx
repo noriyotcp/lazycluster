@@ -23,11 +23,11 @@ const Manager = () => {
   // Define the message handler using useCallback to maintain reference stability
   const handleBackgroundMessage = useCallback(
     (message: BackgroundMessage) => {
-      console.log('Received message from background:', message); // Log received messages
+      console.log(`${new Date()} - Received message from background:`, message); // Log received messages
       if (message.type === 'UPDATE_TABS' && message.tabs) {
         updateTabGroups(message.tabs); // Use the updated tabs
       } else if (message.type === 'BACKGROUND_INITIALIZED') {
-        console.log('Background script initialized');
+        console.log(`${new Date()} - Background script initialized`);
       }
       // No need to handle REQUEST_INITIAL_DATA here, it's sent from client
     },
@@ -40,7 +40,7 @@ const Manager = () => {
   // Effect to request initial data once connected
   useEffect(() => {
     if (isConnected) {
-      console.log('Connection established, requesting initial data...');
+      console.log(`${new Date()} - Connection established, requesting initial data...`);
       sendMessage({ type: 'REQUEST_INITIAL_DATA' });
     }
   }, [isConnected, sendMessage]);
