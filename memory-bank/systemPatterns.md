@@ -7,6 +7,14 @@
 - Document design patterns in use.
 - Outline component relationships.
 
+## localStorage Key Naming Convention
+
+- Key names follow the order: `appName.pageName.feature`.
+- Use dot (`.`) as the main separator for hierarchy levels.
+- Use hyphen (`-`) within compound words for clarity.
+- Example: `lazycluster.manager.color-scheme`, `lazycluster.manager.theme`.
+- This convention improves readability, maintainability, and scalability of stored keys.
+
 ## System Architecture
 
 LazyCluster follows a modular, component-based architecture, primarily leveraging React components for the UI and background scripts for core logic and browser API interactions. The architecture is designed to be event-driven and reactive, ensuring efficient updates and interactions between different parts of the extension.
