@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const ThemeSwitcher = () => {
-  const initialTheme = localStorage.getItem('lazycluster-theme') || 'default';
+  const initialTheme = localStorage.getItem('lazycluster.manager.theme') || 'default';
   const [theme, setTheme] = useState<'default' | 'dark'>(initialTheme as 'default' | 'dark');
 
   const toggleTheme = useCallback(() => {
@@ -9,7 +9,7 @@ const ThemeSwitcher = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('lazycluster-theme', theme);
+    localStorage.setItem('lazycluster.manager.theme', theme);
   }, [theme]);
 
   return (
