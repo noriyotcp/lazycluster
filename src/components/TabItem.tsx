@@ -89,7 +89,18 @@ const TabItem = ({ tab }: TabItemProps) => {
         onChange={handleCheckboxChange}
         ref={checkboxRef}
       />
-      <div>{tab.favIconUrl ? <img className="size-4" src={tab.favIconUrl} alt={tab.title} /> : globeIcon()}</div>
+      <div>
+        {tab.favIconUrl ? (
+          <img
+            className="size-4"
+            src={tab.favIconUrl ?? ''}
+            alt={tab.title ?? ''}
+            onError={e => ((e.target as HTMLImageElement).src = '')}
+          />
+        ) : (
+          globeIcon()
+        )}
+      </div>
       <a
         className="list-col-grow cursor-pointer focus:outline-1 truncate hover:underline"
         href={tab.url}
