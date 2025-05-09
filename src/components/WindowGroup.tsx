@@ -24,7 +24,11 @@ const WindowGroup = ({ tabGroup, activeWindowId }: WindowGroupProps) => {
         <WindowHeader windowId={tabGroup.windowId} activeWindowId={activeWindowId} />
       </div>
       <div className="collapse-content">
-        <WindowActions windowId={tabGroup.windowId} isAnyTabCheckedInGroup={isAnyTabCheckedInGroup} />
+        <WindowActions
+          windowId={tabGroup.windowId}
+          isAnyTabCheckedInGroup={isAnyTabCheckedInGroup}
+          visibleTabs={tabGroup.tabs}
+        />
         <TabList tabs={tabGroup.tabs} onAnyTabCheckChange={handleAnyTabCheckChange} />
       </div>
     </div>

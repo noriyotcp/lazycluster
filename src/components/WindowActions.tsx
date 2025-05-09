@@ -4,12 +4,19 @@ import Alert from '../../src/components/Alert';
 
 interface WindowActionsProps {
   windowId: number;
-  isAnyTabCheckedInGroup: boolean;
+  isAnyTabCheckedInGroup: boolean; // This will be re-calculated based on visibleTabs
+  visibleTabs: chrome.tabs.Tab[];
 }
 
-const WindowActions = ({ windowId, isAnyTabCheckedInGroup }: WindowActionsProps) => {
-  const { selectedTabIds, clearSelection, addWindowTabsToSelection, removeWindowTabsFromSelection } =
-    useTabSelectionContext();
+const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
+  const {
+    selectedTabIds,
+    clearSelection,
+    // addWindowTabsToSelection, // No longer used directly for bulk select
+    // removeWindowTabsFromSelection, // No longer used directly for bulk select
+    addTabsToSelection,
+    removeTabsFromSelection,
+  } = useTabSelectionContext();
   const { showToast } = useToast();
 
   const handleFocusWindow = () => {
@@ -17,10 +24,11 @@ const WindowActions = ({ windowId, isAnyTabCheckedInGroup }: WindowActionsProps)
   };
 
   const handleBulkSelectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const visibleTabIds = visibleTabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
     if (e.target.checked) {
-      addWindowTabsToSelection(windowId);
+      addTabsToSelection(visibleTabIds);
     } else {
-      removeWindowTabsFromSelection(windowId);
+      removeTabsFromSelection(visibleTabIds);
     }
   };
 
@@ -63,7 +71,10 @@ const WindowActions = ({ windowId, isAnyTabCheckedInGroup }: WindowActionsProps)
               className="checkbox checkbox-xs"
               type="checkbox"
               onChange={handleBulkSelectChange}
-              checked={isAnyTabCheckedInGroup}
+              checked={
+                visibleTabs.length > 0 &&
+                visibleTabs.every(tab => tab.id !== undefined && selectedTabIds.includes(tab.id))
+              }
             />
           </div>
           <div className="list-grow">

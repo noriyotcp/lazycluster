@@ -9,6 +9,8 @@ interface TabSelectionContextProps {
   clearSelection: () => void;
   addWindowTabsToSelection: (windowId: number) => void;
   removeWindowTabsFromSelection: (windowId: number) => void;
+  addTabsToSelection: (tabIds: number[]) => void;
+  removeTabsFromSelection: (tabIds: number[]) => void;
 }
 
 const TabSelectionContext = createContext<TabSelectionContextProps | undefined>(undefined);
@@ -34,6 +36,14 @@ export const TabSelectionContextProvider = ({ children }: { children: React.Reac
 
   const clearSelection = () => {
     setSelectedTabIds([]);
+  };
+
+  const addTabsToSelection = (tabIds: number[]) => {
+    setSelectedTabIds(prevSelectedTabIds => [...new Set([...prevSelectedTabIds, ...tabIds])]);
+  };
+
+  const removeTabsFromSelection = (tabIds: number[]) => {
+    setSelectedTabIds(prevSelectedTabIds => prevSelectedTabIds.filter(id => !tabIds.includes(id)));
   };
 
   const { showToast } = useToast();
@@ -75,6 +85,8 @@ export const TabSelectionContextProvider = ({ children }: { children: React.Reac
     clearSelection,
     addWindowTabsToSelection,
     removeWindowTabsFromSelection,
+    addTabsToSelection,
+    removeTabsFromSelection,
   };
 
   return <TabSelectionContext.Provider value={value}>{children}</TabSelectionContext.Provider>;
