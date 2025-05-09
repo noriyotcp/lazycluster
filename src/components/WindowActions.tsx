@@ -47,7 +47,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
 
       await chrome.tabs.remove(tabIdsInWindow);
       clearSelection();
-      showToast(<Alert message="Selected tabs closed successfully." variant="success" />);
+      showToast(<Alert message={`Selected ${tabIdsInWindow.length} tabs closed successfully.`} variant="success" />);
     } catch (error) {
       showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
       console.error('Error closing tabs:', error);
@@ -77,7 +77,11 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
             <button className="btn btn-link btn-xs" onClick={handleCloseWindow}>
               Close Window
             </button>
-            <button className="btn btn-link btn-xs" onClick={handleCloseTabsInWindow}>
+            <button
+              className="btn btn-link btn-xs"
+              onClick={handleCloseTabsInWindow}
+              disabled={selectedTabIds.length === 0}
+            >
               Close Tabs
             </button>
           </div>

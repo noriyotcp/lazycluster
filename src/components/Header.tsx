@@ -19,7 +19,7 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps)
     try {
       await chrome.tabs.remove(selectedTabIds);
       clearSelection();
-      showToast(<Alert message="Selected tabs closed successfully." variant="success" />);
+      showToast(<Alert message={`Selected ${selectedTabIds.length} tabs closed successfully.`} variant="success" />);
     } catch (error) {
       showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
       console.error('Error closing tabs:', error);
@@ -31,7 +31,7 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps)
       <span className="flex justify-between items-center gap-x-4">
         <SearchBar searchQuery={searchQuery} onSearchQueryChange={onSearchQueryChange} ref={searchBarRef} />
         <div className="flex items-center gap-x-4">
-          <button className="btn btn-ghost" onClick={handleCloseSelectedTabs}>
+          <button className="btn btn-ghost" onClick={handleCloseSelectedTabs} disabled={selectedTabIds.length === 0}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
               <path
                 fillRule="evenodd"
