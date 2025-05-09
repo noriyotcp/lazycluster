@@ -43,12 +43,13 @@ const App = () => {
     <div className="flex items-center justify-center min-h-screen min-w-[320px]">
       {/* Apply max-width, auto margin, padding, and text alignment, mimicking original #root styles */}
       <div className="max-w-screen-xl mx-auto p-8 text-center">
+        {/* Center the image and add some margin below it */}
+        <img src="/icon/48.png" className="inline-block mb-4" />
         {/* Apply heading styles */}
         <h1 className="text-5xl leading-tight">lazycluster</h1>
         {/* Apply card styles with padding */}
         <div className="card p-8">
-          {/* Apply button styles */}
-          <button className="btn btn-neutral" onClick={openWindowManager}>
+          <button className="btn btn-secondary" onClick={openWindowManager}>
             Window Manager
           </button>
         </div>
