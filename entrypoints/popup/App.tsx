@@ -39,12 +39,21 @@ const App = () => {
   }, []);
 
   return (
-    <>
-      <h1>lazycluster</h1>
-      <div className="card">
-        <button onClick={openWindowManager}>Window Manager</button>
+    // Apply styles to center content and set min height/width, mimicking original body styles
+    <div className="flex items-center justify-center min-h-screen min-w-[320px]">
+      {/* Apply max-width, auto margin, padding, and text alignment, mimicking original #root styles */}
+      <div className="max-w-screen-xl mx-auto p-8 text-center">
+        {/* Apply heading styles */}
+        <h1 className="text-5xl leading-tight">lazycluster</h1>
+        {/* Apply card styles with padding */}
+        <div className="card p-8">
+          {/* Apply button styles */}
+          <button className="btn btn-neutral" onClick={openWindowManager}>
+            Window Manager
+          </button>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 
