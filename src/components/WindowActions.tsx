@@ -47,7 +47,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
 
       await chrome.tabs.remove(tabIdsInWindow);
       clearSelection();
-      showToast(<Alert message="Selected tabs closed successfully." />);
+      showToast(<Alert message="Selected tabs closed successfully." variant="success" />);
     } catch (error) {
       showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
       console.error('Error closing tabs:', error);

@@ -19,6 +19,7 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps)
     try {
       await chrome.tabs.remove(selectedTabIds);
       clearSelection();
+      showToast(<Alert message="Selected tabs closed successfully." variant="success" />);
     } catch (error) {
       showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
       console.error('Error closing tabs:', error);
