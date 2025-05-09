@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import './App.css';
+import './style.css';
 
 const App = () => {
   const focusExistingTabInCurrentWindow = async (managerUrl: string, currentWindowId: number) => {
