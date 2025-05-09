@@ -1,21 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import TabItem from './TabItem';
-import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 
 interface TabListProps {
   tabs: chrome.tabs.Tab[];
-  onAnyTabCheckChange: (checked: boolean) => void;
 }
 
-const TabList = ({ tabs, onAnyTabCheckChange }: TabListProps) => {
-  const { selectedTabIds } = useTabSelectionContext();
-
-  const isAnyTabChecked = tabs.some(tab => selectedTabIds.includes(tab.id!));
-
-  useEffect(() => {
-    onAnyTabCheckChange(isAnyTabChecked);
-  }, [isAnyTabChecked, onAnyTabCheckChange]);
-
+const TabList = ({ tabs }: TabListProps) => {
   const listRef = useRef<HTMLUListElement>(null);
 
   let lastKeyTime = 0;

@@ -4,19 +4,12 @@ import Alert from '../../src/components/Alert';
 
 interface WindowActionsProps {
   windowId: number;
-  isAnyTabCheckedInGroup: boolean; // This will be re-calculated based on visibleTabs
   visibleTabs: chrome.tabs.Tab[];
 }
 
+// visibleTabs is used to determine the checked state of the bulk select checkbox
 const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
-  const {
-    selectedTabIds,
-    clearSelection,
-    // addWindowTabsToSelection, // No longer used directly for bulk select
-    // removeWindowTabsFromSelection, // No longer used directly for bulk select
-    addTabsToSelection,
-    removeTabsFromSelection,
-  } = useTabSelectionContext();
+  const { selectedTabIds, clearSelection, addTabsToSelection, removeTabsFromSelection } = useTabSelectionContext();
   const { showToast } = useToast();
 
   const handleFocusWindow = () => {
