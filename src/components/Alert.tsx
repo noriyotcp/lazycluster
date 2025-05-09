@@ -2,17 +2,17 @@ import React from 'react';
 
 interface AlertProps {
   message: string;
-  color?: 'error' | 'success' | 'warning' | 'info';
+  variant?: 'error' | 'success' | 'warning' | 'info';
   onClose?: () => void; // Optional callback to close the alert, typically to hide the toast
 }
 
-const Alert = ({ message, color = 'error', onClose }: AlertProps): React.ReactElement => {
+const Alert = ({ message, variant = 'error', onClose }: AlertProps): React.ReactElement => {
   const handleReload = () => {
     window.location.reload();
   };
 
   return (
-    <div role="alert" className={`alert alert-${color} alert-soft pe-px rounded-lg`}>
+    <div role="alert" className={`alert alert-${variant} alert-soft pe-px rounded-lg`}>
       {message}
       <div>
         <button className="btn btn-xs btn-ghost" onClick={handleReload}>
