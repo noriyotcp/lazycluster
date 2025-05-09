@@ -4,6 +4,7 @@ import WindowGroupList from '../../src/components/WindowGroupList';
 import type { Tabs } from 'webextension-polyfill';
 import { TabFocusProvider } from '../../src/contexts/TabFocusContext';
 import { useTabGroupContext } from '../../src/contexts/TabGroupContext';
+import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext'; // Import TabSelectionContext
 import { useBackgroundConnection } from '../../src/hooks/useBackgroundConnection'; // Import the hook
 import './style.css';
 
@@ -16,6 +17,7 @@ interface BackgroundMessage {
 
 const Manager = () => {
   const { tabGroups, updateTabGroups } = useTabGroupContext();
+  const { clearSelection } = useTabSelectionContext(); // Get clearSelection from context
   const [activeWindowId, setActiveWindowId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const searchBarRef = useRef<HTMLInputElement>(null);
@@ -71,6 +73,17 @@ const Manager = () => {
     };
   }, []); // Empty dependency array, runs once on mount
 
+  const handleSearchQueryChange = useCallback(
+    (query: string) => {
+      setSearchQuery(query);
+      // Clear selection only if the search query is not empty
+      if (query !== '') {
+        clearSelection();
+      }
+    },
+    [clearSelection]
+  ); // Dependency array includes clearSelection
+
   const filteredTabGroups = tabGroups
     .map((group, index) => ({ ...group, windowGroupNumber: index }))
     .map(group => ({
@@ -85,7 +98,7 @@ const Manager = () => {
 
   return (
     <TabFocusProvider>
-      <Header searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} searchBarRef={searchBarRef} />
+      <Header searchQuery={searchQuery} onSearchQueryChange={handleSearchQueryChange} searchBarRef={searchBarRef} />
       <div className="p-5 pt-0">
         <WindowGroupList filteredTabGroups={filteredTabGroups} activeWindowId={activeWindowId} />
       </div>
