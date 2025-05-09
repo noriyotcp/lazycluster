@@ -1,6 +1,4 @@
 @import 'tailwindcss';
 @plugin 'daisyui' {
-  themes:
-    garden --default,
-    dracula;
+  themes: dracula --default;
 }
