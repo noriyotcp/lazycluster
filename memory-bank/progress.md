@@ -16,7 +16,7 @@ _(Keep track of project progress, milestones, and current status. Note what's wo
 - Tab listing and grouping by window.
 - Basic UI layout and styling.
 - Theme switching functionality.
-- Bulk tab selection and closing.
+- **Bulk tab selection and closing (now targets only visible/filtered tabs).**
 - Keyboard navigation in TabList.
 - URL search functionality.
 - Tab hover domain display.
@@ -34,6 +34,7 @@ _(Keep track of project progress, milestones, and current status. Note what's wo
 
 ## Current Status
 
+- **Bulk selection feature enhancement (targeting visible tabs) and related refactoring are complete.**
 - Documentation updates are currently in progress.
 - Code refactoring and UI improvements are ongoing.
 - Core features are functional and being tested.
@@ -55,6 +56,9 @@ _(Keep track of project progress, milestones, and current status. Note what's wo
 - Refactored background script connection logic in `entrypoints/background.ts` by extracting it into a `connect` function.
 - Implemented client-side reconnection logic using the `useBackgroundConnection` custom hook in `src/hooks/useBackgroundConnection.ts`.
 - Refactored `entrypoints/manager/App.tsx` to use `useBackgroundConnection` for improved connection management.
+- **Enhanced bulk selection to operate only on currently visible (filtered) tabs.**
+- **Refactored `TabSelectionContext` to use a list of tab IDs for selection/deselection.**
+- **Removed unused props, state, and functions related to the old bulk selection logic from `WindowActions`, `WindowGroup`, `TabList`, and `TabSelectionContext`.**
 
 ## Known Issues
 
@@ -78,6 +82,8 @@ _(Keep track of project progress, milestones, and current status. Note what's wo
 - Prop Drilling and Context API: Prop drilling can complicate component relationships and make naming more challenging. Context API can be a valuable tool to simplify prop flow and improve code organization in such cases.
 - Client vs. Background Connection Responsibility: Understanding the distinct roles of client-side scripts (initiating connections, handling reconnects) and background scripts (listening for connections) is crucial for designing robust communication patterns in Chrome extensions. Background scripts typically don't initiate reconnections themselves.
 - Importance of Client-Side Connection Management: Implementing connection management (including automatic reconnection) on the client-side (e.g., using a custom hook like `useBackgroundConnection`) is essential for maintaining a stable connection to the background script, especially when the background script might be suspended and restarted by the browser.
+- **Clarity in Refactoring: When refactoring, clearly identify and remove all unused code (props, state, functions, imports) to maintain a clean and understandable codebase. This improves maintainability and reduces potential confusion for future development.**
+- **Impact of Context Changes: Modifying a shared context (like `TabSelectionContext`) can have cascading effects. It's important to trace all usages of the context to ensure all dependent components are updated correctly or that unused parts are thoroughly removed.**
 
 ## Next Actions
 
