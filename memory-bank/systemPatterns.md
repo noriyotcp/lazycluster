@@ -58,6 +58,7 @@ LazyCluster follows a modular, component-based architecture, primarily leveragin
 - **State Management (within React UIs):** React's built-in state management or potentially a library like Zustand or Recoil (if needed for more complex state) will be used to manage UI state and data flow within both the Manager Tab UI and Popup UI.
 - **Service Worker Pattern (Background Script):** The background script acts as a service worker, running in the background and handling long-running tasks and event processing.
 - **Persistent Connection with Reconnect (Manager UI):** The Manager Tab UI uses a custom React hook (`useBackgroundConnection`) to establish and maintain a persistent connection (`chrome.runtime.Port`) to the background script. This hook automatically handles reconnection attempts if the connection is lost (e.g., due to the background script being suspended and restarted).
+- **Development-Specific Logging:** A utility function (`src/utils/devLog.ts`) is used to wrap `console.log` calls. This ensures that general debugging logs are only output during development mode (`import.meta.env.MODE === 'development'`), while critical logs like `console.error` and `console.warn` remain active in production builds.
 
 ### Component Relationships
 

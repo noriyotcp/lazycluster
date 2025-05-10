@@ -12,6 +12,7 @@
 
   - Used for all extension logic, UI components, and build tooling.
   - Provides strong typing, improved code organization, and better maintainability.
+  - Custom utility functions, such as `src/utils/devLog.ts` for development-specific logging, are created as needed.
 
 - **UI Framework:** React (v19)
 

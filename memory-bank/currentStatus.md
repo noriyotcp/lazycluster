@@ -87,6 +87,8 @@ _(Logs completed tasks, milestones, and significant decisions.)_
     - Removed the now unused `addWindowTabsToSelection` and `removeWindowTabsFromSelection` functions.
     - Removed unused imports for `useToast` and `Alert`.
   - **Removed unused props, state, and functions related to the old bulk selection logic from `WindowActions`, `WindowGroup`, `TabList`, and `TabSelectionContext`.**
+  - Introduced `devLog` utility in `src/utils/devLog.ts` for development-only console logging.
+  - Refactored `console.log` calls in `entrypoints/background.ts`, `entrypoints/manager/App.tsx`, `src/contexts/TabFocusContext.tsx`, and `src/hooks/useBackgroundConnection.ts` to use the new `devLog` utility. `console.error` and `console.warn` calls were intentionally kept for production visibility.
 - **Decisions Made:**
   - Implemented responsive 2-column layout for window groups using Tailwind CSS Grid.
   - Adjusted layout breakpoints to `lg` for better responsiveness.
@@ -99,6 +101,7 @@ _(Logs completed tasks, milestones, and significant decisions.)_
   - Implemented client-side reconnection logic using a custom hook (`useBackgroundConnection`) to improve connection stability between the manager UI and the background script.
   - **Enhanced bulk selection to only target visible (filtered) tabs within a window.**
   - **Refactored `TabSelectionContext` to use a list of tab IDs for selection/deselection, removing window-wide selection functions.**
+  - Implemented a `devLog` utility to ensure `console.log` statements are only active during development, while `console.error` and `console.warn` remain active in production.
 
 ## 🧠 Lessons Learned & Strategic Outlook
 
