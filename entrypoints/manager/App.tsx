@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react'; // Add useCallback
+import { devLog } from '../../src/utils/devLog';
 import Header from '../../src/components/Header';
 import WindowGroupList from '../../src/components/WindowGroupList';
 import type { Tabs } from 'webextension-polyfill';
@@ -25,11 +26,11 @@ const Manager = () => {
   // Define the message handler using useCallback to maintain reference stability
   const handleBackgroundMessage = useCallback(
     (message: BackgroundMessage) => {
-      console.log(`${new Date()} - Received message from background:`, message); // Log received messages
+      devLog(`${new Date()} - Received message from background:`, message); // Log received messages
       if (message.type === 'UPDATE_TABS' && message.tabs) {
         updateTabGroups(message.tabs); // Use the updated tabs
       } else if (message.type === 'BACKGROUND_INITIALIZED') {
-        console.log(`${new Date()} - Background script initialized`);
+        devLog(`${new Date()} - Background script initialized`);
       }
       // No need to handle REQUEST_INITIAL_DATA here, it's sent from client
     },
@@ -42,7 +43,7 @@ const Manager = () => {
   // Effect to request initial data once connected
   useEffect(() => {
     if (isConnected) {
-      console.log(`${new Date()} - Connection established, requesting initial data...`);
+      devLog(`${new Date()} - Connection established, requesting initial data...`);
       sendMessage({ type: 'REQUEST_INITIAL_DATA' });
     }
   }, [isConnected, sendMessage]);

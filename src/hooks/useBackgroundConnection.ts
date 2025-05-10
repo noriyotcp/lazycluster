@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { devLog } from '../utils/devLog';
 
 // Define a generic type for messages if possible, or use a base type
 // For now, let's keep it flexible but avoid 'any' directly in the handler signature
@@ -34,7 +35,7 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
   }, [messageHandler]);
 
   const connect = useCallback(() => {
-    console.log(`${new Date()} - Attempting to connect to background script with port name: ${portName}`);
+    devLog(`${new Date()} - Attempting to connect to background script with port name: ${portName}`);
     try {
       portRef.current = chrome.runtime.connect({ name: portName });
 
@@ -45,7 +46,7 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
         return;
       }
 
-      console.log(`${new Date()} - Successfully connected to background script.`);
+      devLog(`${new Date()} - Successfully connected to background script.`);
       setIsConnected(true); // Update connection status
 
       portRef.current.onMessage.addListener((message: T) => {
@@ -56,7 +57,7 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
 
       portRef.current.onDisconnect.addListener(() => {
         setIsConnected(false); // Update connection status
-        console.log(`${new Date()} - Port disconnected.`);
+        devLog(`${new Date()} - Port disconnected.`);
         if (chrome.runtime.lastError) {
           console.error(`${new Date()} - Disconnect error:`, chrome.runtime.lastError.message);
         }
@@ -74,7 +75,7 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
     if (reconnectTimerRef.current) {
       clearTimeout(reconnectTimerRef.current); // Clear existing timer if any
     }
-    console.log(`${new Date()} - Scheduling reconnect in ${RECONNECT_DELAY}ms...`);
+    devLog(`${new Date()} - Scheduling reconnect in ${RECONNECT_DELAY}ms...`);
     reconnectTimerRef.current = setTimeout(() => {
       connect();
     }, RECONNECT_DELAY);
@@ -112,7 +113,7 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
         clearTimeout(reconnectTimerRef.current);
       }
       if (portRef.current) {
-        console.log(`${new Date()} - Disconnecting port on component unmount.`);
+        devLog(`${new Date()} - Disconnecting port on component unmount.`);
         try {
           portRef.current.disconnect();
         } catch (e) {

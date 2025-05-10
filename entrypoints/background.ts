@@ -1,5 +1,7 @@
+import { devLog } from '../src/utils/devLog';
+
 export default defineBackground(() => {
-  console.log('Hello background!', { id: browser.runtime.id });
+  devLog('Hello background!', { id: browser.runtime.id });
 
   let port: chrome.runtime.Port | null = null;
 
@@ -22,7 +24,7 @@ export default defineBackground(() => {
 
   // Listen for tab creation
   browser.tabs.onCreated.addListener(async () => {
-    console.log(`${new Date()} - onCreated:`, port);
+    devLog(`${new Date()} - onCreated:`, port);
     if (port) {
       updateTabs(port);
     }
@@ -30,7 +32,7 @@ export default defineBackground(() => {
 
   // Listen for tab updates
   browser.tabs.onUpdated.addListener(async () => {
-    console.log(`${new Date()} - onUpdated:`, port);
+    devLog(`${new Date()} - onUpdated:`, port);
     if (port) {
       updateTabs(port);
     }
@@ -38,7 +40,7 @@ export default defineBackground(() => {
 
   // Listen for tab removal
   browser.tabs.onRemoved.addListener(async () => {
-    console.log(`${new Date()} - onRemoved:`, port);
+    devLog(`${new Date()} - onRemoved:`, port);
     if (port) {
       updateTabs(port);
     }
@@ -46,7 +48,7 @@ export default defineBackground(() => {
 
   // Listen for tab movement within a window
   browser.tabs.onMoved.addListener(async () => {
-    console.log(`${new Date()} - onMoved:`, port);
+    devLog(`${new Date()} - onMoved:`, port);
     if (port) {
       updateTabs(port);
     }
@@ -54,7 +56,7 @@ export default defineBackground(() => {
 
   // Listen for tab attachment (moved into a window)
   browser.tabs.onAttached.addListener(async () => {
-    console.log(`${new Date()} - onAttached:`, port);
+    devLog(`${new Date()} - onAttached:`, port);
     if (port) {
       updateTabs(port);
     }
@@ -62,20 +64,24 @@ export default defineBackground(() => {
 
   // Listen for tab detachment (moved out of a window)
   browser.tabs.onDetached.addListener(async () => {
-    console.log(`${new Date()} - onDetached:`, port);
+    devLog(`${new Date()} - onDetached:`, port);
     if (port) {
       updateTabs(port);
     }
   });
 
   const connect = (p: chrome.runtime.Port) => {
-    console.log(`${new Date()} - onConnect`);
-    console.dir(p);
+    devLog(`${new Date()} - onConnect`);
+    if (import.meta.env.MODE === 'development') {
+      console.dir(p);
+    }
     if (p.name === 'manager') {
       port = p as chrome.runtime.Port;
       port.onDisconnect.addListener(() => {
-        console.log(`${new Date()} - onDisconnect`);
-        console.dir(port);
+        devLog(`${new Date()} - onDisconnect`);
+        if (import.meta.env.MODE === 'development') {
+          console.dir(port);
+        }
         port = null;
       });
 

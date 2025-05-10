@@ -1,4 +1,5 @@
 import React, { createContext, useContext, PropsWithChildren, useCallback } from 'react';
+import { devLog } from '../utils/devLog';
 
 interface TabFocusContextType {
   focusActiveTab: (tabId: number, windowId: number) => Promise<void>;
@@ -13,7 +14,7 @@ export const TabFocusProvider = ({ children }: PropsWithChildren): React.ReactEl
       await chrome.windows.update(windowId, { focused: true });
       // Then, activate the target tab
       await chrome.tabs.update(tabId, { active: true });
-      console.log(`Focused tab ${tabId} in window ${windowId}`);
+      devLog(`Focused tab ${tabId} in window ${windowId}`);
     } catch (error) {
       console.error(`Error focusing tab ${tabId} in window ${windowId}:`, error);
       // Additional error handling can be added here
