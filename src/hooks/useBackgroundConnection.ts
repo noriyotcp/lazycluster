@@ -12,7 +12,24 @@ interface BaseMessage {
 
 type MessageHandler<T extends BaseMessage> = (message: T) => void;
 
-const RECONNECT_DELAY = 1000; // Reconnect delay in milliseconds
+/**
+ * Calculates delay for exponential backoff with equal jitter
+ * @param attempt - The current attempt number (0-based)
+ * @returns The delay in milliseconds to wait, or -1 if max retries exceeded
+ */
+function calculateBackoff(attempt: number): number {
+  const baseInterval: number = 30000; // ms
+  const factor: number = 2;
+  const maxRetries: number = 7;
+
+  if (attempt > maxRetries) {
+    return -1; // Maximum retries exceeded
+  }
+
+  // Equal jitter - half fixed, half random
+  const calculatedDelay = baseInterval * Math.pow(factor, attempt);
+  return calculatedDelay / 2 + (Math.random() * calculatedDelay) / 2;
+}
 
 /**
  * Custom hook to manage a persistent connection to the background script.
@@ -27,6 +44,7 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
   const portRef = useRef<chrome.runtime.Port | null>(null);
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const messageHandlerRef = useRef<MessageHandler<T>>(messageHandler);
+  const attemptRef = useRef<number>(0); // Track retry attempts
   const [isConnected, setIsConnected] = useState(false); // Track connection status
 
   // Keep the message handler ref updated without causing re-renders
@@ -48,6 +66,7 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
 
       devLog(`${new Date()} - Successfully connected to background script.`);
       setIsConnected(true); // Update connection status
+      attemptRef.current = 0; // Reset retry attempts on success
 
       portRef.current.onMessage.addListener((message: T) => {
         // Add type annotation
@@ -75,10 +94,17 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
     if (reconnectTimerRef.current) {
       clearTimeout(reconnectTimerRef.current); // Clear existing timer if any
     }
-    devLog(`${new Date()} - Scheduling reconnect in ${RECONNECT_DELAY}ms...`);
+    attemptRef.current += 1;
+    const delay = calculateBackoff(attemptRef.current - 1);
+    if (delay === -1) {
+      devLog(`${new Date()} - Max retries exceeded. Giving up on reconnect.`);
+      // Optionally, notify user here (e.g., toast)
+      return;
+    }
+    devLog(`${new Date()} - Scheduling reconnect in ${delay}ms (attempt ${attemptRef.current})...`);
     reconnectTimerRef.current = setTimeout(() => {
       connect();
-    }, RECONNECT_DELAY);
+    }, delay);
   }, [connect]);
 
   const sendMessage = useCallback(
