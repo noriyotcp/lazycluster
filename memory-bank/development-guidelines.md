@@ -76,3 +76,11 @@ const MyComponent = ({ name }: MyComponentProps): JSX.Element => {
 - Note the improved toast stacking behavior and how it affects UI layout.
 
 These guidelines help maintain UI consistency and prevent common styling pitfalls related to dynamic class usage in Tailwind CSS.
+
+## Learnings & Best Practices
+
+1. Always consult official documentation  
+   Before introducing new tools, libraries, or plugins, carefully read the official documentation and understand the recommended setup. This helps avoid unnecessary trial and error and ensures alignment with best practices.
+
+2. Start minimal, extend incrementally  
+   Begin with the simplest working configuration. Once the basic setup is confirmed to work, incrementally add customizations and complexity as needed, verifying each step along the way.
