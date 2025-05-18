@@ -12,24 +12,7 @@ interface BaseMessage {
 
 type MessageHandler<T extends BaseMessage> = (message: T) => void;
 
-/**
- * Calculates delay for exponential backoff with equal jitter
- * @param attempt - The current attempt number (0-based)
- * @returns The delay in milliseconds to wait, or -1 if max retries exceeded
- */
-function calculateBackoff(attempt: number): number {
-  const baseInterval: number = 30000; // ms
-  const factor: number = 2;
-  const maxRetries: number = 7;
-
-  if (attempt > maxRetries) {
-    return -1; // Maximum retries exceeded
-  }
-
-  // Equal jitter - half fixed, half random
-  const calculatedDelay = baseInterval * Math.pow(factor, attempt);
-  return calculatedDelay / 2 + (Math.random() * calculatedDelay) / 2;
-}
+import { calculateBackoff } from '../utils/backoff';
 
 /**
  * Custom hook to manage a persistent connection to the background script.
@@ -95,7 +78,7 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
       clearTimeout(reconnectTimerRef.current); // Clear existing timer if any
     }
     attemptRef.current += 1;
-    const delay = calculateBackoff(attemptRef.current - 1);
+    const delay = calculateBackoff({ attempt: attemptRef.current - 1 });
     if (delay === -1) {
       devLog(`${new Date()} - Max retries exceeded. Giving up on reconnect.`);
       // Optionally, notify user here (e.g., toast)
