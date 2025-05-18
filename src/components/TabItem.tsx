@@ -3,6 +3,7 @@ import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useTabFocusContext } from '../../src/contexts/TabFocusContext';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
+import { calculateBackoff } from '../../src/utils/backoff';
 
 const extractDomain = (url: string): string => {
   try {
@@ -67,6 +68,31 @@ const TabItem = ({ tab }: TabItemProps) => {
   };
 
   const handleCloseButtonClick = () => {
+    const maxRetries = 3;
+    const baseInterval = 1000;
+    const factor = 2;
+
+    const retryLog = (attempt: number) => {
+      const backoffDelay = calculateBackoff({
+        attempt: attempt,
+        baseInterval: baseInterval,
+        factor: factor,
+        maxRetries: maxRetries,
+      });
+
+      if (backoffDelay !== -1) {
+        console.log(`Logging message in ${backoffDelay}ms (attempt ${attempt + 1}/${maxRetries})`);
+        setTimeout(() => {
+          console.log(`${new Date()}: This is a test log message.`);
+          retryLog(attempt + 1);
+        }, backoffDelay);
+      } else {
+        console.log('Finished logging attempts.');
+      }
+    };
+
+    retryLog(0); // Start the initial attempt
+
     chrome.tabs.remove(tab.id!, () => {
       if (chrome.runtime.lastError) {
         showToast(<Alert message="Failed to close tab" />);
