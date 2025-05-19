@@ -7,7 +7,7 @@
  *   - baseInterval: The base interval in ms (default: 30000)
  *   - factor: The exponential factor (default: 2)
  *   - maxRetries: Maximum allowed attempts (default: 7)
- * @returns The delay in milliseconds to wait, or -1 if max retries exceeded
+ * @returns {number | -1} Positive number (delay in ms) if retry is allowed, or -1 if max retries exceeded
  *
  * Why not keep this in the hook? → By extracting, we enable reuse and easier unit testing.
  * Why use an options object? → Named parameters improve readability and extensibility.
@@ -24,7 +24,7 @@ export const calculateBackoff = ({
   baseInterval = 30000,
   factor = 2,
   maxRetries = 7,
-}: CalculateBackoffOptions = {}): number => {
+}: CalculateBackoffOptions = {}): number | -1 => {
   if (attempt > maxRetries) {
     return -1; // Maximum retries exceeded
   }
