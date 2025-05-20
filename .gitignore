@@ -32,3 +32,8 @@ web-ext.config.ts
 /playwright/.cache/
 user-data-dir/
 storageState.json
+
+# Docs for AI, ignore these files for now.
+.clinerules/
+.clineignore
+docs/
