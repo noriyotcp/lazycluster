@@ -84,3 +84,15 @@ These guidelines help maintain UI consistency and prevent common styling pitfall
 
 2. Start minimal, extend incrementally  
    Begin with the simplest working configuration. Once the basic setup is confirmed to work, incrementally add customizations and complexity as needed, verifying each step along the way.
+
+---
+
+### Lessons Learned (Project-wide)
+
+- Clearly define requirements for expected behaviors.
+- Always consult official documentation and leverage built-in framework features.
+- Separate component responsibilities to improve code organization and reusability.
+- Emphasize iterative improvement and continuous information gathering based on feedback.
+- Prioritize clear and accurate naming conventions, and refine names as code evolves.
+- Avoid prop drilling by using the Context API, but be mindful of the impact of context changes on dependent components.
+- During refactoring, promptly remove all unused code (props, state, functions, imports) to maintain code clarity.
