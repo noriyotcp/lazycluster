@@ -77,22 +77,13 @@ const MyComponent = ({ name }: MyComponentProps): JSX.Element => {
 
 These guidelines help maintain UI consistency and prevent common styling pitfalls related to dynamic class usage in Tailwind CSS.
 
-## Learnings & Best Practices
-
-1. Always consult official documentation  
-   Before introducing new tools, libraries, or plugins, carefully read the official documentation and understand the recommended setup. This helps avoid unnecessary trial and error and ensures alignment with best practices.
-
-2. Start minimal, extend incrementally  
-   Begin with the simplest working configuration. Once the basic setup is confirmed to work, incrementally add customizations and complexity as needed, verifying each step along the way.
-
----
-
 ### Lessons Learned (Project-wide)
 
 - Clearly define requirements for expected behaviors.
 - Always consult official documentation and leverage built-in framework features.
 - Separate component responsibilities to improve code organization and reusability.
-- Emphasize iterative improvement and continuous information gathering based on feedback.
+- Emphasize iterative improvement and continuous information gathering based on feedback, leveraging the distinction between PLAN MODE and ACT MODE for iterative refinement.
 - Prioritize clear and accurate naming conventions, and refine names as code evolves.
 - Avoid prop drilling by using the Context API, but be mindful of the impact of context changes on dependent components.
 - During refactoring, promptly remove all unused code (props, state, functions, imports) to maintain code clarity.
+- Document lessons learned to inform future development and provide reference for similar challenges.
