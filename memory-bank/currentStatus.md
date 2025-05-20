@@ -6,7 +6,6 @@
   - Update documentation to reflect recent code changes.
 - **Next Steps:**
   - Update this file (`memory-bank/currentStatus.md`) with the latest progress and lessons learned.
-  - Review and update `memory-bank/development-guidelines.md` to discourage the use of React.FC (if not already done).
   - Update `memory-bank/useContext-usage.md` to reflect provider component refactoring (if applicable to recent changes).
   - Consider adding E2E tests for UI components, including the updated bulk selection.
 - **Blockers:**
