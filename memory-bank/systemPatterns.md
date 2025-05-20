@@ -17,70 +17,121 @@
 
 ## System Architecture
 
-LazyCluster follows a modular, component-based architecture, primarily leveraging React components for the UI and background scripts for core logic and browser API interactions. The architecture is designed to be event-driven and reactive, ensuring efficient updates and interactions between different parts of the extension.
+LazyCluster is a modular, event-driven browser extension built with React, TypeScript, and Chrome Extension APIs. The architecture emphasizes component-based design, clear separation of concerns, and robust state management for scalability and maintainability.
 
-### Component Descriptions
+### Main Components
 
-1.  **Manager Tab UI (React):**
+#### 1. Manager Tab UI (`entrypoints/manager/App.tsx` and related components)
 
-    - Built using React and TypeScript, specifically `entrypoints/manager/App.tsx`.
-    - Responsible for rendering the main user interface within a dedicated browser tab (the "manager tab").
-    - Communicates with the Background Script to fetch data and trigger actions.
+- **Role:** The primary user interface for managing browser tabs and windows.
+- **Key Components:**
+  - `Header`: Displays the app title and main controls.
+  - `SearchBar`: Filters tabs/windows.
+  - `WindowGroupList`: Renders all window groups.
+  - `WindowGroup`: Represents a single browser window and its tabs.
+  - `WindowHeader`: Shows window-level actions and info.
+  - `WindowActions`: Provides actions for all tabs in a window (e.g., select/deselect, close, move).
+  - `TabList`: Lists all tabs in a window.
+  - `TabItem`: Represents a single tab, with selection and actions.
+  - `ThemeSwitcher`: Allows switching between light/dark themes.
+  - `Alert`: Shows important messages.
+  - `ToastProvider`: Handles toast notifications for errors and feedback.
 
-2.  **Popup UI (React):**
+#### 2. Popup UI (`entrypoints/popup/App.tsx`)
 
-    - Built using React and TypeScript, specifically `entrypoints/popup/App.tsx`.
-    - Currently has a very limited role: primarily to provide a button that opens the "manager tab".
-    - This popup UI is lightweight and focused on quickly directing users to the full management interface in the manager tab.
-    - Communicates with the Background Script to request the opening of the manager tab.
+- **Role:** Minimal UI for opening the Manager Tab.
+- **Key Components:** Simple button, styled with daisyUI, to launch the main interface.
 
-3.  **Background Script (background.ts):**
+#### 3. Background Script (`entrypoints/background.ts`)
 
-    - The core logic of the extension resides here.
-    - Manages interactions with Chrome Extension APIs to:
-      - Fetch window and tab data.
-      - Modify tabs (move, suspend, close, etc.).
-      - Modify windows (create, focus, close, etc.).
-      - Implement session saving and restoring logic.
-    - Handles events from both the Manager Tab UI and the Popup UI, as well as browser events (e.g., tab created, tab closed).
-    - Listens for connections from the Manager Tab UI (`chrome.runtime.onConnect`).
-    - Orchestrates communication between different parts of the extension.
+- **Role:** Core logic and orchestrator.
+- **Responsibilities:**
+  - Manages Chrome Extension API interactions (tabs, windows, sessions).
+  - Handles events from Manager Tab UI and Popup UI.
+  - Listens for browser events (tab/window create, remove, update).
+  - Maintains persistent connection with Manager Tab UI via `chrome.runtime.Port`.
+  - Implements session save/restore, tab/window manipulation, and state updates.
 
-4.  **Content Script (content.ts - Optional):**
-    - Currently considered optional. May be used in the future if features require interaction with the content of web pages.
-    - If implemented, it would allow the extension to access and manipulate the DOM of web pages, potentially for features like tab grouping based on page content or advanced tab information extraction.
+#### 4. Context Providers (`src/contexts/`)
 
-### Key Design Patterns
+- **TabFocusContext:** Tracks which tab is focused for keyboard navigation.
+- **TabGroupContext:** Manages logical groupings of tabs (future extensibility).
+- **TabSelectionContext:** Tracks selected tab IDs for bulk actions.
+- **WindowGroupContext:** Manages state for window groups and their tabs.
 
-- **Component-Based Architecture:** The UI is built using reusable React components, promoting modularity and maintainability.
-- **Base CSS Styles:** Application-wide styles are defined to ensure a consistent look and feel across the extension, loaded before entrypoint-specific styles.
-- **Event-Driven Architecture:** Communication between components, especially between the UIs and background script, is primarily event-driven. This allows for loose coupling and reactive updates.
-- **State Management (within React UIs):** React's built-in state management or potentially a library like Zustand or Recoil (if needed for more complex state) will be used to manage UI state and data flow within both the Manager Tab UI and Popup UI.
-- **Service Worker Pattern (Background Script):** The background script acts as a service worker, running in the background and handling long-running tasks and event processing.
-- **Persistent Connection with Reconnect (Manager UI):** The Manager Tab UI uses a custom React hook (`useBackgroundConnection`) to establish and maintain a persistent connection (`chrome.runtime.Port`) to the background script. This hook automatically handles reconnection attempts if the connection is lost (e.g., due to the background script being suspended and restarted).
-- **Development-Specific Logging:** A utility function (`src/utils/devLog.ts`) is used to wrap `console.log` calls. This ensures that general debugging logs are only output during development mode (`import.meta.env.MODE === 'development'`), while critical logs like `console.error` and `console.warn` remain active in production builds.
+#### 5. Utility Modules
 
-### Component Relationships
+- **`useBackgroundConnection` (hook):** Maintains persistent/reconnecting port to background script.
+- **`devLog`:** Development-only logging utility.
+- **`backoff`:** Exponential backoff for reconnection attempts.
 
-- **Manager UI <-> Background Script:** Communication happens via a persistent `chrome.runtime.Port` established by the Manager UI. The `useBackgroundConnection` hook manages this connection and its lifecycle, including reconnection. Messages are exchanged for requesting data, sending commands, and receiving updates.
-- **Popup UI <-> Background Script:** Communication likely uses short-lived messages (`chrome.runtime.sendMessage`) or potentially a short-lived port connection, primarily to trigger the opening of the Manager Tab.
-- **State Synchronization between WindowActions and TabItem:** To ensure UI consistency, the TabItem component subscribes to the TabSelectionContext and updates its `isChecked` state based on the `selectedTabIds`. This allows the TabItem's checkbox to reflect the selection state when tabs are selected/deselected via the WindowActions component.
+## Key Design Patterns
 
-### Data Flow
+- **Component-Based UI:** All UI is built from small, reusable React components, following composition over inheritance.
+- **Context-Driven State Management:** React Contexts are used for cross-component state (selection, focus, grouping, etc.), minimizing prop drilling.
+- **Event-Driven Architecture:** Communication between UI and background is event/message-based, using persistent ports and short-lived messages as appropriate.
+- **Service Worker Pattern:** Background script acts as a long-running service worker, handling all privileged operations and state.
+- **Persistent Connection with Auto-Reconnect:** `useBackgroundConnection` ensures the Manager Tab UI always stays in sync with the background, even after background reloads.
+- **daisyUI + Tailwind CSS:** All UI styling uses daisyUI 5 and Tailwind CSS 4 utility classes. No custom CSS is written unless absolutely necessary. See `.clinerules/daisyui.md` for rules.
+- **Toast Notification Pattern:** All error and feedback messages are surfaced to the user via a global `ToastProvider` component, following ADR-0008.
+- **Keyboard Navigation:** Native and custom keyboard navigation for accessibility, as per ADR-0003/0004.
+- **Responsive Layouts:** Two-column and column-count layouts for window groups, responsive to screen size (ADR-0002/0006).
+- **Development-Only Logging:** `devLog` ensures only critical logs are shown in production.
 
-1.  **Connection Establishment (Manager Tab):** The Manager Tab UI, using `useBackgroundConnection`, establishes a persistent connection (`chrome.runtime.Port`) to the Background Script.
-2.  **Initial Data Request (Manager Tab):** Once the connection is established, the Manager Tab UI sends a message (`REQUEST_INITIAL_DATA`) to the Background Script via the port.
-3.  **Data Fetching (Background):** The Background Script receives the request, uses Chrome Extension APIs to retrieve the current state of windows and tabs.
-4.  **Data Transmission (Background -> Manager):** The Background Script sends the tab/window data back to the Manager Tab UI via the established port (`UPDATE_TABS` message).
-5.  **Data Rendering (Manager Tab):** The Manager Tab UI receives the data and renders it using React components.
-6.  **User Actions (Manager Tab):** User interactions trigger commands sent to the Background Script via the port using the `sendMessage` function from `useBackgroundConnection`.
-7.  **Command Handling (Background):** The Background Script receives commands, processes them using Chrome Extension APIs.
-8.  **Browser Event Triggered Updates (Background):** Browser events (like tab creation/removal) trigger the Background Script to fetch updated tab data.
-9.  **Push Updates (Background -> Manager):** The Background Script sends updated tab data (`UPDATE_TABS`) to the connected Manager Tab UI via the port.
-10. **Reconnection:** If the connection drops, `useBackgroundConnection` in the Manager Tab UI automatically attempts to re-establish the connection and repeats the initial data request upon success.
+## Component Relationships
 
-### Considerations
+- **Manager UI <-> Background Script:** Persistent connection via `chrome.runtime.Port` managed by `useBackgroundConnection`. All data and commands flow through this channel.
+- **Popup UI <-> Background Script:** Uses `chrome.runtime.sendMessage` for one-off actions (open manager tab).
+- **TabItem <-> TabSelectionContext:** Each `TabItem` subscribes to selection context to reflect and update selection state.
+- **WindowActions <-> TabSelectionContext:** Bulk actions (select all, deselect all, close selected) are coordinated via context.
+- **TabFocusContext:** Used by `TabList` and `TabItem` for keyboard navigation and focus management.
+- **ToastProvider:** Wraps the entire Manager UI, allowing any component to trigger toast notifications.
+- **ThemeSwitcher:** Updates theme state, which is reflected throughout the UI via daisyUI/Tailwind classes.
+- **WindowGroupContext:** Provides window/tab state and actions to all window-related components.
 
-- **Performance:** Efficient data handling and rendering are crucial for a smooth user experience, especially with a large number of tabs and windows in the Manager Tab UI.
-- **Scalability:** The architecture should be scalable to accommodate potential future features and increased complexity, particularly within the Manager Tab UI.
-- **Maintainability:** Modularity and clear separation of concerns are essential for long-term maintainability and ease of development, especially as the Manager Tab UI becomes more feature-rich.
+```mermaid
+flowchart LR
+  TabSelectionContext --> TabItem
+  TabSelectionContext --> WindowActions
+  TabFocusContext --> TabList
+  TabFocusContext --> TabItem
+  WindowGroupContext --> WindowGroupList
+  ToastProvider --> ManagerUI
+  ThemeSwitcher --> ManagerUI
+```
+
+## Data Flow
+
+1. **Connection:** Manager Tab UI establishes a persistent port to the background script using `useBackgroundConnection`.
+2. **Initial Data Fetch:** On connect, Manager Tab UI requests current tab/window state.
+3. **State Update:** Background script fetches data via Chrome APIs and sends it to Manager Tab UI.
+4. **Rendering:** Manager Tab UI renders windows/tabs using context and component tree.
+5. **User Actions:** User actions (select, close, move, etc.) are dispatched to the background script via the port.
+6. **Background Processing:** Background script performs requested actions, updates state, and pushes new data to Manager Tab UI.
+7. **Browser Events:** Tab/window changes in the browser trigger background updates, which are pushed to the UI.
+8. **Error Handling:** Any errors are surfaced to the user via `ToastProvider`.
+9. **Reconnection:** If the port disconnects, `useBackgroundConnection` auto-reconnects and re-requests state.
+
+```mermaid
+flowchart TD
+  A[Manager UI] -->|connect| B[Background Script]
+  B -->|send data| A
+  A -->|user action| B
+  B -->|push update| A
+  A -->|disconnect| C[Reconnect Hook]
+  C -->|re-request| B
+```
+
+## Considerations
+
+- **Performance:** Efficient rendering and minimal re-renders are prioritized, especially for large tab/window counts.
+- **Scalability:** Modular design and context-driven state allow for easy feature expansion (e.g., tab grouping, advanced search).
+- **Maintainability:** Clear separation of UI, state, and background logic. All major decisions are documented in ADRs.
+- **Accessibility:** Keyboard navigation and focus management are first-class concerns.
+- **Styling Consistency:** All UI uses daisyUI/Tailwind utility classes, following Refactoring UI best practices.
+- **Documentation:** All significant changes and patterns are documented in `/docs` and memory-bank files.
+
+## References
+
+- `.clinerules/daisyui.md` — daisyUI usage rules
+- `.clinerules/project-guidelines.md` — coding, testing, and documentation standards
