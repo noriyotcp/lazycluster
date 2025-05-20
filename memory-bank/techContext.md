@@ -85,3 +85,55 @@
 - **Favicon:** Ensuring the extension's favicon is correctly displayed in the manager tab.
 - **Manifest Description:** The manifest.json description will be updated to accurately reflect the extension's purpose as 'lazycluster'.
 - **Dev Mode Data Persistence:** Utilizing WXT's configuration options to persist data during development mode for easier testing and debugging.
+
+---
+
+## Development Guidelines
+
+### Unified Type Definition Management
+
+Consolidate all type definitions in one location (e.g., `src/@types`) and consistently import them using aliases throughout the project.  
+→ Prevents build errors caused by duplicate or inconsistent type definitions.
+
+### Consistent Use of Import Paths
+
+Always use aliases as configured in `tsconfig.json` instead of relative paths to improve maintainability and readability.
+
+### Immediate Deletion of Unnecessary Files
+
+Promptly organize and delete unnecessary files and code to keep the file structure clean.  
+→ Eliminates redundancy, confusion, and potential build errors.
+
+### Continuous Documentation Updates
+
+Keep internal documents (e.g., ADRs, progress notes) updated with lessons learned and best practices gleaned from development experience.
+
+### Regular Code Reviews and Revisions
+
+Periodically review and update these guidelines to ensure they stay relevant as the project evolves.
+
+### Tailwind CSS Safelist Enhancement
+
+- Add a safelist of Tailwind CSS color classes in `tailwind.config.js` to prevent tree-shaking from removing dynamically applied color styles.
+- Alert-specific classes (`alert-error`, `alert-success`, `alert-warning`, `alert-info`) should be included in the safelist to ensure consistent styling.
+- This change prevents visual breakage caused by missing CSS for dynamically generated class names.
+
+### Recommendations for Documentation Updates
+
+- Update `README.md` or relevant user-facing documentation to describe the new Alert component and its usage within toasts.
+- Document the need for safelisting dynamic Tailwind CSS classes to avoid styling issues.
+- Include examples of how to use the ToastProvider and Alert components together for consistent UI feedback.
+- Note the improved toast stacking behavior and how it affects UI layout.
+
+These guidelines help maintain UI consistency and prevent common styling pitfalls related to dynamic class usage in Tailwind CSS.
+
+### Lessons Learned (Project-wide)
+
+- Clearly define requirements for expected behaviors.
+- Always consult official documentation and leverage built-in framework features.
+- Separate component responsibilities to improve code organization and reusability.
+- Emphasize iterative improvement and continuous information gathering based on feedback, leveraging the distinction between PLAN MODE and ACT MODE for iterative refinement.
+- Prioritize clear and accurate naming conventions, and refine names as code evolves.
+- Avoid prop drilling by using the Context API, but be mindful of the impact of context changes on dependent components.
+- During refactoring, promptly remove all unused code (props, state, functions, imports) to maintain code clarity.
+- Document lessons learned to inform future development and provide reference for similar challenges.

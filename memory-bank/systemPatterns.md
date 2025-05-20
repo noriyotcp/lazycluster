@@ -131,6 +131,47 @@ flowchart TD
 - **Styling Consistency:** All UI uses daisyUI/Tailwind utility classes, following Refactoring UI best practices.
 - **Documentation:** All significant changes and patterns are documented in `/docs` and memory-bank files.
 
+---
+
+## React Components
+
+### Avoid Using `React.FC`
+
+When defining React functional components, avoid using `React.FC`. Instead, explicitly type the props and return type.
+
+**Why?**
+
+- `React.FC` implicitly includes `children`, which may not always be desired.
+- It can interfere with `defaultProps` and other static properties.
+- It's less explicit and can be less readable than typing props directly.
+
+**Instead:**
+
+```typescript
+interface MyComponentProps {
+  name: string;
+}
+
+const MyComponent = ({ name }: MyComponentProps): JSX.Element => {
+  return <div>Hello, {name}!</div>;
+};
+```
+
+**Reference:**
+
+- [TypeScript + React: Why I don't use React.FC](https://fettblog.eu/typescript-react-why-i-dont-use-react-fc/)
+
+**Note:** In this project, define functional components without using React.FC to ensure explicit prop definitions and to avoid unintended inclusion of the children prop.
+
+## Toast and Alert Components Update
+
+- The ToastProvider and Toast components have been restructured to improve compatibility with daisyUI's toast stacking behavior.
+- ToastContainer now wraps toasts in a container div with appropriate daisyUI classes to ensure proper stacking.
+- The Toast component returns only the content without an extra wrapper div, allowing the container to manage stacking.
+- An Alert component was extracted to provide a reusable alert UI, which is used within ToastProvider to display error messages and notifications.
+- The ToastProvider injects an `onClose` prop into Alert components to allow for controlled dismissal of toasts.
+- TabItem component now uses the Alert component for displaying toast messages on tab close failures.
+
 ## References
 
 - `.clinerules/daisyui.md` — daisyUI usage rules
