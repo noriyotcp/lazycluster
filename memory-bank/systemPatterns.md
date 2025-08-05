@@ -129,7 +129,7 @@ flowchart TD
 - **Maintainability:** Clear separation of UI, state, and background logic. All major decisions are documented in ADRs.
 - **Accessibility:** Keyboard navigation and focus management are first-class concerns.
 - **Styling Consistency:** All UI uses daisyUI/Tailwind utility classes, following Refactoring UI best practices.
-- **Documentation:** All significant changes and patterns are documented in `/docs` and memory-bank files.
+- **Documentation:** All significant changes and patterns are documented in `/ai-docs` and memory-bank files.
 
 ---
 

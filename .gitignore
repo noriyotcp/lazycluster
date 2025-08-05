@@ -36,4 +36,5 @@ storageState.json
 # Docs for AI, ignore these files for now.
 .clinerules/
 .clineignore
-docs/
+ai-docs/
+memory-bank/

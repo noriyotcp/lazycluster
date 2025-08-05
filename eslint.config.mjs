@@ -6,7 +6,7 @@ import pluginReact from 'eslint-plugin-react';
 import autoImports from './.wxt/eslint-auto-imports.mjs';
 
 export default defineConfig([
-  globalIgnores(['node_modules/*', '.output/*', 'docs/*', '.wxt/*']),
+  globalIgnores(['node_modules/*', '.output/*', 'ai-docs/*', '.wxt/*']),
   autoImports,
   { files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'] },
   pluginJs.configs.recommended,
