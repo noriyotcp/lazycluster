@@ -15,6 +15,7 @@ async function globalSetup(config: FullConfig) {
   const userDataDir = tmp.dirSync().name;
   const { storageState } = config.projects[0].use;
   const context = await chromium.launchPersistentContext(userDataDir, {
+    channel: 'chromium',
     args: ['--headless=new', `--disable-extensions-except=${pathToExtension}`, `--load-extension=${pathToExtension}`],
   });
   await context.storageState({ path: storageState as string });
