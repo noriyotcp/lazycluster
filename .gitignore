@@ -38,3 +38,20 @@ storageState.json
 .clineignore
 ai-docs/
 memory-bank/
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+.env.*
+
+# Private keys and certificates
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Tool versions
+.tool-versions
