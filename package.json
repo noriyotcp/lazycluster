@@ -1,6 +1,6 @@
 {
   "name": "lazycluster",
-  "description": "manifest.json description",
+  "description": "A Chrome extension for enhanced tab and window management",
   "private": true,
   "version": "0.0.0",
   "type": "module",
