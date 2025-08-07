@@ -1,15 +1,4 @@
 {
-  "cookies": [
-    {
-      "name": "NID",
-      "value": "523=erzwScxfdWYtSMpYJBn-PFpYZw1XDIJvvTBjcENRRtaaBpyKbFpvNmYQl6BAvw2UWtdaWCdiWOo6rn1MitCczmkeePkpxt67LN9utwXmR6cS_U-q2vcoIF6EEBCxVuxVylEEV4tQ0bsKDjo8LUrySChaLvnZ2P1MvdhOLtOG1aHHVCobBgPJIOd9Qb0dgfLTqw",
-      "domain": ".google.com",
-      "path": "/",
-      "expires": 1759693234.226815,
-      "httpOnly": true,
-      "secure": true,
-      "sameSite": "None"
-    }
-  ],
+  "cookies": [],
   "origins": []
 }
