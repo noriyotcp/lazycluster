@@ -6,9 +6,6 @@ export default defineConfig({
   fullyParallel: true,
   reporter: 'html',
   globalSetup: fileURLToPath(new URL('./global-setup', import.meta.url)),
-  use: {
-    headless: true, // Set headless mode to true by default
-  },
   projects: [
     {
       name: 'chromium',
@@ -16,7 +13,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         channel: 'chromium',
         launchOptions: {
-          args: [],
+          args: ['--headless=new'],
         },
         storageState: 'storageState.json',
       },

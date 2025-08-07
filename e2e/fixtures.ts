@@ -20,7 +20,7 @@ export const test = base.extend<{
     }
     const context = await chromium.launchPersistentContext(userDataDir, {
       headless: true,
-      args: [`--disable-extensions-except=${pathToExtension}`, `--load-extension=${pathToExtension}`],
+      args: ['--headless=new', `--disable-extensions-except=${pathToExtension}`, `--load-extension=${pathToExtension}`],
     });
     await use(context);
     await context.close();
