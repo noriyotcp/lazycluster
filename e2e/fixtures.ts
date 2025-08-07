@@ -30,7 +30,7 @@ export const test = base.extend<{
     await context.close();
   },
   extensionId: async ({ context }, use) => {
-    const background = context.serviceWorkers()[0] ?? (await context.waitForEvent('serviceworker')); // use serviceworker event
+    const background = context.serviceWorkers()[0] ?? (await context.waitForEvent('serviceworker', { timeout: 60000 })); // use serviceworker event
     if (!background || !background.url()) {
       throw new Error('Background page or URL not available');
     }
