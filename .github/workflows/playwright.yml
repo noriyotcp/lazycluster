@@ -17,10 +17,23 @@ jobs:
         run: npm ci
       - name: Build Chrome Extension
         run: npm run build
+      - name: List chrome-mv3 output directory
+        run: |
+          if [ -d .output/chrome-mv3 ]; then
+            echo ".output/chrome-mv3 exists!"
+            ls -l .output/chrome-mv3
+          else
+            echo ".output/chrome-mv3 does not exist!"
+          fi
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Run Playwright tests
         run: npx playwright test
+      - name: Upload chrome-mv3 directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrome-mv3
+          path: .output/chrome-mv3
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
