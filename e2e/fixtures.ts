@@ -19,8 +19,12 @@ export const test = base.extend<{
       fs.rmSync(userDataDir, { recursive: true, force: true });
     }
     const context = await chromium.launchPersistentContext(userDataDir, {
-      channel: 'chromium',
-      args: ['--headless=new', `--disable-extensions-except=${pathToExtension}`, `--load-extension=${pathToExtension}`],
+      headless: process.env.HEADLESS !== 'false',
+      args: [
+        process.env.HEADLESS !== 'false' ? '--headless=new' : '',
+        `--disable-extensions-except=${pathToExtension}`,
+        `--load-extension=${pathToExtension}`,
+      ],
     });
     // Add init script for extension initialization
     await context.addInitScript(() => {

@@ -13,7 +13,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         channel: 'chromium',
         launchOptions: {
-          args: ['--headless=new'],
+          args: [process.env.HEADLESS !== 'false' ? '--headless=new' : ''],
         },
         storageState: 'storageState.json',
       },
