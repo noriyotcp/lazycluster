@@ -22,14 +22,20 @@ export const test = base.extend<{
       headless: true,
       args: ['--headless=new', `--disable-extensions-except=${pathToExtension}`, `--load-extension=${pathToExtension}`],
     });
+    // Add init script for extension initialization
+    await context.addInitScript(() => {
+      window.localStorage.setItem('com.example.lang', 'ja');
+    });
     await use(context);
     await context.close();
   },
   extensionId: async ({ context }, use) => {
-    let [background] = await context.serviceWorkers();
-    if (!background) {
-      background = await context.waitForEvent('serviceworker');
+    // e2e/fixtures.ts
+    const background = await context.waitForEvent('serviceworker', { timeout: 90000 }); // use serviceworker event
+    if (!background || !background.url()) {
+      throw new Error('Background page or URL not available');
     }
+    console.log('Background serviceworker URL:', background.url());
     const extensionId = background.url().split('/')[2];
     await use(extensionId);
   },
