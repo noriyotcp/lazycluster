@@ -55,3 +55,8 @@ memory-bank/
 
 # Tool versions
 .tool-versions
+
+# Claude Code
+CLAUDE.md
+.claude
+
