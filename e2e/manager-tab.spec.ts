@@ -65,4 +65,114 @@ test.describe('Manager Tab E2E Tests', () => {
     await expect(searchBar).toBeFocused();
     await expect(searchBar).toHaveValue('/');
   });
+
+  // Test for window group keyboard sequence navigation
+  test('should focus window group with w+number sequence', async ({ page, extensionId }) => {
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    
+    // Wait for window groups to load
+    await page.locator('[data-window-group-number]').first().waitFor();
+    
+    // Get the actual window group number of the first group
+    const firstGroupNumber = await page.locator('[data-window-group-number]')
+      .first()
+      .getAttribute('data-window-group-number');
+    
+    // Press w then the actual number of the first window group
+    await page.keyboard.press('w');
+    await page.keyboard.press(firstGroupNumber || '1');
+    
+    // Verify focus moved to first tab in first window group
+    const focusedElement = await page.evaluate(() => {
+      return document.activeElement?.closest('[data-window-group-number]')
+        ?.getAttribute('data-window-group-number');
+    });
+    
+    expect(focusedElement).toBe(firstGroupNumber);
+  });
+
+  test('should timeout sequence after 1 second', async ({ page, extensionId }) => {
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    
+    // Wait for window groups to load
+    await page.locator('[data-window-group-number]').first().waitFor();
+    
+    await page.keyboard.press('w');
+    await page.waitForTimeout(1100); // Wait for timeout
+    await page.keyboard.press('1');
+    
+    // Focus should not change
+    const focusedElement = await page.evaluate(() => {
+      return document.activeElement?.tagName;
+    });
+    
+    expect(focusedElement).not.toBe('LI');
+  });
+
+  test('should not activate when input is focused', async ({ page, extensionId }) => {
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    
+    // Focus search bar
+    await page.locator('#search-bar').focus();
+    
+    // Try w sequence
+    await page.keyboard.press('w');
+    await page.keyboard.press('1');
+    
+    // Search bar should still have focus and contain 'w1'
+    const focusedId = await page.evaluate(() => document.activeElement?.id);
+    expect(focusedId).toBe('search-bar');
+    
+    const searchBarValue = await page.locator('#search-bar').inputValue();
+    expect(searchBarValue).toBe('w1');
+  });
+
+  test('should show visual feedback when sequence is active', async ({ page, extensionId }) => {
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    
+    // Wait for window groups to load
+    await page.locator('[data-window-group-number]').first().waitFor();
+    
+    // Press w to activate sequence
+    await page.keyboard.press('w');
+    
+    // Check if visual feedback is shown
+    const badge = page.locator('.badge.badge-primary.badge-lg');
+    await expect(badge).toBeVisible();
+    await expect(badge).toContainText('Press 0-9 to jump to Window Group');
+    
+    // Press 1 to complete sequence
+    await page.keyboard.press('1');
+    
+    // Badge should disappear
+    await expect(badge).not.toBeVisible();
+  });
+
+  test('should focus current window with w+0', async ({ page, extensionId }) => {
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    
+    // Wait for window groups to load
+    await page.locator('[data-window-group-number]').first().waitFor();
+    
+    // Get current window ID
+    const currentWindowId = await page.evaluate(() => {
+      // Find the active window element
+      const activeWindow = document.querySelector('.collapse-title .text-green-600')?.closest('[data-window-id]');
+      return activeWindow?.getAttribute('data-window-id');
+    });
+    
+    if (currentWindowId) {
+      // Press w then 0
+      await page.keyboard.press('w');
+      await page.keyboard.press('0');
+      
+      // Verify focus moved to current window
+      const focusedWindowId = await page.evaluate(() => {
+        return document.activeElement?.closest('[data-window-id]')
+          ?.getAttribute('data-window-id');
+      });
+      
+      expect(focusedWindowId).toBe(currentWindowId);
+    }
+  });
 });
