@@ -115,8 +115,13 @@ const Manager = () => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Check if input element is focused
       const activeElement = document.activeElement;
+      const isCheckbox = activeElement?.tagName === 'INPUT' && 
+                         (activeElement as HTMLInputElement).type === 'checkbox';
+      
+      // Allow keyboard shortcuts for checkboxes, but not for other inputs
       if (
         activeElement &&
+        !isCheckbox &&  // Checkboxes are excluded to allow keyboard shortcuts
         (activeElement.tagName === 'INPUT' ||
           activeElement.tagName === 'TEXTAREA' ||
           activeElement.tagName === 'SELECT' ||
