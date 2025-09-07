@@ -78,33 +78,14 @@ const Manager = () => {
           collapseInput.checked = true;
         }
 
-        // Focus first tab item
+        // Focus first tab item (always exists due to WindowGroupList filtering)
         const firstTab = targetElement.querySelector('.collapse-content li[tabindex="0"]') as HTMLElement;
-
-        if (firstTab) {
-          firstTab.focus();
-          // Smooth scroll into view
-          firstTab.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          });
-
-          // Light highlight animation (optional)
-          firstTab.classList.add('ring-2', 'ring-primary');
-          setTimeout(() => {
-            firstTab.classList.remove('ring-2', 'ring-primary');
-          }, 1000);
-        } else {
-          // Focus collapse title if no tabs
-          const collapseTitle = targetElement.querySelector('.collapse-title') as HTMLElement;
-          if (collapseTitle) {
-            collapseTitle.focus();
-            collapseTitle.scrollIntoView({
-              behavior: 'smooth',
-              block: 'center',
-            });
-          }
-        }
+        firstTab.focus();
+        // Smooth scroll into view
+        firstTab.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
       }
     },
     [activeWindowId]
