@@ -205,19 +205,81 @@ test.describe('Manager Tab E2E Tests', () => {
     expect(focusedElement).not.toBe('LI');
   });
 
-  test('should activate sequence when checkbox is focused', async ({ page, extensionId }) => {
+  test('should navigate to window group 1 when checkbox focused (multiple windows)', async ({ page, extensionId }) => {
+    // First, open the manager tab to establish extension context
     await page.goto(`chrome-extension://${extensionId}/manager.html`);
 
-    // Wait for window groups to load
-    await page.locator('[data-window-group-number]').first().waitFor();
+    // Create a new window and store its ID for cleanup
+    const newWindowId = await page.evaluate(() => {
+      return new Promise<number>(resolve => {
+        chrome.windows.create(
+          {
+            url: 'https://example.com',
+            type: 'normal',
+          },
+          window => {
+            if (window && window.id) {
+              resolve(window.id);
+            }
+          }
+        );
+      });
+    });
 
-    // Get the actual first window group number
-    const firstGroupNumber = await page
-      .locator('[data-window-group-number]')
-      .first()
-      .getAttribute('data-window-group-number');
+    try {
+      // Wait for the new window to be recognized
+      await page.waitForTimeout(2000);
 
-    // Focus on the first collapse checkbox
+      // Reload the manager tab to get updated window list
+      await page.reload();
+
+      // Verify that 2 window groups exist
+      await page.locator('[data-window-group-number="1"]').waitFor({ timeout: 5000 });
+      const windowGroupCount = await page.locator('[data-window-group-number]').count();
+      expect(windowGroupCount).toBe(2);
+
+      // Focus on the first collapse checkbox
+      const collapseCheckbox = page.locator('input[id^="window-group-collapse-"]').first();
+      await collapseCheckbox.focus();
+
+      // Verify checkbox is focused
+      const checkboxId = await collapseCheckbox.getAttribute('id');
+      const focusedId = await page.evaluate(() => document.activeElement?.id);
+      expect(focusedId).toBe(checkboxId);
+
+      // Press w to activate sequence
+      await page.keyboard.press('w');
+
+      // Check if visual feedback is shown
+      const badge = page.locator('.badge.badge-primary.badge-lg');
+      await expect(badge).toBeVisible();
+
+      // Press 1 to navigate to window group 1
+      await page.keyboard.press('1');
+
+      // Verify navigation occurred to window group 1 (second window)
+      const focusedElement = await page.evaluate(() => {
+        return document.activeElement?.closest('[data-window-group-number]')?.getAttribute('data-window-group-number');
+      });
+      expect(focusedElement).toBe('1');
+    } finally {
+      // Cleanup: close only the window we created
+      await page.evaluate(windowId => {
+        chrome.windows.remove(windowId);
+      }, newWindowId);
+    }
+  });
+
+  test('should not navigate when pressing 1 with single window', async ({ page, extensionId }) => {
+    // Open the manager tab (single window environment)
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+
+    // Wait and verify only 1 window group exists
+    await page.waitForTimeout(500);
+    const windowGroupCount = await page.locator('[data-window-group-number]').count();
+    expect(windowGroupCount).toBe(1);
+
+    // Focus on the collapse checkbox
     const collapseCheckbox = page.locator('input[id^="window-group-collapse-"]').first();
     await collapseCheckbox.focus();
 
@@ -226,30 +288,22 @@ test.describe('Manager Tab E2E Tests', () => {
     const focusedId = await page.evaluate(() => document.activeElement?.id);
     expect(focusedId).toBe(checkboxId);
 
-    // Press w to activate sequence (should work even with checkbox focused)
+    // Press w to activate sequence
     await page.keyboard.press('w');
 
     // Check if visual feedback is shown
     const badge = page.locator('.badge.badge-primary.badge-lg');
     await expect(badge).toBeVisible();
 
-    // Complete sequence by pressing 1 (which selects window group with number 1)
+    // Press 1 to attempt navigation
     await page.keyboard.press('1');
 
-    // Verify navigation occurred to window group 1
-    // If there's only one window group (numbered 0), it won't navigate
-    const windowGroupCount = await page.locator('[data-window-group-number]').count();
-    const focusedElement = await page.evaluate(() => {
-      return document.activeElement?.closest('[data-window-group-number]')?.getAttribute('data-window-group-number');
-    });
+    // Verify checkbox still has focus (no navigation occurred)
+    const stillFocusedId = await page.evaluate(() => document.activeElement?.id);
+    expect(stillFocusedId).toBe(checkboxId);
 
-    if (windowGroupCount > 1) {
-      // Multiple windows: pressing 1 should go to second window (index 1)
-      expect(focusedElement).toBe('1');
-    } else {
-      // Single window: pressing 1 with only window 0 available, focus remains
-      expect(focusedElement).toBe('0');
-    }
+    // Badge should disappear
+    await expect(badge).not.toBeVisible();
   });
 
   test('should allow w sequence on tab checkbox focus', async ({ page, extensionId }) => {
