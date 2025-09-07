@@ -235,7 +235,9 @@ const Manager = () => {
         <WindowGroupList filteredTabGroups={filteredTabGroups} activeWindowId={activeWindowId} />
       </div>
       {sequenceActive && (
-        <div className="fixed bottom-4 right-4 badge badge-primary badge-lg">Press 0-9 to jump to Window Group</div>
+        <div className="fixed bottom-4 right-4 badge badge-soft badge-primary badge-jump-to-window-group">
+          Press 0-9 to jump to Window Group
+        </div>
       )}
     </TabFocusProvider>
   );

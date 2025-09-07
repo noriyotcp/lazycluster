@@ -99,23 +99,23 @@ test.describe('Manager Tab E2E Tests', () => {
 
     // Press w to start sequence
     await page.keyboard.press('w');
-    
+
     // Verify badge is visible
-    const badge = page.locator('.badge.badge-primary.badge-lg');
+    const badge = page.locator('.badge-jump-to-window-group');
     await expect(badge).toBeVisible();
-    
+
     // Wait for 2 seconds (still within timeout)
     await page.waitForTimeout(2000);
-    
+
     // Badge should still be visible
     await expect(badge).toBeVisible();
-    
+
     // Wait for timeout to complete (additional 1.5 seconds = total 3.5 seconds)
     await page.waitForTimeout(1500);
-    
+
     // Badge should now be hidden (sequence timed out)
     await expect(badge).not.toBeVisible();
-    
+
     // Press 1 after timeout - should not navigate
     await page.keyboard.press('1');
 
@@ -155,7 +155,7 @@ test.describe('Manager Tab E2E Tests', () => {
     await page.keyboard.press('w');
 
     // Check if visual feedback is shown
-    const badge = page.locator('.badge.badge-primary.badge-lg');
+    const badge = page.locator('.badge-jump-to-window-group');
     await expect(badge).toBeVisible();
     await expect(badge).toContainText('Press 0-9 to jump to Window Group');
 
@@ -203,7 +203,7 @@ test.describe('Manager Tab E2E Tests', () => {
     await page.keyboard.press('w');
 
     // Check if visual feedback is shown
-    const badge = page.locator('.badge.badge-primary.badge-lg');
+    const badge = page.locator('.badge-jump-to-window-group');
     await expect(badge).toBeVisible();
 
     // Press ESC to cancel sequence
@@ -269,7 +269,7 @@ test.describe('Manager Tab E2E Tests', () => {
       await page.keyboard.press('w');
 
       // Check if visual feedback is shown
-      const badge = page.locator('.badge.badge-primary.badge-lg');
+      const badge = page.locator('.badge-jump-to-window-group');
       await expect(badge).toBeVisible();
 
       // Press 1 to navigate to window group 1
@@ -283,8 +283,8 @@ test.describe('Manager Tab E2E Tests', () => {
     } finally {
       // Cleanup: close only the window we created with proper wait
       try {
-        await page.evaluate((windowId) => {
-          return new Promise<void>((resolve) => {
+        await page.evaluate(windowId => {
+          return new Promise<void>(resolve => {
             chrome.windows.remove(windowId, () => {
               // Give Chrome time to fully clean up
               setTimeout(resolve, 100);
@@ -295,7 +295,7 @@ test.describe('Manager Tab E2E Tests', () => {
         // Window might already be closed, which is fine
         console.log('Cleanup error (expected):', e);
       }
-      
+
       // Additional wait to ensure window is fully closed
       await page.waitForTimeout(200);
     }
@@ -323,7 +323,7 @@ test.describe('Manager Tab E2E Tests', () => {
     await page.keyboard.press('w');
 
     // Check if visual feedback is shown
-    const badge = page.locator('.badge.badge-primary.badge-lg');
+    const badge = page.locator('.badge-jump-to-window-group');
     await expect(badge).toBeVisible();
 
     // Press 1 to attempt navigation
@@ -356,7 +356,7 @@ test.describe('Manager Tab E2E Tests', () => {
     await page.keyboard.press('w');
 
     // Check if visual feedback is shown
-    const badge = page.locator('.badge.badge-primary.badge-lg');
+    const badge = page.locator('.badge-jump-to-window-group');
     await expect(badge).toBeVisible();
 
     // Press 2 to navigate to second window group
