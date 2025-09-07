@@ -7,7 +7,16 @@ A Chrome extension for enhanced tab and window management, inspired by the origi
 - **Effortless Bulk Tab Management:** Quickly select and close multiple tabs across all windows or within specific windows, saving time and reducing clutter.
   - Global Bulk Close: Close tabs from any window with a single action.
   - Window-Specific Bulk Close: Target tabs within a particular window for closing.
-- **Intuitive Keyboard Navigation:** Navigate and select tabs efficiently using familiar keyboard shortcuts (j, k, gg, G, spacebar) for a smooth workflow.
+- **Intuitive Keyboard Navigation:** Navigate and select tabs efficiently using familiar keyboard shortcuts for a smooth workflow:
+  - `j/k`: Navigate up/down through tabs
+  - `gg/G`: Jump to first/last tab (double press `g` for first, `Shift+g` for last)
+  - `Space`: Toggle tab selection
+  - `w + [0-9]`: Quick jump to Window Groups
+    - `w` then `1-9`: Jump to specific Window Group
+    - `w` then `0`: Jump to current window
+    - `ESC`: Cancel the sequence
+    - Sequence times out after 3 seconds
+  - `/`: Focus search bar
 - **Quick Domain Access:** Easily see and access a tab's domain by hovering, even when the title is long, providing quick context and navigation.
 - **Streamlined Selection:** Simple checkboxes allow for easy individual or window-wide tab selection for bulk actions.
 
