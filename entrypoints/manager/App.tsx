@@ -9,6 +9,9 @@ import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useBackgroundConnection } from '../../src/hooks/useBackgroundConnection'; // Import the hook
 import './style.css';
 
+// Constants for keyboard navigation
+const WINDOW_GROUP_SEQUENCE_TIMEOUT_MS = 3000; // Time to wait for second key in w+number sequence
+
 // Define a more specific message type based on BaseMessage from the hook
 interface BackgroundMessage {
   type: 'UPDATE_TABS' | 'BACKGROUND_INITIALIZED' | 'REQUEST_INITIAL_DATA'; // Known types
@@ -66,7 +69,7 @@ const Manager = () => {
         targetElement = document.querySelector(`[data-window-id="${activeWindowId}"]`) as HTMLElement;
       } else {
         // 1-9 handling - use the digit directly as the window group number
-        const targetIndex = parseInt(digit);
+        const targetIndex = parseInt(digit, 10);
         targetElement = document.querySelector(`[data-window-group-number="${targetIndex}"]`) as HTMLElement;
       }
 
@@ -147,7 +150,7 @@ const Manager = () => {
         }
         sequenceTimeoutRef.current = setTimeout(() => {
           setSequenceActive(false);
-        }, 3000);
+        }, WINDOW_GROUP_SEQUENCE_TIMEOUT_MS);
         return;
       }
 

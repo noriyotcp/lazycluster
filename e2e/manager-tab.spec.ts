@@ -1,5 +1,8 @@
 import { test, expect } from './fixtures';
 
+// Test constants
+const CHROME_CLEANUP_DELAY_MS = 100; // Chrome needs time to fully clean up window resources
+
 test.describe('Manager Tab E2E Tests', () => {
   test('manager tab should open and display window groups', async ({ page, extensionId }) => {
     // Open the manager tab
@@ -282,8 +285,8 @@ test.describe('Manager Tab E2E Tests', () => {
         await page.evaluate(windowId => {
           return new Promise<void>(resolve => {
             chrome.windows.remove(windowId, () => {
-              // Give Chrome time to fully clean up
-              setTimeout(resolve, 100);
+              // Give Chrome time to fully clean up window resources
+              setTimeout(resolve, CHROME_CLEANUP_DELAY_MS);
             });
           });
         }, newWindowId);
