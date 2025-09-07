@@ -33,5 +33,19 @@ export default defineConfig([
         ],
       },
     },
+    {
+      files: ['**/*.{ts,tsx}'], // Apply to TypeScript files
+      rules: {
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          {
+            argsIgnorePattern: '^_',
+            varsIgnorePattern: '^_',
+            caughtErrorsIgnorePattern: '^_',
+            destructuredArrayIgnorePattern: '^_',
+          },
+        ],
+      },
+    },
   ],
 ]);
