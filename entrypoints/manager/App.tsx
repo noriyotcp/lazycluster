@@ -27,7 +27,7 @@ const Manager = () => {
   const [sequenceActive, setSequenceActive] = useState<boolean>(false);
   const searchBarRef = useRef<HTMLInputElement>(null);
   const sequenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const sequenceActiveRef = useRef<boolean>(false); // Track latest sequenceActive value
+  const sequenceActiveRef = useRef<boolean>(false); // Ref to access latest sequenceActive value in event handlers to avoid stale closure issues
 
   // Define the message handler using useCallback to maintain reference stability
   const handleBackgroundMessage = useCallback(
