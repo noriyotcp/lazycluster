@@ -21,10 +21,6 @@ test.describe('Manager Tab E2E Tests', () => {
       const tabCount = await windowGroupList.locator('.collapse').nth(i).locator(`.group\\/tabitem`).count();
       expect(tabCount).toBeGreaterThan(0);
 
-      // Verify that the tab title is correct (This requires access to the actual tab titles, which might be tricky)
-      // const tabTitle = await windowGroupList.locator('.collapse').nth(i).locator('.tab-item a').first().textContent();
-      // expect(tabTitle).toBe('Expected Tab Title'); // Replace with actual tab title
-
       // Click the window group to collapse it
       const collapseCheckbox = windowGroupList
         .locator('.collapse')
