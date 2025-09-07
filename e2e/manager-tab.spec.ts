@@ -282,17 +282,19 @@ test.describe('Manager Tab E2E Tests', () => {
     } finally {
       // Cleanup: close only the window we created with proper wait
       try {
-        await page.evaluate(({ windowId, cleanupDelay }: { windowId: number; cleanupDelay: number }) => {
-          return new Promise<void>(resolve => {
-            chrome.windows.remove(windowId, () => {
-              // Give Chrome time to fully clean up window resources
-              setTimeout(resolve, cleanupDelay);
+        await page.evaluate(
+          ({ windowId, cleanupDelay }: { windowId: number; cleanupDelay: number }) => {
+            return new Promise<void>(resolve => {
+              chrome.windows.remove(windowId, () => {
+                // Give Chrome time to fully clean up window resources
+                setTimeout(resolve, cleanupDelay);
+              });
             });
-          });
-        }, { windowId: newWindowId, cleanupDelay: CHROME_CLEANUP_DELAY_MS });
-      } catch (e) {
-        // Window might already be closed, which is fine
-        console.log('Cleanup error (expected):', e);
+          },
+          { windowId: newWindowId, cleanupDelay: CHROME_CLEANUP_DELAY_MS }
+        );
+      } catch (_e) {
+        // (expected error, no action needed)
       }
     }
   });

@@ -144,7 +144,6 @@ const Manager = () => {
         event.preventDefault();
         setSequenceActive(true);
 
-        // Set timeout (1 second)
         if (sequenceTimeoutRef.current) {
           clearTimeout(sequenceTimeoutRef.current);
         }
