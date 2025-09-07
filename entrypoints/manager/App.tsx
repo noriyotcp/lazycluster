@@ -24,6 +24,7 @@ const Manager = () => {
   const [sequenceActive, setSequenceActive] = useState<boolean>(false);
   const searchBarRef = useRef<HTMLInputElement>(null);
   const sequenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const sequenceActiveRef = useRef<boolean>(false); // Track latest sequenceActive value
 
   // Define the message handler using useCallback to maintain reference stability
   const handleBackgroundMessage = useCallback(
@@ -38,6 +39,11 @@ const Manager = () => {
     },
     [updateTabGroups]
   ); // Dependency array includes updateTabGroups
+
+  // Sync sequenceActive with its ref
+  useEffect(() => {
+    sequenceActiveRef.current = sequenceActive;
+  }, [sequenceActive]);
 
   // Use the custom hook to manage the connection
   const { sendMessage, isConnected } = useBackgroundConnection<BackgroundMessage>('manager', handleBackgroundMessage);
@@ -104,24 +110,17 @@ const Manager = () => {
     [activeWindowId]
   );
 
-  // Effect for getting current window ID and setting up keydown listener
-  useEffect(() => {
-    chrome.windows.getCurrent().then(window => {
-      if (window.id !== undefined) {
-        setActiveWindowId(window.id);
-      }
-    });
-
-    const handleKeyDown = (event: KeyboardEvent) => {
+  // Define handleKeyDown with useCallback to maintain stable reference
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
       // Check if input element is focused
       const activeElement = document.activeElement;
-      const isCheckbox = activeElement?.tagName === 'INPUT' && 
-                         (activeElement as HTMLInputElement).type === 'checkbox';
-      
+      const isCheckbox = activeElement?.tagName === 'INPUT' && (activeElement as HTMLInputElement).type === 'checkbox';
+
       // Allow keyboard shortcuts for checkboxes, but not for other inputs
       if (
         activeElement &&
-        !isCheckbox &&  // Checkboxes are excluded to allow keyboard shortcuts
+        !isCheckbox && // Checkboxes are excluded to allow keyboard shortcuts
         (activeElement.tagName === 'INPUT' ||
           activeElement.tagName === 'TEXTAREA' ||
           activeElement.tagName === 'SELECT' ||
@@ -146,7 +145,7 @@ const Manager = () => {
       }
 
       // Handle ESC key to cancel sequence
-      if (event.key === 'Escape' && sequenceActive) {
+      if (event.key === 'Escape' && sequenceActiveRef.current) {
         event.preventDefault();
         setSequenceActive(false);
         if (sequenceTimeoutRef.current) {
@@ -157,7 +156,7 @@ const Manager = () => {
       }
 
       // Start sequence with 'w' key
-      if (event.key === 'w' && !sequenceActive) {
+      if (event.key === 'w' && !sequenceActiveRef.current) {
         event.preventDefault();
         setSequenceActive(true);
 
@@ -167,12 +166,12 @@ const Manager = () => {
         }
         sequenceTimeoutRef.current = setTimeout(() => {
           setSequenceActive(false);
-        }, 1000);
+        }, 3000);
         return;
       }
 
       // Handle number keys when sequence is active
-      if (sequenceActive && /^[0-9]$/.test(event.key)) {
+      if (sequenceActiveRef.current && /^[0-9]$/.test(event.key)) {
         event.preventDefault();
         handleWindowGroupFocus(event.key);
 
@@ -183,7 +182,17 @@ const Manager = () => {
           sequenceTimeoutRef.current = null;
         }
       }
-    };
+    },
+    [handleWindowGroupFocus]
+  ); // Include handleWindowGroupFocus as dependency
+
+  // Effect for getting current window ID and setting up keydown listener
+  useEffect(() => {
+    chrome.windows.getCurrent().then(window => {
+      if (window.id !== undefined) {
+        setActiveWindowId(window.id);
+      }
+    });
 
     document.addEventListener('keydown', handleKeyDown);
 
@@ -194,7 +203,7 @@ const Manager = () => {
         clearTimeout(sequenceTimeoutRef.current);
       }
     };
-  }, [sequenceActive, handleWindowGroupFocus]); // Dependencies
+  }, [handleKeyDown]); // Depend only on handleKeyDown
 
   const handleSearchQueryChange = useCallback(
     (query: string) => {

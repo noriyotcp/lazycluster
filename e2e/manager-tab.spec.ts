@@ -91,17 +91,35 @@ test.describe('Manager Tab E2E Tests', () => {
     expect(focusedElement).toBe(firstGroupNumber);
   });
 
-  test('should timeout sequence after 1 second', async ({ page, extensionId }) => {
+  test('should timeout sequence after 3 seconds', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/manager.html`);
 
     // Wait for window groups to load
     await page.locator('[data-window-group-number]').first().waitFor();
 
+    // Press w to start sequence
     await page.keyboard.press('w');
-    await page.waitForTimeout(1100); // Wait for timeout
+    
+    // Verify badge is visible
+    const badge = page.locator('.badge.badge-primary.badge-lg');
+    await expect(badge).toBeVisible();
+    
+    // Wait for 2 seconds (still within timeout)
+    await page.waitForTimeout(2000);
+    
+    // Badge should still be visible
+    await expect(badge).toBeVisible();
+    
+    // Wait for timeout to complete (additional 1.5 seconds = total 3.5 seconds)
+    await page.waitForTimeout(1500);
+    
+    // Badge should now be hidden (sequence timed out)
+    await expect(badge).not.toBeVisible();
+    
+    // Press 1 after timeout - should not navigate
     await page.keyboard.press('1');
 
-    // Focus should not change
+    // Verify no navigation occurred (focus unchanged)
     const focusedElement = await page.evaluate(() => {
       return document.activeElement?.tagName;
     });
@@ -263,10 +281,23 @@ test.describe('Manager Tab E2E Tests', () => {
       });
       expect(focusedElement).toBe('1');
     } finally {
-      // Cleanup: close only the window we created
-      await page.evaluate(windowId => {
-        chrome.windows.remove(windowId);
-      }, newWindowId);
+      // Cleanup: close only the window we created with proper wait
+      try {
+        await page.evaluate((windowId) => {
+          return new Promise<void>((resolve) => {
+            chrome.windows.remove(windowId, () => {
+              // Give Chrome time to fully clean up
+              setTimeout(resolve, 100);
+            });
+          });
+        }, newWindowId);
+      } catch (e) {
+        // Window might already be closed, which is fine
+        console.log('Cleanup error (expected):', e);
+      }
+      
+      // Additional wait to ensure window is fully closed
+      await page.waitForTimeout(200);
     }
   });
 
