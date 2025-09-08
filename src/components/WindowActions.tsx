@@ -54,6 +54,11 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
     }
   };
 
+  // Calculate the number of selected tabs in this window
+  const selectedCountInWindow = visibleTabs.filter(
+    tab => tab.id !== undefined && selectedTabIds.includes(tab.id)
+  ).length;
+
   return (
     <>
       <ul className="list shadow-md">
@@ -80,7 +85,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
             <button
               className="btn btn-link btn-xs"
               onClick={handleCloseTabsInWindow}
-              disabled={selectedTabIds.length === 0}
+              disabled={selectedCountInWindow === 0}
             >
               Close Tabs
             </button>
