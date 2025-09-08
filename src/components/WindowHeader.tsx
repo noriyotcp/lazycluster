@@ -11,7 +11,7 @@ const WindowHeader = ({ windowId, activeWindowId }: WindowHeaderProps) => {
   const tabCount = useWindowTabCount(windowId);
   
   return (
-    <div className="window-header flex items-center gap-4">
+    <div className="flex items-center gap-4">
       <WindowTitle windowId={windowId} activeWindowId={activeWindowId} />
       <TabCountBadge count={tabCount} />
     </div>
