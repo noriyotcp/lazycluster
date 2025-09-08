@@ -1,6 +1,12 @@
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useToast } from '../../src/components/ToastProvider';
 import Alert from '../../src/components/Alert';
+import {
+  calculateSelectedCountInWindow,
+  shouldBulkSelectBeChecked,
+  extractTabIds,
+  shouldCloseTabsBeDisabled,
+} from '../utils/windowActions';
 
 interface WindowActionsProps {
   windowId: number;
@@ -17,7 +23,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
   };
 
   const handleBulkSelectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const visibleTabIds = visibleTabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
+    const visibleTabIds = extractTabIds(visibleTabs);
     if (e.target.checked) {
       addTabsToSelection(visibleTabIds);
     } else {
@@ -55,9 +61,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
   };
 
   // Calculate the number of selected tabs in this window
-  const selectedCountInWindow = visibleTabs.filter(
-    tab => tab.id !== undefined && selectedTabIds.includes(tab.id)
-  ).length;
+  const selectedCountInWindow = calculateSelectedCountInWindow(visibleTabs, selectedTabIds);
 
   return (
     <>
@@ -69,10 +73,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
               className="checkbox checkbox-xs"
               type="checkbox"
               onChange={handleBulkSelectChange}
-              checked={
-                visibleTabs.length > 0 &&
-                visibleTabs.every(tab => tab.id !== undefined && selectedTabIds.includes(tab.id))
-              }
+              checked={shouldBulkSelectBeChecked(visibleTabs, selectedTabIds)}
             />
           </div>
           <div className="list-grow">
@@ -85,7 +86,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
             <button
               className="btn btn-link btn-xs"
               onClick={handleCloseTabsInWindow}
-              disabled={selectedCountInWindow === 0}
+              disabled={shouldCloseTabsBeDisabled(visibleTabs, selectedTabIds)}
             >
               Close Tabs
             </button>
