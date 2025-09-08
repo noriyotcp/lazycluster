@@ -9,7 +9,7 @@ interface WindowHeaderProps {
 
 const WindowHeader = ({ windowId, activeWindowId }: WindowHeaderProps) => {
   const tabCount = useWindowTabCount(windowId);
-  
+
   return (
     <div className="flex items-center gap-4">
       <WindowTitle windowId={windowId} activeWindowId={activeWindowId} />
