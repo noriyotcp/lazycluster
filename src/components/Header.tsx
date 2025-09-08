@@ -4,6 +4,7 @@ import ThemeSwitcher from './ThemeSwitcher';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useToast } from '../../src/components/ToastProvider';
 import Alert from '../../src/components/Alert';
+import { useTotalTabCount } from '../hooks/useTotalTabCount';
 
 interface HeaderProps {
   searchQuery: string;
@@ -14,6 +15,7 @@ interface HeaderProps {
 const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps) => {
   const { selectedTabIds, clearSelection } = useTabSelectionContext();
   const { showToast } = useToast();
+  const totalTabCount = useTotalTabCount();
 
   const handleCloseSelectedTabs = async () => {
     try {
@@ -31,6 +33,7 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps)
       <span className="flex justify-between items-center gap-x-4">
         <SearchBar searchQuery={searchQuery} onSearchQueryChange={onSearchQueryChange} ref={searchBarRef} />
         <div className="flex items-center gap-x-4">
+          <div className="badge badge-outline badge-xs badge-primary">{totalTabCount}</div>
           <button className="btn btn-ghost" onClick={handleCloseSelectedTabs} disabled={selectedTabIds.length === 0}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
               <path

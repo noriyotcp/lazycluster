@@ -1,4 +1,6 @@
 import WindowTitle from './WindowTitle';
+import TabCountBadge from './TabCountBadge';
+import { useWindowTabCount } from '../hooks/useWindowTabCount';
 
 interface WindowHeaderProps {
   windowId: number;
@@ -6,9 +8,12 @@ interface WindowHeaderProps {
 }
 
 const WindowHeader = ({ windowId, activeWindowId }: WindowHeaderProps) => {
+  const tabCount = useWindowTabCount(windowId);
+  
   return (
-    <div className="window-header">
+    <div className="window-header flex items-center gap-4">
       <WindowTitle windowId={windowId} activeWindowId={activeWindowId} />
+      <TabCountBadge count={tabCount} />
     </div>
   );
 };
