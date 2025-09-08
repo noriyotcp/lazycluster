@@ -89,6 +89,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
             >
               Close Tabs
             </button>
+            {selectedCountInWindow > 0 && `(${selectedCountInWindow})`}
           </div>
         </li>
       </ul>
