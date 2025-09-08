@@ -4,7 +4,6 @@ import Alert from '../../src/components/Alert';
 import {
   calculateSelectedCountInWindow,
   shouldBulkSelectBeChecked,
-  extractTabIds,
   shouldCloseTabsBeDisabled,
 } from '../utils/windowActions';
 
@@ -12,6 +11,10 @@ interface WindowActionsProps {
   windowId: number;
   visibleTabs: chrome.tabs.Tab[];
 }
+
+const extractTabIds = (tabs: chrome.tabs.Tab[]): number[] => {
+  return tabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
+};
 
 // visibleTabs is used to determine the checked state of the bulk select checkbox
 const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {

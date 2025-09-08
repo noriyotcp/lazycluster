@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import {
   calculateSelectedCountInWindow,
   shouldBulkSelectBeChecked,
-  extractTabIds,
   filterTabIdsByWindow,
   shouldCloseTabsBeDisabled,
 } from './windowActions';
@@ -93,41 +92,6 @@ describe('windowActions utilities', () => {
       const selectedTabIds = [1]; // Only one of two selectable tabs is selected
 
       expect(shouldBulkSelectBeChecked(visibleTabs, selectedTabIds)).toBe(false);
-    });
-  });
-
-  describe('extractTabIds', () => {
-    it('extracts valid tab IDs', () => {
-      const tabs = [
-        { id: 1, windowId: 1 } as chrome.tabs.Tab,
-        { id: 2, windowId: 1 } as chrome.tabs.Tab,
-        { id: 3, windowId: 1 } as chrome.tabs.Tab,
-      ];
-
-      expect(extractTabIds(tabs)).toEqual([1, 2, 3]);
-    });
-
-    it('filters out undefined IDs', () => {
-      const tabs = [
-        { id: 1, windowId: 1 } as chrome.tabs.Tab,
-        { id: undefined, windowId: 1 } as chrome.tabs.Tab,
-        { id: 3, windowId: 1 } as chrome.tabs.Tab,
-      ];
-
-      expect(extractTabIds(tabs)).toEqual([1, 3]);
-    });
-
-    it('returns empty array for empty input', () => {
-      expect(extractTabIds([])).toEqual([]);
-    });
-
-    it('returns empty array when all IDs are undefined', () => {
-      const tabs = [
-        { id: undefined, windowId: 1 } as chrome.tabs.Tab,
-        { id: undefined, windowId: 1 } as chrome.tabs.Tab,
-      ];
-
-      expect(extractTabIds(tabs)).toEqual([]);
     });
   });
 

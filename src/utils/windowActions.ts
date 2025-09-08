@@ -18,13 +18,6 @@ export const shouldBulkSelectBeChecked = (visibleTabs: chrome.tabs.Tab[], select
 };
 
 /**
- * Extract valid tab IDs from an array of tabs
- */
-export const extractTabIds = (tabs: chrome.tabs.Tab[]): number[] => {
-  return tabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
-};
-
-/**
  * Filter tab IDs to only include those belonging to a specific window
  * @param tabIds - Array of tab IDs to filter
  * @param windowId - Target window ID
