@@ -1,44 +1,46 @@
 import { describe, it, expect } from 'vitest';
 import {
-  calculateSelectedCountInWindow,
+  countSelectedIds,
   shouldBulkSelectBeChecked,
   filterTabIdsByWindow,
   shouldCloseTabsBeDisabled,
 } from './windowActions';
 
 describe('windowActions utilities', () => {
-  describe('calculateSelectedCountInWindow', () => {
-    it('returns 0 when no tabs are selected', () => {
-      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
+  describe('countSelectedIds', () => {
+    it('returns 0 when no IDs are selected', () => {
+      const visibleTabIds = [1, 2];
       const selectedTabIds: number[] = [];
 
-      expect(calculateSelectedCountInWindow(visibleTabs, selectedTabIds)).toBe(0);
+      expect(countSelectedIds(visibleTabIds, selectedTabIds)).toBe(0);
     });
 
-    it('counts only tabs from current window that are selected', () => {
-      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
-      const selectedTabIds = [1, 2, 3, 4]; // 3, 4 are from other windows
+    it('counts matching IDs correctly', () => {
+      const visibleTabIds = [1, 2];
+      const selectedTabIds = [1, 2, 3, 4]; // 3, 4 are not in visibleTabIds
 
-      expect(calculateSelectedCountInWindow(visibleTabs, selectedTabIds)).toBe(2);
+      expect(countSelectedIds(visibleTabIds, selectedTabIds)).toBe(2);
     });
 
-    it('handles tabs with undefined IDs', () => {
-      const visibleTabs = [
-        { id: 1, windowId: 1 } as chrome.tabs.Tab,
-        { id: undefined, windowId: 1 } as chrome.tabs.Tab,
-        { id: 3, windowId: 1 } as chrome.tabs.Tab,
-      ];
-      const selectedTabIds = [1, 3];
+    it('handles empty visible IDs', () => {
+      const visibleTabIds: number[] = [];
+      const selectedTabIds = [1, 2, 3];
 
-      expect(calculateSelectedCountInWindow(visibleTabs, selectedTabIds)).toBe(2);
+      expect(countSelectedIds(visibleTabIds, selectedTabIds)).toBe(0);
     });
 
-    it('returns 0 when only other window tabs are selected', () => {
-      // This test would have caught the original bug!
-      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
-      const selectedTabIds = [3, 4]; // Only tabs from other windows
+    it('returns 0 when no IDs match', () => {
+      const visibleTabIds = [1, 2];
+      const selectedTabIds = [3, 4]; // No overlap
 
-      expect(calculateSelectedCountInWindow(visibleTabs, selectedTabIds)).toBe(0);
+      expect(countSelectedIds(visibleTabIds, selectedTabIds)).toBe(0);
+    });
+
+    it('counts partial matches correctly', () => {
+      const visibleTabIds = [1, 2, 3, 4, 5];
+      const selectedTabIds = [2, 4, 6, 8]; // Only 2 and 4 match
+
+      expect(countSelectedIds(visibleTabIds, selectedTabIds)).toBe(2);
     });
   });
 
@@ -136,33 +138,32 @@ describe('windowActions utilities', () => {
   });
 
   describe('shouldCloseTabsBeDisabled', () => {
-    it('returns true when no tabs are selected in current window', () => {
-      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
+    it('returns true when no IDs are selected', () => {
+      const visibleTabIds = [1, 2];
       const selectedTabIds: number[] = [];
 
-      expect(shouldCloseTabsBeDisabled(visibleTabs, selectedTabIds)).toBe(true);
+      expect(shouldCloseTabsBeDisabled(visibleTabIds, selectedTabIds)).toBe(true);
     });
 
-    it('returns false when tabs are selected in current window', () => {
-      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
+    it('returns false when IDs are selected', () => {
+      const visibleTabIds = [1, 2];
       const selectedTabIds = [1, 2];
 
-      expect(shouldCloseTabsBeDisabled(visibleTabs, selectedTabIds)).toBe(false);
+      expect(shouldCloseTabsBeDisabled(visibleTabIds, selectedTabIds)).toBe(false);
     });
 
-    it('returns true when only other window tabs are selected', () => {
-      // This test specifically checks the bug we fixed!
-      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
-      const selectedTabIds = [3, 4]; // Only tabs from window 2
+    it('returns true when no matching IDs are selected', () => {
+      const visibleTabIds = [1, 2];
+      const selectedTabIds = [3, 4]; // No overlap
 
-      expect(shouldCloseTabsBeDisabled(visibleTabs, selectedTabIds)).toBe(true);
+      expect(shouldCloseTabsBeDisabled(visibleTabIds, selectedTabIds)).toBe(true);
     });
 
-    it('returns false when mixed selection includes current window', () => {
-      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
-      const selectedTabIds = [1, 3, 4]; // Tab 1 from current window, 3 & 4 from others
+    it('returns false when at least one ID matches', () => {
+      const visibleTabIds = [1, 2];
+      const selectedTabIds = [1, 3, 4]; // Only 1 matches
 
-      expect(shouldCloseTabsBeDisabled(visibleTabs, selectedTabIds)).toBe(false);
+      expect(shouldCloseTabsBeDisabled(visibleTabIds, selectedTabIds)).toBe(false);
     });
   });
 });

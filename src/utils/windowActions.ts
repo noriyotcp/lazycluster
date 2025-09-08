@@ -3,10 +3,10 @@
  */
 
 /**
- * Calculate the number of selected tabs in the current window
+ * Count how many IDs from the first array are present in the second array
  */
-export const calculateSelectedCountInWindow = (visibleTabs: chrome.tabs.Tab[], selectedTabIds: number[]): number => {
-  return visibleTabs.filter(tab => tab.id !== undefined && selectedTabIds.includes(tab.id)).length;
+export const countSelectedIds = (visibleTabIds: number[], selectedTabIds: number[]): number => {
+  return visibleTabIds.filter(id => selectedTabIds.includes(id)).length;
 };
 
 /**
@@ -34,6 +34,6 @@ export const filterTabIdsByWindow = (
 /**
  * Determine if the Close Tabs button should be disabled
  */
-export const shouldCloseTabsBeDisabled = (visibleTabs: chrome.tabs.Tab[], selectedTabIds: number[]): boolean => {
-  return calculateSelectedCountInWindow(visibleTabs, selectedTabIds) === 0;
+export const shouldCloseTabsBeDisabled = (visibleTabIds: number[], selectedTabIds: number[]): boolean => {
+  return countSelectedIds(visibleTabIds, selectedTabIds) === 0;
 };

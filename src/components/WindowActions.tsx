@@ -2,7 +2,7 @@ import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useToast } from '../../src/components/ToastProvider';
 import Alert from '../../src/components/Alert';
 import {
-  calculateSelectedCountInWindow,
+  countSelectedIds,
   shouldBulkSelectBeChecked,
   shouldCloseTabsBeDisabled,
 } from '../utils/windowActions';
@@ -64,7 +64,8 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
   };
 
   // Calculate the number of selected tabs in this window
-  const selectedCountInWindow = calculateSelectedCountInWindow(visibleTabs, selectedTabIds);
+  const visibleTabIds = extractTabIds(visibleTabs);
+  const selectedCountInWindow = countSelectedIds(visibleTabIds, selectedTabIds);
 
   return (
     <>
@@ -89,7 +90,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
             <button
               className="btn btn-link btn-xs"
               onClick={handleCloseTabsInWindow}
-              disabled={shouldCloseTabsBeDisabled(visibleTabs, selectedTabIds)}
+              disabled={shouldCloseTabsBeDisabled(visibleTabIds, selectedTabIds)}
             >
               Close Tabs
             </button>
