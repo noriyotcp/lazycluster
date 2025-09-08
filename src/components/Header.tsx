@@ -39,6 +39,7 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps)
                 clipRule="evenodd"
               />
             </svg>
+            {selectedTabIds.length > 0 && <div className="badge badge-sm">{selectedTabIds.length}</div>}
           </button>
           <ThemeSwitcher />
         </div>

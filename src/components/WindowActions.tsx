@@ -1,11 +1,20 @@
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useToast } from '../../src/components/ToastProvider';
 import Alert from '../../src/components/Alert';
+import {
+  countSelectedIds,
+  shouldBulkSelectBeChecked,
+  shouldCloseTabsBeDisabled,
+} from '../utils/windowActions';
 
 interface WindowActionsProps {
   windowId: number;
   visibleTabs: chrome.tabs.Tab[];
 }
+
+const extractTabIds = (tabs: chrome.tabs.Tab[]): number[] => {
+  return tabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
+};
 
 // visibleTabs is used to determine the checked state of the bulk select checkbox
 const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
@@ -17,7 +26,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
   };
 
   const handleBulkSelectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const visibleTabIds = visibleTabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
+    const visibleTabIds = extractTabIds(visibleTabs);
     if (e.target.checked) {
       addTabsToSelection(visibleTabIds);
     } else {
@@ -54,6 +63,10 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
     }
   };
 
+  // Calculate the number of selected tabs in this window
+  const visibleTabIds = extractTabIds(visibleTabs);
+  const selectedCountInWindow = countSelectedIds(visibleTabIds, selectedTabIds);
+
   return (
     <>
       <ul className="list shadow-md">
@@ -64,10 +77,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
               className="checkbox checkbox-xs"
               type="checkbox"
               onChange={handleBulkSelectChange}
-              checked={
-                visibleTabs.length > 0 &&
-                visibleTabs.every(tab => tab.id !== undefined && selectedTabIds.includes(tab.id))
-              }
+              checked={shouldBulkSelectBeChecked(visibleTabIds, selectedTabIds)}
             />
           </div>
           <div className="list-grow">
@@ -80,10 +90,11 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
             <button
               className="btn btn-link btn-xs"
               onClick={handleCloseTabsInWindow}
-              disabled={selectedTabIds.length === 0}
+              disabled={shouldCloseTabsBeDisabled(visibleTabIds, selectedTabIds)}
             >
               Close Tabs
             </button>
+            {selectedCountInWindow > 0 && `(${selectedCountInWindow})`}
           </div>
         </li>
       </ul>
