@@ -45,55 +45,46 @@ describe('windowActions utilities', () => {
   });
 
   describe('shouldBulkSelectBeChecked', () => {
-    it('returns false when no tabs exist', () => {
-      const visibleTabs: chrome.tabs.Tab[] = [];
+    it('returns false when no IDs exist', () => {
+      const visibleTabIds: number[] = [];
       const selectedTabIds: number[] = [];
 
-      expect(shouldBulkSelectBeChecked(visibleTabs, selectedTabIds)).toBe(false);
+      expect(shouldBulkSelectBeChecked(visibleTabIds, selectedTabIds)).toBe(false);
     });
 
-    it('returns true when all visible tabs are selected', () => {
-      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
+    it('returns true when all visible IDs are selected', () => {
+      const visibleTabIds = [1, 2];
       const selectedTabIds = [1, 2, 3]; // Including extra selections
 
-      expect(shouldBulkSelectBeChecked(visibleTabs, selectedTabIds)).toBe(true);
+      expect(shouldBulkSelectBeChecked(visibleTabIds, selectedTabIds)).toBe(true);
     });
 
-    it('returns false when only some visible tabs are selected', () => {
-      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
+    it('returns false when only some visible IDs are selected', () => {
+      const visibleTabIds = [1, 2];
       const selectedTabIds = [1]; // Only one selected
 
-      expect(shouldBulkSelectBeChecked(visibleTabs, selectedTabIds)).toBe(false);
+      expect(shouldBulkSelectBeChecked(visibleTabIds, selectedTabIds)).toBe(false);
     });
 
-    it('returns false when no visible tabs are selected', () => {
-      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
-      const selectedTabIds = [3, 4]; // Other window tabs
+    it('returns false when no visible IDs are selected', () => {
+      const visibleTabIds = [1, 2];
+      const selectedTabIds = [3, 4]; // Other IDs
 
-      expect(shouldBulkSelectBeChecked(visibleTabs, selectedTabIds)).toBe(false);
+      expect(shouldBulkSelectBeChecked(visibleTabIds, selectedTabIds)).toBe(false);
     });
 
-    it('handles tabs with undefined IDs correctly', () => {
-      const visibleTabs = [
-        { id: 1, windowId: 1 } as chrome.tabs.Tab,
-        { id: undefined, windowId: 1 } as chrome.tabs.Tab,
-      ];
-      const selectedTabIds = [1];
+    it('returns true when exact match of IDs', () => {
+      const visibleTabIds = [1, 2, 3];
+      const selectedTabIds = [1, 2, 3];
 
-      // The function checks if ALL tabs (including undefined) pass the condition
-      // Since undefined tab cannot be included in selectedTabIds, it returns false
-      expect(shouldBulkSelectBeChecked(visibleTabs, selectedTabIds)).toBe(false);
+      expect(shouldBulkSelectBeChecked(visibleTabIds, selectedTabIds)).toBe(true);
     });
 
-    it('returns false when selectable tabs are not all selected', () => {
-      const visibleTabs = [
-        { id: 1, windowId: 1 } as chrome.tabs.Tab,
-        { id: undefined, windowId: 1 } as chrome.tabs.Tab,
-        { id: 3, windowId: 1 } as chrome.tabs.Tab,
-      ];
-      const selectedTabIds = [1]; // Only one of two selectable tabs is selected
+    it('returns true when all visible IDs are in larger selection', () => {
+      const visibleTabIds = [2, 4];
+      const selectedTabIds = [1, 2, 3, 4, 5]; // Superset
 
-      expect(shouldBulkSelectBeChecked(visibleTabs, selectedTabIds)).toBe(false);
+      expect(shouldBulkSelectBeChecked(visibleTabIds, selectedTabIds)).toBe(true);
     });
   });
 

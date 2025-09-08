@@ -13,8 +13,8 @@ export const countSelectedIds = (visibleTabIds: number[], selectedTabIds: number
  * Determine if the bulk select checkbox should be checked
  * (all visible tabs are selected)
  */
-export const shouldBulkSelectBeChecked = (visibleTabs: chrome.tabs.Tab[], selectedTabIds: number[]): boolean => {
-  return visibleTabs.length > 0 && visibleTabs.every(tab => tab.id !== undefined && selectedTabIds.includes(tab.id));
+export const shouldBulkSelectBeChecked = (visibleTabIds: number[], selectedTabIds: number[]): boolean => {
+  return visibleTabIds.length > 0 && visibleTabIds.every(id => selectedTabIds.includes(id));
 };
 
 /**

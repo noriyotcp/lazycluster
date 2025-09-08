@@ -77,7 +77,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
               className="checkbox checkbox-xs"
               type="checkbox"
               onChange={handleBulkSelectChange}
-              checked={shouldBulkSelectBeChecked(visibleTabs, selectedTabIds)}
+              checked={shouldBulkSelectBeChecked(visibleTabIds, selectedTabIds)}
             />
           </div>
           <div className="list-grow">
