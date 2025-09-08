@@ -10,20 +10,14 @@ import {
 describe('windowActions utilities', () => {
   describe('calculateSelectedCountInWindow', () => {
     it('returns 0 when no tabs are selected', () => {
-      const visibleTabs = [
-        { id: 1, windowId: 1 } as chrome.tabs.Tab,
-        { id: 2, windowId: 1 } as chrome.tabs.Tab,
-      ];
+      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
       const selectedTabIds: number[] = [];
 
       expect(calculateSelectedCountInWindow(visibleTabs, selectedTabIds)).toBe(0);
     });
 
     it('counts only tabs from current window that are selected', () => {
-      const visibleTabs = [
-        { id: 1, windowId: 1 } as chrome.tabs.Tab,
-        { id: 2, windowId: 1 } as chrome.tabs.Tab,
-      ];
+      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
       const selectedTabIds = [1, 2, 3, 4]; // 3, 4 are from other windows
 
       expect(calculateSelectedCountInWindow(visibleTabs, selectedTabIds)).toBe(2);
@@ -42,10 +36,7 @@ describe('windowActions utilities', () => {
 
     it('returns 0 when only other window tabs are selected', () => {
       // This test would have caught the original bug!
-      const visibleTabs = [
-        { id: 1, windowId: 1 } as chrome.tabs.Tab,
-        { id: 2, windowId: 1 } as chrome.tabs.Tab,
-      ];
+      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
       const selectedTabIds = [3, 4]; // Only tabs from other windows
 
       expect(calculateSelectedCountInWindow(visibleTabs, selectedTabIds)).toBe(0);
@@ -61,30 +52,21 @@ describe('windowActions utilities', () => {
     });
 
     it('returns true when all visible tabs are selected', () => {
-      const visibleTabs = [
-        { id: 1, windowId: 1 } as chrome.tabs.Tab,
-        { id: 2, windowId: 1 } as chrome.tabs.Tab,
-      ];
+      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
       const selectedTabIds = [1, 2, 3]; // Including extra selections
 
       expect(shouldBulkSelectBeChecked(visibleTabs, selectedTabIds)).toBe(true);
     });
 
     it('returns false when only some visible tabs are selected', () => {
-      const visibleTabs = [
-        { id: 1, windowId: 1 } as chrome.tabs.Tab,
-        { id: 2, windowId: 1 } as chrome.tabs.Tab,
-      ];
+      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
       const selectedTabIds = [1]; // Only one selected
 
       expect(shouldBulkSelectBeChecked(visibleTabs, selectedTabIds)).toBe(false);
     });
 
     it('returns false when no visible tabs are selected', () => {
-      const visibleTabs = [
-        { id: 1, windowId: 1 } as chrome.tabs.Tab,
-        { id: 2, windowId: 1 } as chrome.tabs.Tab,
-      ];
+      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
       const selectedTabIds = [3, 4]; // Other window tabs
 
       expect(shouldBulkSelectBeChecked(visibleTabs, selectedTabIds)).toBe(false);
@@ -191,20 +173,14 @@ describe('windowActions utilities', () => {
 
   describe('shouldCloseTabsBeDisabled', () => {
     it('returns true when no tabs are selected in current window', () => {
-      const visibleTabs = [
-        { id: 1, windowId: 1 } as chrome.tabs.Tab,
-        { id: 2, windowId: 1 } as chrome.tabs.Tab,
-      ];
+      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
       const selectedTabIds: number[] = [];
 
       expect(shouldCloseTabsBeDisabled(visibleTabs, selectedTabIds)).toBe(true);
     });
 
     it('returns false when tabs are selected in current window', () => {
-      const visibleTabs = [
-        { id: 1, windowId: 1 } as chrome.tabs.Tab,
-        { id: 2, windowId: 1 } as chrome.tabs.Tab,
-      ];
+      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
       const selectedTabIds = [1, 2];
 
       expect(shouldCloseTabsBeDisabled(visibleTabs, selectedTabIds)).toBe(false);
@@ -212,20 +188,14 @@ describe('windowActions utilities', () => {
 
     it('returns true when only other window tabs are selected', () => {
       // This test specifically checks the bug we fixed!
-      const visibleTabs = [
-        { id: 1, windowId: 1 } as chrome.tabs.Tab,
-        { id: 2, windowId: 1 } as chrome.tabs.Tab,
-      ];
+      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
       const selectedTabIds = [3, 4]; // Only tabs from window 2
 
       expect(shouldCloseTabsBeDisabled(visibleTabs, selectedTabIds)).toBe(true);
     });
 
     it('returns false when mixed selection includes current window', () => {
-      const visibleTabs = [
-        { id: 1, windowId: 1 } as chrome.tabs.Tab,
-        { id: 2, windowId: 1 } as chrome.tabs.Tab,
-      ];
+      const visibleTabs = [{ id: 1, windowId: 1 } as chrome.tabs.Tab, { id: 2, windowId: 1 } as chrome.tabs.Tab];
       const selectedTabIds = [1, 3, 4]; // Tab 1 from current window, 3 & 4 from others
 
       expect(shouldCloseTabsBeDisabled(visibleTabs, selectedTabIds)).toBe(false);

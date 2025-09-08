@@ -5,27 +5,16 @@
 /**
  * Calculate the number of selected tabs in the current window
  */
-export const calculateSelectedCountInWindow = (
-  visibleTabs: chrome.tabs.Tab[],
-  selectedTabIds: number[]
-): number => {
-  return visibleTabs.filter(
-    tab => tab.id !== undefined && selectedTabIds.includes(tab.id)
-  ).length;
+export const calculateSelectedCountInWindow = (visibleTabs: chrome.tabs.Tab[], selectedTabIds: number[]): number => {
+  return visibleTabs.filter(tab => tab.id !== undefined && selectedTabIds.includes(tab.id)).length;
 };
 
 /**
  * Determine if the bulk select checkbox should be checked
  * (all visible tabs are selected)
  */
-export const shouldBulkSelectBeChecked = (
-  visibleTabs: chrome.tabs.Tab[],
-  selectedTabIds: number[]
-): boolean => {
-  return (
-    visibleTabs.length > 0 &&
-    visibleTabs.every(tab => tab.id !== undefined && selectedTabIds.includes(tab.id))
-  );
+export const shouldBulkSelectBeChecked = (visibleTabs: chrome.tabs.Tab[], selectedTabIds: number[]): boolean => {
+  return visibleTabs.length > 0 && visibleTabs.every(tab => tab.id !== undefined && selectedTabIds.includes(tab.id));
 };
 
 /**
@@ -52,9 +41,6 @@ export const filterTabIdsByWindow = (
 /**
  * Determine if the Close Tabs button should be disabled
  */
-export const shouldCloseTabsBeDisabled = (
-  visibleTabs: chrome.tabs.Tab[],
-  selectedTabIds: number[]
-): boolean => {
+export const shouldCloseTabsBeDisabled = (visibleTabs: chrome.tabs.Tab[], selectedTabIds: number[]): boolean => {
   return calculateSelectedCountInWindow(visibleTabs, selectedTabIds) === 0;
 };
