@@ -21,7 +21,7 @@ interface BackgroundMessage {
 
 const Manager = () => {
   const { tabGroups, updateTabGroups } = useTabGroupContext();
-  const { clearSelection } = useTabSelectionContext(); // Get clearSelection from context
+  const { clearSelection, syncWithExistingTabs } = useTabSelectionContext();
   const [activeWindowId, setActiveWindowId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sequenceActive, setSequenceActive] = useState<boolean>(false);
@@ -35,13 +35,17 @@ const Manager = () => {
       devLog(`${new Date()} - Received message from background:`, message); // Log received messages
       if (message.type === 'UPDATE_TABS' && message.tabs) {
         updateTabGroups(message.tabs); // Use the updated tabs
+
+        // Sync selected tabs with existing tabs
+        const existingTabIds = message.tabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
+        syncWithExistingTabs(existingTabIds);
       } else if (message.type === 'BACKGROUND_INITIALIZED') {
         devLog(`${new Date()} - Background script initialized`);
       }
       // No need to handle REQUEST_INITIAL_DATA here, it's sent from client
     },
-    [updateTabGroups]
-  ); // Dependency array includes updateTabGroups
+    [updateTabGroups, syncWithExistingTabs]
+  );
 
   // Sync sequenceActive with its ref
   useEffect(() => {
@@ -167,7 +171,7 @@ const Manager = () => {
       }
     },
     [handleWindowGroupFocus]
-  ); // Include handleWindowGroupFocus as dependency
+  );
 
   // Effect for getting current window ID and setting up keydown listener
   useEffect(() => {
@@ -197,7 +201,7 @@ const Manager = () => {
       }
     },
     [clearSelection]
-  ); // Dependency array includes clearSelection
+  );
 
   const filteredTabGroups = tabGroups
     .map((group, index) => ({ ...group, windowGroupNumber: index }))
