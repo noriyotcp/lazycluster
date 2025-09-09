@@ -7,6 +7,10 @@ A Chrome extension for enhanced tab and window management, inspired by the origi
 - **Effortless Bulk Tab Management:** Quickly select and close multiple tabs across all windows or within specific windows, saving time and reducing clutter.
   - Global Bulk Close: Close tabs from any window with a single action.
   - Window-Specific Bulk Close: Target tabs within a particular window for closing.
+  - Real-time Selection Sync: Tab selection automatically updates when tabs are closed from anywhere (browser UI, other extensions, etc.)
+- **Visual Tab Metrics:** Stay informed about your tab usage with visual badges:
+  - Tab Count Badges: See the number of tabs in each window and total across all windows
+  - Selection Counter: Real-time display of how many tabs you have selected
 - **Intuitive Keyboard Navigation:** Navigate and select tabs efficiently using familiar keyboard shortcuts for a smooth workflow:
   - `j/k`: Navigate up/down through tabs
   - `gg/G`: Jump to first/last tab (double press `g` for first, `Shift+g` for last)
