@@ -19,13 +19,15 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps)
   const totalTabCount = useTotalTabCount();
 
   const handleCloseSelectedTabs = async () => {
+    const tabsToClose = [...selectedTabIds]; // Copy the array before removal
     try {
-      const tabsToClose = [...selectedTabIds]; // Copy the array before removal
       await chrome.tabs.remove(tabsToClose);
-      // Remove only the closed tabs from selection
+      // Success: remove all from selection
       removeTabsFromSelection(tabsToClose);
       showToast(<Alert message={`Selected ${tabsToClose.length} tabs closed successfully.`} variant="success" />);
     } catch (error) {
+      // On error, don't update selection - let syncWithExistingTabs handle cleanup
+      // This prevents state inconsistency when tab removal fails
       showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
       console.error('Error closing tabs:', error);
     }
