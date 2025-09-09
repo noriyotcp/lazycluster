@@ -1,4 +1,12 @@
 import { createContext, useContext, useState } from 'react';
+import {
+  syncSelectedTabsWithExisting,
+  addTabToSelection as addTabToSelectionUtil,
+  removeTabFromSelection as removeTabFromSelectionUtil,
+  addTabsToSelectionUnique,
+  removeTabsFromSelection as removeTabsFromSelectionUtil,
+  clearSelection as clearSelectionUtil,
+} from '../utils/tabSelection';
 
 interface TabSelectionContextProps {
   selectedTabIds: number[];
@@ -7,6 +15,7 @@ interface TabSelectionContextProps {
   clearSelection: () => void;
   addTabsToSelection: (tabIds: number[]) => void;
   removeTabsFromSelection: (tabIds: number[]) => void;
+  syncWithExistingTabs: (existingTabIds: number[]) => void;
 }
 
 const TabSelectionContext = createContext<TabSelectionContextProps | undefined>(undefined);
@@ -23,23 +32,27 @@ export const TabSelectionContextProvider = ({ children }: { children: React.Reac
   const [selectedTabIds, setSelectedTabIds] = useState<number[]>([]);
 
   const addTabToSelection = (tabId: number) => {
-    setSelectedTabIds([...selectedTabIds, tabId]);
+    setSelectedTabIds(prevIds => addTabToSelectionUtil(prevIds, tabId));
   };
 
   const removeTabFromSelection = (tabId: number) => {
-    setSelectedTabIds(selectedTabIds.filter(id => id !== tabId));
+    setSelectedTabIds(prevIds => removeTabFromSelectionUtil(prevIds, tabId));
   };
 
   const clearSelection = () => {
-    setSelectedTabIds([]);
+    setSelectedTabIds(clearSelectionUtil());
   };
 
   const addTabsToSelection = (tabIds: number[]) => {
-    setSelectedTabIds(prevSelectedTabIds => [...new Set([...prevSelectedTabIds, ...tabIds])]);
+    setSelectedTabIds(prevIds => addTabsToSelectionUnique(prevIds, tabIds));
   };
 
   const removeTabsFromSelection = (tabIds: number[]) => {
-    setSelectedTabIds(prevSelectedTabIds => prevSelectedTabIds.filter(id => !tabIds.includes(id)));
+    setSelectedTabIds(prevIds => removeTabsFromSelectionUtil(prevIds, tabIds));
+  };
+
+  const syncWithExistingTabs = (existingTabIds: number[]) => {
+    setSelectedTabIds(prevIds => syncSelectedTabsWithExisting(prevIds, existingTabIds));
   };
 
   const value: TabSelectionContextProps = {
@@ -49,6 +62,7 @@ export const TabSelectionContextProvider = ({ children }: { children: React.Reac
     clearSelection,
     addTabsToSelection,
     removeTabsFromSelection,
+    syncWithExistingTabs,
   };
 
   return <TabSelectionContext.Provider value={value}>{children}</TabSelectionContext.Provider>;

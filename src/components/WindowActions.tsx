@@ -18,7 +18,7 @@ const extractTabIds = (tabs: chrome.tabs.Tab[]): number[] => {
 
 // visibleTabs is used to determine the checked state of the bulk select checkbox
 const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
-  const { selectedTabIds, clearSelection, addTabsToSelection, removeTabsFromSelection } = useTabSelectionContext();
+  const { selectedTabIds, addTabsToSelection, removeTabsFromSelection } = useTabSelectionContext();
   const { showToast } = useToast();
 
   const handleFocusWindow = () => {
@@ -34,8 +34,20 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
     }
   };
 
-  const handleCloseWindow = () => {
-    chrome.windows.remove(windowId);
+  const handleCloseWindow = async () => {
+    try {
+      // Get all tabs in this window to remove them from selection
+      const tabs = await chrome.tabs.query({ windowId });
+      const tabIds = tabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
+      
+      // Remove these tabs from selection before closing the window
+      removeTabsFromSelection(tabIds);
+      
+      // Close the window
+      await chrome.windows.remove(windowId);
+    } catch (error) {
+      console.error('Error closing window:', error);
+    }
   };
 
   const handleCloseTabsInWindow = async () => {
@@ -55,7 +67,8 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
       const tabIdsInWindow = results.filter((tabId): tabId is number => tabId !== null);
 
       await chrome.tabs.remove(tabIdsInWindow);
-      clearSelection();
+      // Remove only the closed tabs from selection instead of clearing all
+      removeTabsFromSelection(tabIdsInWindow);
       showToast(<Alert message={`Selected ${tabIdsInWindow.length} tabs closed successfully.`} variant="success" />);
     } catch (error) {
       showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);

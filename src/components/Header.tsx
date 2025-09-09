@@ -14,15 +14,17 @@ interface HeaderProps {
 }
 
 const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps) => {
-  const { selectedTabIds, clearSelection } = useTabSelectionContext();
+  const { selectedTabIds, removeTabsFromSelection } = useTabSelectionContext();
   const { showToast } = useToast();
   const totalTabCount = useTotalTabCount();
 
   const handleCloseSelectedTabs = async () => {
     try {
-      await chrome.tabs.remove(selectedTabIds);
-      clearSelection();
-      showToast(<Alert message={`Selected ${selectedTabIds.length} tabs closed successfully.`} variant="success" />);
+      const tabsToClose = [...selectedTabIds]; // Copy the array before removal
+      await chrome.tabs.remove(tabsToClose);
+      // Remove only the closed tabs from selection
+      removeTabsFromSelection(tabsToClose);
+      showToast(<Alert message={`Selected ${tabsToClose.length} tabs closed successfully.`} variant="success" />);
     } catch (error) {
       showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
       console.error('Error closing tabs:', error);
