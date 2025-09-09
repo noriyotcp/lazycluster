@@ -1,11 +1,7 @@
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useToast } from '../../src/components/ToastProvider';
 import Alert from '../../src/components/Alert';
-import {
-  countSelectedIds,
-  shouldBulkSelectBeChecked,
-  shouldCloseTabsBeDisabled,
-} from '../utils/windowActions';
+import { countSelectedIds, shouldBulkSelectBeChecked, shouldCloseTabsBeDisabled } from '../utils/windowActions';
 
 interface WindowActionsProps {
   windowId: number;
@@ -39,14 +35,16 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
       // Get all tabs in this window to remove them from selection
       const tabs = await chrome.tabs.query({ windowId });
       const tabIds = tabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
-      
-      // Remove these tabs from selection before closing the window
-      removeTabsFromSelection(tabIds);
-      
-      // Close the window
+
+      // Close the window first
       await chrome.windows.remove(windowId);
+
+      // Remove these tabs from selection after successful close
+      removeTabsFromSelection(tabIds);
     } catch (error) {
       console.error('Error closing window:', error);
+      // Add user notification
+      showToast(<Alert message="Failed to close window" variant="error" />);
     }
   };
 
