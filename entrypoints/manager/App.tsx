@@ -21,7 +21,7 @@ interface BackgroundMessage {
 
 const Manager = () => {
   const { tabGroups, updateTabGroups } = useTabGroupContext();
-  const { clearSelection, syncWithExistingTabs } = useTabSelectionContext(); // Get clearSelection and syncWithExistingTabs from context
+  const { clearSelection, syncWithExistingTabs } = useTabSelectionContext();
   const [activeWindowId, setActiveWindowId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sequenceActive, setSequenceActive] = useState<boolean>(false);
