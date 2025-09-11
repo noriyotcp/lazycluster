@@ -14,23 +14,30 @@ interface HeaderProps {
 }
 
 const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps) => {
-  const { selectedTabIds, removeTabsFromSelection } = useTabSelectionContext();
+  const { selectedTabIds, removeTabsFromSelection, markTabsAsRemoving, unmarkTabsAsRemoving } = useTabSelectionContext();
   const { showToast } = useToast();
   const totalTabCount = useTotalTabCount();
 
   const handleCloseSelectedTabs = async () => {
     const tabsToClose = [...selectedTabIds]; // Copy the array before removal
-    try {
-      await chrome.tabs.remove(tabsToClose);
-      // Success: remove all from selection
-      removeTabsFromSelection(tabsToClose);
-      showToast(<Alert message={`Selected ${tabsToClose.length} tabs closed successfully.`} variant="success" />);
-    } catch (error) {
-      // On error, don't update selection - let syncWithExistingTabs handle cleanup
-      // This prevents state inconsistency when tab removal fails
-      showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
-      console.error('Error closing tabs:', error);
-    }
+    
+    // Mark all tabs as removing to trigger fade-out animation
+    markTabsAsRemoving(tabsToClose);
+    
+    // Wait for animation to complete
+    setTimeout(async () => {
+      try {
+        await chrome.tabs.remove(tabsToClose);
+        // Success: remove all from selection
+        removeTabsFromSelection(tabsToClose);
+        showToast(<Alert message={`Selected ${tabsToClose.length} tabs closed successfully.`} variant="success" />);
+      } catch (error) {
+        // On error, unmark tabs and don't update selection
+        unmarkTabsAsRemoving(tabsToClose);
+        showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
+        console.error('Error closing tabs:', error);
+      }
+    }, 500); // Match the duration-500 class
   };
 
   return (

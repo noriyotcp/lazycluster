@@ -14,7 +14,7 @@ const extractTabIds = (tabs: chrome.tabs.Tab[]): number[] => {
 
 // visibleTabs is used to determine the checked state of the bulk select checkbox
 const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
-  const { selectedTabIds, addTabsToSelection, removeTabsFromSelection } = useTabSelectionContext();
+  const { selectedTabIds, addTabsToSelection, removeTabsFromSelection, markTabsAsRemoving, unmarkTabsAsRemoving } = useTabSelectionContext();
   const { showToast } = useToast();
 
   const handleFocusWindow = () => {
@@ -63,14 +63,27 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
       );
 
       const tabIdsInWindow = results.filter((tabId): tabId is number => tabId !== null);
-
-      await chrome.tabs.remove(tabIdsInWindow);
-      // Remove only the closed tabs from selection instead of clearing all
-      removeTabsFromSelection(tabIdsInWindow);
-      showToast(<Alert message={`Selected ${tabIdsInWindow.length} tabs closed successfully.`} variant="success" />);
+      
+      // Mark tabs as removing to trigger fade-out animation
+      markTabsAsRemoving(tabIdsInWindow);
+      
+      // Wait for animation to complete
+      setTimeout(async () => {
+        try {
+          await chrome.tabs.remove(tabIdsInWindow);
+          // Remove only the closed tabs from selection instead of clearing all
+          removeTabsFromSelection(tabIdsInWindow);
+          showToast(<Alert message={`Selected ${tabIdsInWindow.length} tabs closed successfully.`} variant="success" />);
+        } catch (error) {
+          // On error, unmark tabs
+          unmarkTabsAsRemoving(tabIdsInWindow);
+          showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
+          console.error('Error closing tabs:', error);
+        }
+      }, 500); // Match the duration-500 class
     } catch (error) {
-      showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
-      console.error('Error closing tabs:', error);
+      showToast(<Alert message={`Error getting tab information: ${error instanceof Error ? error.message : String(error)}`} />);
+      console.error('Error getting tab information:', error);
     }
   };
 

@@ -10,12 +10,15 @@ import {
 
 interface TabSelectionContextProps {
   selectedTabIds: number[];
+  removingTabIds: Set<number>;
   addTabToSelection: (tabId: number) => void;
   removeTabFromSelection: (tabId: number) => void;
   clearSelection: () => void;
   addTabsToSelection: (tabIds: number[]) => void;
   removeTabsFromSelection: (tabIds: number[]) => void;
   syncWithExistingTabs: (existingTabIds: number[]) => void;
+  markTabsAsRemoving: (tabIds: number[]) => void;
+  unmarkTabsAsRemoving: (tabIds: number[]) => void;
 }
 
 const TabSelectionContext = createContext<TabSelectionContextProps | undefined>(undefined);
@@ -30,6 +33,7 @@ export const useTabSelectionContext = () => {
 
 export const TabSelectionContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedTabIds, setSelectedTabIds] = useState<number[]>([]);
+  const [removingTabIds, setRemovingTabIds] = useState<Set<number>>(new Set());
 
   const addTabToSelection = (tabId: number) => {
     setSelectedTabIds(prevIds => addTabToSelectionUtil(prevIds, tabId));
@@ -55,14 +59,33 @@ export const TabSelectionContextProvider = ({ children }: { children: React.Reac
     setSelectedTabIds(prevIds => syncSelectedTabsWithExisting(prevIds, existingTabIds));
   };
 
+  const markTabsAsRemoving = (tabIds: number[]) => {
+    setRemovingTabIds(prev => {
+      const newSet = new Set(prev);
+      tabIds.forEach(id => newSet.add(id));
+      return newSet;
+    });
+  };
+
+  const unmarkTabsAsRemoving = (tabIds: number[]) => {
+    setRemovingTabIds(prev => {
+      const newSet = new Set(prev);
+      tabIds.forEach(id => newSet.delete(id));
+      return newSet;
+    });
+  };
+
   const value: TabSelectionContextProps = {
     selectedTabIds,
+    removingTabIds,
     addTabToSelection,
     removeTabFromSelection,
     clearSelection,
     addTabsToSelection,
     removeTabsFromSelection,
     syncWithExistingTabs,
+    markTabsAsRemoving,
+    unmarkTabsAsRemoving,
   };
 
   return <TabSelectionContext.Provider value={value}>{children}</TabSelectionContext.Provider>;

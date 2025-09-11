@@ -29,11 +29,13 @@ const globeIcon = () => {
 };
 
 const TabItem = ({ tab }: TabItemProps) => {
-  const { selectedTabIds, addTabToSelection, removeTabFromSelection } = useTabSelectionContext();
+  const { selectedTabIds, addTabToSelection, removeTabFromSelection, removingTabIds, markTabsAsRemoving, unmarkTabsAsRemoving } = useTabSelectionContext();
   const [isChecked, setIsChecked] = useState(false);
   const { focusActiveTab } = useTabFocusContext();
   const checkboxRef = useRef<HTMLInputElement>(null);
+  const itemRef = useRef<HTMLLIElement>(null);
   const { showToast } = useToast();
+  const isRemoving = removingTabIds.has(tab.id!);
 
   useEffect(() => {
     setIsChecked(selectedTabIds.includes(tab.id!));
@@ -67,18 +69,30 @@ const TabItem = ({ tab }: TabItemProps) => {
   };
 
   const handleCloseButtonClick = () => {
-    chrome.tabs.remove(tab.id!, () => {
-      if (chrome.runtime.lastError) {
-        showToast(<Alert message="Failed to close tab" />);
-        console.error('Failed to close tab:', chrome.runtime.lastError);
-      }
-    });
+    const tabId = tab.id!;
+    
+    // Mark tab as removing to trigger fade-out animation
+    markTabsAsRemoving([tabId]);
+    
+    // Wait for animation to complete, then remove the tab
+    setTimeout(() => {
+      chrome.tabs.remove(tabId, () => {
+        if (chrome.runtime.lastError) {
+          // If removal failed, unmark the tab
+          unmarkTabsAsRemoving([tabId]);
+          showToast(<Alert message="Failed to close tab" />);
+          console.error('Failed to close tab:', chrome.runtime.lastError);
+        }
+        // Tab will be removed from DOM by background script update
+      });
+    }, 500); // Match the duration-500 class
   };
 
   return (
     <li
+      ref={itemRef}
       tabIndex={0}
-      className="list-row p-2 items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem"
+      className={`list-row p-2 items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem transition-opacity duration-500 ease-out ${isRemoving ? 'opacity-0' : 'opacity-100'}`}
       onKeyDown={handleKeyDown}
     >
       <input
