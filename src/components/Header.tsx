@@ -8,6 +8,7 @@ import { useToast } from '../../src/components/ToastProvider';
 import Alert from '../../src/components/Alert';
 import { useTotalTabCount } from '../hooks/useTotalTabCount';
 import { analyzeTabDeletion } from '../utils/deletionHelpers';
+import { ANIMATION_DURATIONS } from '../constants/animation';
 
 interface HeaderProps {
   searchQuery: string;
@@ -63,7 +64,7 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef, tabGroups }: H
         showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
         console.error('Error closing tabs:', error);
       }
-    }, 500); // Match the duration-500 class
+    }, ANIMATION_DURATIONS.REMOVAL_MS); // Match the duration-500 class
   };
 
   return (

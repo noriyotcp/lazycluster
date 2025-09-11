@@ -4,6 +4,7 @@ import { useToast } from '../../src/components/ToastProvider';
 import Alert from '../../src/components/Alert';
 import { countSelectedIds, shouldBulkSelectBeChecked, shouldCloseTabsBeDisabled } from '../utils/windowActions';
 import { analyzeTabDeletion } from '../utils/deletionHelpers';
+import { ANIMATION_DURATIONS } from '../constants/animation';
 
 interface WindowActionsProps {
   windowId: number;
@@ -56,7 +57,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
           console.error('Error closing window:', error);
           showToast(<Alert message="Failed to close window" variant="error" />);
         }
-      }, 500); // Match the duration-500 class
+      }, ANIMATION_DURATIONS.REMOVAL_MS); // Match the duration-500 class
     } catch (error) {
       console.error('Error getting window tabs:', error);
       showToast(<Alert message="Failed to get window tabs" variant="error" />);
@@ -108,7 +109,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
           showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
           console.error('Error closing tabs:', error);
         }
-      }, 500); // Match the duration-500 class
+      }, ANIMATION_DURATIONS.REMOVAL_MS); // Match the duration-500 class
     } catch (error) {
       showToast(<Alert message={`Error getting tab information: ${error instanceof Error ? error.message : String(error)}`} />);
       console.error('Error getting tab information:', error);

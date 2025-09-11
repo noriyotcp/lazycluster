@@ -5,6 +5,7 @@ import { useTabFocusContext } from '../../src/contexts/TabFocusContext';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
 import { isLastTabInWindow } from '../utils/deletionHelpers';
+import { ANIMATION_DURATIONS } from '../constants/animation';
 
 const extractDomain = (url: string): string => {
   try {
@@ -105,13 +106,14 @@ const TabItem = ({ tab, windowTabs }: TabItemProps) => {
         }
         // Tab will be removed from DOM by background script update
       });
-    }, 500); // Match the duration-500 class
+    }, ANIMATION_DURATIONS.REMOVAL_MS); // Match the duration-500 class
   };
 
   return (
     <li
       ref={itemRef}
       tabIndex={0}
+      // duration-500 must match ANIMATION_DURATIONS.REMOVAL_MS (500ms)
       className={`list-row p-2 items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem transition-opacity duration-500 ease-out ${isRemoving ? 'opacity-0' : 'opacity-100'}`}
       onKeyDown={handleKeyDown}
     >
