@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
+import { useDeletionContext } from '../../src/contexts/DeletionContext';
 import { useTabFocusContext } from '../../src/contexts/TabFocusContext';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
+import { isLastTabInWindow } from '../utils/deletionHelpers';
 
 const extractDomain = (url: string): string => {
   try {
@@ -14,6 +16,7 @@ const extractDomain = (url: string): string => {
 
 interface TabItemProps {
   tab: chrome.tabs.Tab;
+  windowTabs: chrome.tabs.Tab[]; // All tabs in the same window
 }
 
 const globeIcon = () => {
@@ -28,14 +31,19 @@ const globeIcon = () => {
   );
 };
 
-const TabItem = ({ tab }: TabItemProps) => {
-  const { selectedTabIds, addTabToSelection, removeTabFromSelection, removingTabIds, markTabsAsRemoving, unmarkTabsAsRemoving } = useTabSelectionContext();
+const TabItem = ({ tab, windowTabs }: TabItemProps) => {
+  const { selectedTabIds, addTabToSelection, removeTabFromSelection } = useTabSelectionContext();
+  const { removingTabIds, removingWindowIds, markTabsAsRemoving, unmarkTabsAsRemoving, markWindowAsRemoving, unmarkWindowAsRemoving } = useDeletionContext();
   const [isChecked, setIsChecked] = useState(false);
   const { focusActiveTab } = useTabFocusContext();
   const checkboxRef = useRef<HTMLInputElement>(null);
   const itemRef = useRef<HTMLLIElement>(null);
   const { showToast } = useToast();
-  const isRemoving = removingTabIds.has(tab.id!);
+  
+  // Check if tab or its window is being removed
+  const isTabRemoving = removingTabIds.has(tab.id!);
+  const isWindowRemoving = tab.windowId !== undefined && removingWindowIds.has(tab.windowId);
+  const isRemoving = isTabRemoving || isWindowRemoving;
 
   useEffect(() => {
     setIsChecked(selectedTabIds.includes(tab.id!));
@@ -70,16 +78,28 @@ const TabItem = ({ tab }: TabItemProps) => {
 
   const handleCloseButtonClick = () => {
     const tabId = tab.id!;
+    const windowId = tab.windowId!;
     
-    // Mark tab as removing to trigger fade-out animation
-    markTabsAsRemoving([tabId]);
+    // Check if this is the last tab in the window
+    const isLastTab = isLastTabInWindow(tabId, windowTabs);
+    
+    // Mark for removal based on whether it's the last tab
+    if (isLastTab && windowId !== undefined) {
+      markWindowAsRemoving(windowId);
+    } else {
+      markTabsAsRemoving([tabId]);
+    }
     
     // Wait for animation to complete, then remove the tab
     setTimeout(() => {
       chrome.tabs.remove(tabId, () => {
         if (chrome.runtime.lastError) {
-          // If removal failed, unmark the tab
-          unmarkTabsAsRemoving([tabId]);
+          // If removal failed, unmark based on type
+          if (isLastTab && windowId !== undefined) {
+            unmarkWindowAsRemoving(windowId);
+          } else {
+            unmarkTabsAsRemoving([tabId]);
+          }
           showToast(<Alert message="Failed to close tab" />);
           console.error('Failed to close tab:', chrome.runtime.lastError);
         }

@@ -3,26 +3,49 @@ import SearchBar from './SearchBar';
 import ThemeSwitcher from './ThemeSwitcher';
 import TabCountBadge from './TabCountBadge';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
+import { useDeletionContext } from '../../src/contexts/DeletionContext';
 import { useToast } from '../../src/components/ToastProvider';
 import Alert from '../../src/components/Alert';
 import { useTotalTabCount } from '../hooks/useTotalTabCount';
+import { analyzeTabDeletion } from '../utils/deletionHelpers';
 
 interface HeaderProps {
   searchQuery: string;
   onSearchQueryChange: (query: string) => void;
   searchBarRef: React.RefObject<HTMLInputElement | null>;
+  tabGroups: { windowId: number; tabs: chrome.tabs.Tab[] }[];
 }
 
-const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps) => {
-  const { selectedTabIds, removeTabsFromSelection, markTabsAsRemoving, unmarkTabsAsRemoving } = useTabSelectionContext();
+const Header = ({ searchQuery, onSearchQueryChange, searchBarRef, tabGroups }: HeaderProps) => {
+  const { selectedTabIds, removeTabsFromSelection } = useTabSelectionContext();
+  const { markTabsAsRemoving, unmarkTabsAsRemoving, markWindowAsRemoving, unmarkWindowAsRemoving } = useDeletionContext();
   const { showToast } = useToast();
   const totalTabCount = useTotalTabCount();
 
   const handleCloseSelectedTabs = async () => {
     const tabsToClose = [...selectedTabIds]; // Copy the array before removal
     
-    // Mark all tabs as removing to trigger fade-out animation
-    markTabsAsRemoving(tabsToClose);
+    // Analyze which windows will be fully closed
+    const allTabs = tabGroups.flatMap(g => g.tabs);
+    const deletionAnalysis = analyzeTabDeletion(tabsToClose, allTabs);
+    
+    // Separate full window deletions from partial deletions
+    const windowsToClose: number[] = [];
+    const individualTabsToClose: number[] = [];
+    
+    deletionAnalysis.forEach(analysis => {
+      if (analysis.isFullWindowSelection) {
+        windowsToClose.push(analysis.windowId);
+      } else {
+        individualTabsToClose.push(...analysis.selectedTabIds);
+      }
+    });
+    
+    // Mark windows and tabs for removal
+    windowsToClose.forEach(windowId => markWindowAsRemoving(windowId));
+    if (individualTabsToClose.length > 0) {
+      markTabsAsRemoving(individualTabsToClose);
+    }
     
     // Wait for animation to complete
     setTimeout(async () => {
@@ -32,8 +55,11 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps)
         removeTabsFromSelection(tabsToClose);
         showToast(<Alert message={`Selected ${tabsToClose.length} tabs closed successfully.`} variant="success" />);
       } catch (error) {
-        // On error, unmark tabs and don't update selection
-        unmarkTabsAsRemoving(tabsToClose);
+        // On error, unmark windows and tabs
+        windowsToClose.forEach(windowId => unmarkWindowAsRemoving(windowId));
+        if (individualTabsToClose.length > 0) {
+          unmarkTabsAsRemoving(individualTabsToClose);
+        }
         showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
         console.error('Error closing tabs:', error);
       }

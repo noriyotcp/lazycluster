@@ -1,7 +1,9 @@
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
+import { useDeletionContext } from '../../src/contexts/DeletionContext';
 import { useToast } from '../../src/components/ToastProvider';
 import Alert from '../../src/components/Alert';
 import { countSelectedIds, shouldBulkSelectBeChecked, shouldCloseTabsBeDisabled } from '../utils/windowActions';
+import { analyzeTabDeletion } from '../utils/deletionHelpers';
 
 interface WindowActionsProps {
   windowId: number;
@@ -14,7 +16,8 @@ const extractTabIds = (tabs: chrome.tabs.Tab[]): number[] => {
 
 // visibleTabs is used to determine the checked state of the bulk select checkbox
 const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
-  const { selectedTabIds, addTabsToSelection, removeTabsFromSelection, markTabsAsRemoving, unmarkTabsAsRemoving } = useTabSelectionContext();
+  const { selectedTabIds, addTabsToSelection, removeTabsFromSelection } = useTabSelectionContext();
+  const { markTabsAsRemoving, unmarkTabsAsRemoving, markWindowAsRemoving, unmarkWindowAsRemoving } = useDeletionContext();
   const { showToast } = useToast();
 
   const handleFocusWindow = () => {
@@ -36,15 +39,27 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
       const tabs = await chrome.tabs.query({ windowId });
       const tabIds = tabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
 
-      // Close the window first
-      await chrome.windows.remove(windowId);
+      // Mark window as removing to trigger WindowGroup fade-out
+      markWindowAsRemoving(windowId);
 
-      // Remove these tabs from selection after successful close
-      removeTabsFromSelection(tabIds);
+      // Wait for animation to complete
+      setTimeout(async () => {
+        try {
+          // Close the window
+          await chrome.windows.remove(windowId);
+
+          // Remove these tabs from selection after successful close
+          removeTabsFromSelection(tabIds);
+        } catch (error) {
+          // On error, unmark window to revert animation
+          unmarkWindowAsRemoving(windowId);
+          console.error('Error closing window:', error);
+          showToast(<Alert message="Failed to close window" variant="error" />);
+        }
+      }, 500); // Match the duration-500 class
     } catch (error) {
-      console.error('Error closing window:', error);
-      // Add user notification
-      showToast(<Alert message="Failed to close window" variant="error" />);
+      console.error('Error getting window tabs:', error);
+      showToast(<Alert message="Failed to get window tabs" variant="error" />);
     }
   };
 
@@ -64,8 +79,17 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
 
       const tabIdsInWindow = results.filter((tabId): tabId is number => tabId !== null);
       
-      // Mark tabs as removing to trigger fade-out animation
-      markTabsAsRemoving(tabIdsInWindow);
+      // Check if this is a full window selection
+      const allTabsInWindow = await chrome.tabs.query({ windowId });
+      const deletionAnalysis = analyzeTabDeletion(tabIdsInWindow, allTabsInWindow);
+      const isFullWindow = deletionAnalysis.some(a => a.windowId === windowId && a.isFullWindowSelection);
+      
+      // Mark for removal based on whether it's full window or partial
+      if (isFullWindow) {
+        markWindowAsRemoving(windowId);
+      } else {
+        markTabsAsRemoving(tabIdsInWindow);
+      }
       
       // Wait for animation to complete
       setTimeout(async () => {
@@ -75,8 +99,12 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
           removeTabsFromSelection(tabIdsInWindow);
           showToast(<Alert message={`Selected ${tabIdsInWindow.length} tabs closed successfully.`} variant="success" />);
         } catch (error) {
-          // On error, unmark tabs
-          unmarkTabsAsRemoving(tabIdsInWindow);
+          // On error, unmark based on type
+          if (isFullWindow) {
+            unmarkWindowAsRemoving(windowId);
+          } else {
+            unmarkTabsAsRemoving(tabIdsInWindow);
+          }
           showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
           console.error('Error closing tabs:', error);
         }
