@@ -18,7 +18,8 @@ const extractTabIds = (tabs: chrome.tabs.Tab[]): number[] => {
 // visibleTabs is used to determine the checked state of the bulk select checkbox
 const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
   const { selectedTabIds, addTabsToSelection, removeTabsFromSelection } = useTabSelectionContext();
-  const { markTabsAsRemoving, unmarkTabsAsRemoving, markWindowAsRemoving, unmarkWindowAsRemoving } = useDeletionContext();
+  const { markTabsAsRemoving, unmarkTabsAsRemoving, markWindowAsRemoving, unmarkWindowAsRemoving } =
+    useDeletionContext();
   const { showToast } = useToast();
 
   const handleFocusWindow = () => {
@@ -57,7 +58,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
           console.error('Error closing window:', error);
           showToast(<Alert message="Failed to close window" variant="error" />);
         }
-      }, ANIMATION_DURATIONS.REMOVAL_MS); // Match the duration-500 class
+      }, ANIMATION_DURATIONS.REMOVAL_MS); // Wait for animation to complete
     } catch (error) {
       console.error('Error getting window tabs:', error);
       showToast(<Alert message="Failed to get window tabs" variant="error" />);
@@ -79,26 +80,28 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
       );
 
       const tabIdsInWindow = results.filter((tabId): tabId is number => tabId !== null);
-      
+
       // Check if this is a full window selection
       const allTabsInWindow = await chrome.tabs.query({ windowId });
       const deletionAnalysis = analyzeTabDeletion(tabIdsInWindow, allTabsInWindow);
       const isFullWindow = deletionAnalysis.some(a => a.windowId === windowId && a.isFullWindowSelection);
-      
+
       // Mark for removal based on whether it's full window or partial
       if (isFullWindow) {
         markWindowAsRemoving(windowId);
       } else {
         markTabsAsRemoving(tabIdsInWindow);
       }
-      
+
       // Wait for animation to complete
       setTimeout(async () => {
         try {
           await chrome.tabs.remove(tabIdsInWindow);
           // Remove only the closed tabs from selection instead of clearing all
           removeTabsFromSelection(tabIdsInWindow);
-          showToast(<Alert message={`Selected ${tabIdsInWindow.length} tabs closed successfully.`} variant="success" />);
+          showToast(
+            <Alert message={`Selected ${tabIdsInWindow.length} tabs closed successfully.`} variant="success" />
+          );
         } catch (error) {
           // On error, unmark based on type
           if (isFullWindow) {
@@ -106,12 +109,16 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
           } else {
             unmarkTabsAsRemoving(tabIdsInWindow);
           }
-          showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
+          showToast(
+            <Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />
+          );
           console.error('Error closing tabs:', error);
         }
-      }, ANIMATION_DURATIONS.REMOVAL_MS); // Match the duration-500 class
+      }, ANIMATION_DURATIONS.REMOVAL_MS); // Wait for animation to complete
     } catch (error) {
-      showToast(<Alert message={`Error getting tab information: ${error instanceof Error ? error.message : String(error)}`} />);
+      showToast(
+        <Alert message={`Error getting tab information: ${error instanceof Error ? error.message : String(error)}`} />
+      );
       console.error('Error getting tab information:', error);
     }
   };

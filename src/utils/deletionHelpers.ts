@@ -9,13 +9,10 @@ export interface DeletionAnalysis {
  * Analyze which tabs are being deleted and group them by window
  * Determines if entire windows are being deleted or just individual tabs
  */
-export function analyzeTabDeletion(
-  selectedTabIds: number[],
-  allTabs: chrome.tabs.Tab[]
-): DeletionAnalysis[] {
+export function analyzeTabDeletion(selectedTabIds: number[], allTabs: chrome.tabs.Tab[]): DeletionAnalysis[] {
   // Group tabs by window
   const windowMap = new Map<number, chrome.tabs.Tab[]>();
-  
+
   allTabs.forEach(tab => {
     if (tab.windowId !== undefined) {
       const tabs = windowMap.get(tab.windowId) || [];
@@ -29,7 +26,7 @@ export function analyzeTabDeletion(
 
   // Analyze each window
   const results: DeletionAnalysis[] = [];
-  
+
   windowMap.forEach((windowTabs, windowId) => {
     const selectedInWindow = windowTabs
       .filter(tab => tab.id !== undefined && selectedSet.has(tab.id))
@@ -51,10 +48,7 @@ export function analyzeTabDeletion(
 /**
  * Check if a single tab deletion would close the entire window
  */
-export function isLastTabInWindow(
-  tabId: number,
-  windowTabs: chrome.tabs.Tab[]
-): boolean {
+export function isLastTabInWindow(tabId: number, windowTabs: chrome.tabs.Tab[]): boolean {
   const tabsInWindow = windowTabs.filter(tab => tab.id !== undefined);
   return tabsInWindow.length === 1 && tabsInWindow[0].id === tabId;
 }
@@ -62,10 +56,7 @@ export function isLastTabInWindow(
 /**
  * Group tab IDs by their window ID
  */
-export function groupTabIdsByWindow(
-  tabIds: number[],
-  allTabs: chrome.tabs.Tab[]
-): Map<number, number[]> {
+export function groupTabIdsByWindow(tabIds: number[], allTabs: chrome.tabs.Tab[]): Map<number, number[]> {
   const windowToTabs = new Map<number, number[]>();
   const tabIdSet = new Set(tabIds);
 

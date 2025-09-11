@@ -34,13 +34,20 @@ const globeIcon = () => {
 
 const TabItem = ({ tab, windowTabs }: TabItemProps) => {
   const { selectedTabIds, addTabToSelection, removeTabFromSelection } = useTabSelectionContext();
-  const { removingTabIds, removingWindowIds, markTabsAsRemoving, unmarkTabsAsRemoving, markWindowAsRemoving, unmarkWindowAsRemoving } = useDeletionContext();
+  const {
+    removingTabIds,
+    removingWindowIds,
+    markTabsAsRemoving,
+    unmarkTabsAsRemoving,
+    markWindowAsRemoving,
+    unmarkWindowAsRemoving,
+  } = useDeletionContext();
   const [isChecked, setIsChecked] = useState(false);
   const { focusActiveTab } = useTabFocusContext();
   const checkboxRef = useRef<HTMLInputElement>(null);
   const itemRef = useRef<HTMLLIElement>(null);
   const { showToast } = useToast();
-  
+
   // Check if tab or its window is being removed
   const isTabRemoving = removingTabIds.has(tab.id!);
   const isWindowRemoving = tab.windowId !== undefined && removingWindowIds.has(tab.windowId);
@@ -80,17 +87,17 @@ const TabItem = ({ tab, windowTabs }: TabItemProps) => {
   const handleCloseButtonClick = () => {
     const tabId = tab.id!;
     const windowId = tab.windowId!;
-    
+
     // Check if this is the last tab in the window
     const isLastTab = isLastTabInWindow(tabId, windowTabs);
-    
+
     // Mark for removal based on whether it's the last tab
     if (isLastTab && windowId !== undefined) {
       markWindowAsRemoving(windowId);
     } else {
       markTabsAsRemoving([tabId]);
     }
-    
+
     // Wait for animation to complete, then remove the tab
     setTimeout(() => {
       chrome.tabs.remove(tabId, () => {
@@ -106,15 +113,15 @@ const TabItem = ({ tab, windowTabs }: TabItemProps) => {
         }
         // Tab will be removed from DOM by background script update
       });
-    }, ANIMATION_DURATIONS.REMOVAL_MS); // Match the duration-500 class
+    }, ANIMATION_DURATIONS.REMOVAL_MS); // Match the duration-300 class
   };
 
   return (
     <li
       ref={itemRef}
       tabIndex={0}
-      // duration-500 must match ANIMATION_DURATIONS.REMOVAL_MS (500ms)
-      className={`list-row p-2 items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem transition-opacity duration-500 ease-out ${isRemoving ? 'opacity-0' : 'opacity-100'}`}
+      // duration-300 must match ANIMATION_DURATIONS.REMOVAL_MS (300ms)
+      className={`list-row p-2 items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem transition-opacity duration-300 ease-out ${isRemoving ? 'opacity-0' : 'opacity-100'}`}
       onKeyDown={handleKeyDown}
     >
       <input

@@ -19,21 +19,22 @@ interface HeaderProps {
 
 const Header = ({ searchQuery, onSearchQueryChange, searchBarRef, tabGroups }: HeaderProps) => {
   const { selectedTabIds, removeTabsFromSelection } = useTabSelectionContext();
-  const { markTabsAsRemoving, unmarkTabsAsRemoving, markWindowAsRemoving, unmarkWindowAsRemoving } = useDeletionContext();
+  const { markTabsAsRemoving, unmarkTabsAsRemoving, markWindowAsRemoving, unmarkWindowAsRemoving } =
+    useDeletionContext();
   const { showToast } = useToast();
   const totalTabCount = useTotalTabCount();
 
   const handleCloseSelectedTabs = async () => {
     const tabsToClose = [...selectedTabIds]; // Copy the array before removal
-    
+
     // Analyze which windows will be fully closed
     const allTabs = tabGroups.flatMap(g => g.tabs);
     const deletionAnalysis = analyzeTabDeletion(tabsToClose, allTabs);
-    
+
     // Separate full window deletions from partial deletions
     const windowsToClose: number[] = [];
     const individualTabsToClose: number[] = [];
-    
+
     deletionAnalysis.forEach(analysis => {
       if (analysis.isFullWindowSelection) {
         windowsToClose.push(analysis.windowId);
@@ -41,13 +42,13 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef, tabGroups }: H
         individualTabsToClose.push(...analysis.selectedTabIds);
       }
     });
-    
+
     // Mark windows and tabs for removal
     windowsToClose.forEach(windowId => markWindowAsRemoving(windowId));
     if (individualTabsToClose.length > 0) {
       markTabsAsRemoving(individualTabsToClose);
     }
-    
+
     // Wait for animation to complete
     setTimeout(async () => {
       try {
@@ -64,7 +65,7 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef, tabGroups }: H
         showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
         console.error('Error closing tabs:', error);
       }
-    }, ANIMATION_DURATIONS.REMOVAL_MS); // Match the duration-500 class
+    }, ANIMATION_DURATIONS.REMOVAL_MS); // Wait for animation to complete
   };
 
   return (
