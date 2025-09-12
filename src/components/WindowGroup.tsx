@@ -18,8 +18,8 @@ const WindowGroup = ({ tabGroup, activeWindowId }: WindowGroupProps) => {
 
   return (
     <div
-      // duration-300 must match ANIMATION_DURATIONS.REMOVAL_MS (300ms)
-      className={`collapse collapse-arrow bg-base-100 border-base-300 border rounded-none mb-4 transition-opacity duration-300 ease-out ${isWindowRemoving ? 'opacity-0' : 'opacity-100'}`}
+      // duration-200 must match ANIMATION_DURATIONS.REMOVAL_MS (200ms)
+      className={`collapse collapse-arrow bg-base-100 border-base-300 border rounded-none mb-4 transition-opacity duration-200 ease-out ${isWindowRemoving ? 'opacity-0' : 'opacity-100'}`}
       data-window-group-number={windowGroupNumber}
       data-window-id={tabGroup.windowId}
     >
