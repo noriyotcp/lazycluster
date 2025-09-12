@@ -87,9 +87,14 @@ const TabItem = ({ tab, windowTabs }: TabItemProps) => {
   };
 
   const handleCloseButtonClick = () => {
-    const tabId = tab.id!;
-    const windowId = tab.windowId!;
+    const tabId = tab.id;
+    const windowId = tab.windowId;
 
+    if (tabId === undefined || windowId === undefined) {
+      showToast(<Alert message="Cannot close tab: missing tab or window ID." />);
+      console.error('Cannot close tab: tabId or windowId is undefined', { tabId, windowId });
+      return;
+    }
     // Check if this is the last tab in the window
     const isLastTab = isLastTabInWindow(tabId, windowTabs);
 
