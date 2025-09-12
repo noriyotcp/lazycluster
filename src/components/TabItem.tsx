@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useTabFocusContext } from '../../src/contexts/TabFocusContext';
+import { useDeletionState } from '../contexts/DeletionStateContext';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
 
@@ -34,6 +35,8 @@ const TabItem = ({ tab }: TabItemProps) => {
   const { focusActiveTab } = useTabFocusContext();
   const checkboxRef = useRef<HTMLInputElement>(null);
   const { showToast } = useToast();
+  const { isDeleting, setDeletingState } = useDeletionState();
+  const isDeletingTab = isDeleting({ type: 'tab', id: tab.id! });
 
   useEffect(() => {
     setIsChecked(selectedTabIds.includes(tab.id!));
@@ -66,55 +69,58 @@ const TabItem = ({ tab }: TabItemProps) => {
     }
   };
 
-  const handleCloseButtonClick = () => {
-    chrome.tabs.remove(tab.id!, () => {
-      if (chrome.runtime.lastError) {
-        showToast(<Alert message="Failed to close tab" />);
-        console.error('Failed to close tab:', chrome.runtime.lastError);
-      }
-    });
+  const handleCloseButtonClick = async () => {
+    setDeletingState({ type: 'tab', id: tab.id!, isDeleting: true });
+    try {
+      await chrome.tabs.remove(tab.id!);
+    } catch (error) {
+      showToast(<Alert message="Failed to close tab" />);
+      console.error('Failed to close tab:', error);
+    }
   };
 
   return (
-    <li
-      tabIndex={0}
-      className="list-row p-2 items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem"
-      onKeyDown={handleKeyDown}
-    >
-      <input
-        id={`tab-${tab.id}`}
-        type="checkbox"
-        className="checkbox checkbox-xs"
-        checked={isChecked}
-        onChange={handleCheckboxChange}
-        ref={checkboxRef}
-      />
-      <div>
-        {tab.favIconUrl ? (
-          <img
-            className="size-4"
-            src={tab.favIconUrl ?? ''}
-            alt={tab.title ?? ''}
-            onError={e => ((e.target as HTMLImageElement).src = '')}
-          />
-        ) : (
-          globeIcon()
-        )}
-      </div>
-      <a
-        className="list-col-grow cursor-pointer focus:outline-1 truncate hover:underline"
-        href={tab.url}
-        onClick={handleClick}
+    <div inert={isDeletingTab || undefined} className="inert:opacity-50">
+      <li
+        tabIndex={0}
+        className="list-row p-2 items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem"
+        onKeyDown={handleKeyDown}
       >
-        {tab.title}
-      </a>
-      <a className="hidden group-hover/tabitem:inline text-gray-500 underline" href={tab.url} onClick={handleClick}>
-        {extractDomain(tab.url || '')}
-      </a>
-      <button className="btn btn-outline btn-error btn-xs" onClick={handleCloseButtonClick}>
-        Close
-      </button>
-    </li>
+        <input
+          id={`tab-${tab.id}`}
+          type="checkbox"
+          className="checkbox checkbox-xs"
+          checked={isChecked}
+          onChange={handleCheckboxChange}
+          ref={checkboxRef}
+        />
+        <div>
+          {tab.favIconUrl ? (
+            <img
+              className="size-4"
+              src={tab.favIconUrl ?? ''}
+              alt={tab.title ?? ''}
+              onError={e => ((e.target as HTMLImageElement).src = '')}
+            />
+          ) : (
+            globeIcon()
+          )}
+        </div>
+        <a
+          className="list-col-grow cursor-pointer focus:outline-1 truncate hover:underline"
+          href={tab.url}
+          onClick={handleClick}
+        >
+          {tab.title}
+        </a>
+        <a className="hidden group-hover/tabitem:inline text-gray-500 underline" href={tab.url} onClick={handleClick}>
+          {extractDomain(tab.url || '')}
+        </a>
+        <button className="btn btn-outline btn-error btn-xs" onClick={handleCloseButtonClick}>
+          Close
+        </button>
+      </li>
+    </div>
   );
 };
 

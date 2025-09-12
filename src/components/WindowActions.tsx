@@ -1,4 +1,5 @@
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
+import { useDeletionState } from '../contexts/DeletionStateContext';
 import { useToast } from '../../src/components/ToastProvider';
 import Alert from '../../src/components/Alert';
 import { countSelectedIds, shouldBulkSelectBeChecked, shouldCloseTabsBeDisabled } from '../utils/windowActions';
@@ -15,6 +16,7 @@ const extractTabIds = (tabs: chrome.tabs.Tab[]): number[] => {
 // visibleTabs is used to determine the checked state of the bulk select checkbox
 const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
   const { selectedTabIds, addTabsToSelection, removeTabsFromSelection } = useTabSelectionContext();
+  const { setDeletingState } = useDeletionState();
   const { showToast } = useToast();
 
   const handleFocusWindow = () => {
@@ -31,6 +33,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
   };
 
   const handleCloseWindow = async () => {
+    setDeletingState({ type: 'window', id: windowId, isDeleting: true });
     try {
       // Get all tabs in this window to remove them from selection
       const tabs = await chrome.tabs.query({ windowId });
@@ -49,6 +52,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
   };
 
   const handleCloseTabsInWindow = async () => {
+    let tabIdsInWindow: number[] = [];
     try {
       const results = await Promise.all(
         selectedTabIds.map(async tabId => {
@@ -62,7 +66,10 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
         })
       );
 
-      const tabIdsInWindow = results.filter((tabId): tabId is number => tabId !== null);
+      tabIdsInWindow = results.filter((tabId): tabId is number => tabId !== null);
+
+      // Mark tabs as deleting
+      tabIdsInWindow.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: true }));
 
       await chrome.tabs.remove(tabIdsInWindow);
       // Remove only the closed tabs from selection instead of clearing all

@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { TabSelectionContextProvider } from '../../src/contexts/TabSelectionContext';
 import { TabGroupProvider } from '@/src/contexts/TabGroupContext';
+import { DeletionStateProvider } from '../../src/contexts/DeletionStateContext';
 import { ToastProvider } from '../../src/components/ToastProvider';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -10,7 +11,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <ToastProvider>
       <TabGroupProvider>
         <TabSelectionContextProvider>
-          <App />
+          <DeletionStateProvider>
+            <App />
+          </DeletionStateProvider>
         </TabSelectionContextProvider>
       </TabGroupProvider>
     </ToastProvider>
