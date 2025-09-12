@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react'; // Add useCallback
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { devLog } from '../../src/utils/devLog';
 import Header from '../../src/components/Header';
 import WindowGroupList from '../../src/components/WindowGroupList';
@@ -203,21 +203,30 @@ const Manager = () => {
     [clearSelection]
   );
 
-  const filteredTabGroups = tabGroups
-    .map((group, index) => ({ ...group, windowGroupNumber: index }))
-    .map(group => ({
-      ...group,
-      tabs: group.tabs.filter(tab =>
-        ['title', 'url'].some(target => {
-          const value = (tab as Tabs.Tab)[target as keyof Tabs.Tab];
-          return typeof value === 'string' && value.toLowerCase().includes(searchQuery.toLowerCase());
-        })
-      ) as chrome.tabs.Tab[],
-    })) satisfies { windowId: number; tabs: chrome.tabs.Tab[]; windowGroupNumber: number }[]; // Enforce chrome.tabs.Tab[] type.
+  const filteredTabGroups = useMemo(
+    () =>
+      tabGroups
+        .map((group, index) => ({ ...group, windowGroupNumber: index }))
+        .map(group => ({
+          ...group,
+          tabs: group.tabs.filter(tab =>
+            ['title', 'url'].some(target => {
+              const value = (tab as Tabs.Tab)[target as keyof Tabs.Tab];
+              return typeof value === 'string' && value.toLowerCase().includes(searchQuery.toLowerCase());
+            })
+          ) as chrome.tabs.Tab[],
+        })) satisfies { windowId: number; tabs: chrome.tabs.Tab[]; windowGroupNumber: number }[], // Enforce chrome.tabs.Tab[] type.
+    [tabGroups, searchQuery]
+  );
 
   return (
     <TabFocusProvider>
-      <Header searchQuery={searchQuery} onSearchQueryChange={handleSearchQueryChange} searchBarRef={searchBarRef} tabGroups={tabGroups} />
+      <Header
+        searchQuery={searchQuery}
+        onSearchQueryChange={handleSearchQueryChange}
+        searchBarRef={searchBarRef}
+        tabGroups={tabGroups}
+      />
       <div className="p-5 pt-0">
         <WindowGroupList filteredTabGroups={filteredTabGroups} activeWindowId={activeWindowId} />
       </div>

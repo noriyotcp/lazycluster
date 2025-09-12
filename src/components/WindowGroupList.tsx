@@ -12,8 +12,8 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId }: WindowGroupListP
       .filter(group => group.tabs.length > 0)
       .map(tabGroup => (
         <div key={tabGroup.windowId} className="break-inside-avoid-column">
-          <WindowGroupContextProvider key={tabGroup.windowId} value={{ windowGroupNumber: tabGroup.windowGroupNumber }}>
-            <WindowGroup key={tabGroup.windowId} tabGroup={tabGroup} activeWindowId={activeWindowId} />
+          <WindowGroupContextProvider value={{ windowGroupNumber: tabGroup.windowGroupNumber }}>
+            <WindowGroup tabGroup={tabGroup} activeWindowId={activeWindowId} />
           </WindowGroupContextProvider>
         </div>
       ))}
