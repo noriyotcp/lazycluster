@@ -1,0 +1,23 @@
+version: 2
+updates:
+  # npm パッケージの依存関係更新
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "09:00"
+      timezone: "Asia/Tokyo"
+    # メジャーバージョンの更新を無視
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    # プルリクエストの設定
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "dependabot"
+      - "npm"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
