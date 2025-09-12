@@ -49,12 +49,12 @@ const TabItem = ({ tab, windowTabs }: TabItemProps) => {
   const { showToast } = useToast();
 
   // Check if tab or its window is being removed
-  const isTabRemoving = removingTabIds.has(tab.id!);
+  const isTabRemoving = tab.id !== undefined && removingTabIds.has(tab.id);
   const isWindowRemoving = tab.windowId !== undefined && removingWindowIds.has(tab.windowId);
   const isRemoving = isTabRemoving || isWindowRemoving;
 
   useEffect(() => {
-    setIsChecked(selectedTabIds.includes(tab.id!));
+    setIsChecked(tab.id !== undefined && selectedTabIds.includes(tab.id));
   }, [selectedTabIds, tab.id]);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -65,10 +65,12 @@ const TabItem = ({ tab, windowTabs }: TabItemProps) => {
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (tab.id === undefined) return;
+    
     if (e.target.checked) {
-      addTabToSelection(tab.id!);
+      addTabToSelection(tab.id);
     } else {
-      removeTabFromSelection(tab.id!);
+      removeTabFromSelection(tab.id);
     }
     setIsChecked(e.target.checked);
   };
