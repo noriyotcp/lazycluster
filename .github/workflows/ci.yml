@@ -1,0 +1,111 @@
+name: CI
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  # Static analysis - TypeScript type checking and ESLint
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type checking
+        run: npm run compile
+
+      - name: ESLint
+        run: npm run lint
+
+  # Unit tests with Vitest
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: unit-test-results
+          path: |
+            coverage/**/*
+            test-results/**/*
+          retention-days: 7
+
+  # Build and E2E tests - depends on static analysis and unit tests passing
+  build-and-e2e:
+    name: Build & E2E Tests
+    needs: [static-analysis, unit-tests]
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    env:
+      BUILD_OUTPUT_DIR: .output/chrome-mv3
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Chrome Extension
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          if [ -d "$BUILD_OUTPUT_DIR" ]; then
+            echo "✅ Build output exists at $BUILD_OUTPUT_DIR"
+            echo "Build contents:"
+            ls -la "$BUILD_OUTPUT_DIR"
+          else
+            echo "❌ Build output missing at $BUILD_OUTPUT_DIR"
+            exit 1
+          fi
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: chrome-extension-build
+          path: ${{ env.BUILD_OUTPUT_DIR }}
+          retention-days: 7
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
