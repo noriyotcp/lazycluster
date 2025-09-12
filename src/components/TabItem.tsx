@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
+import { useDeletionContext } from '../../src/contexts/DeletionContext';
 import { useTabFocusContext } from '../../src/contexts/TabFocusContext';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
+import { isLastTabInWindow } from '../utils/deletionHelpers';
+import { ANIMATION_DURATIONS } from '../constants/animation';
 
 const extractDomain = (url: string): string => {
   try {
@@ -14,6 +17,7 @@ const extractDomain = (url: string): string => {
 
 interface TabItemProps {
   tab: chrome.tabs.Tab;
+  windowTabs: chrome.tabs.Tab[]; // All tabs in the same window
 }
 
 const globeIcon = () => {
@@ -28,15 +32,29 @@ const globeIcon = () => {
   );
 };
 
-const TabItem = ({ tab }: TabItemProps) => {
+const TabItem = ({ tab, windowTabs }: TabItemProps) => {
   const { selectedTabIds, addTabToSelection, removeTabFromSelection } = useTabSelectionContext();
+  const {
+    removingTabIds,
+    removingWindowIds,
+    markTabsAsRemoving,
+    unmarkTabsAsRemoving,
+    markWindowAsRemoving,
+    unmarkWindowAsRemoving,
+  } = useDeletionContext();
   const [isChecked, setIsChecked] = useState(false);
   const { focusActiveTab } = useTabFocusContext();
   const checkboxRef = useRef<HTMLInputElement>(null);
+  const itemRef = useRef<HTMLLIElement>(null);
   const { showToast } = useToast();
 
+  // Check if tab or its window is being removed
+  const isTabRemoving = tab.id !== undefined && removingTabIds.has(tab.id);
+  const isWindowRemoving = tab.windowId !== undefined && removingWindowIds.has(tab.windowId);
+  const isRemoving = isTabRemoving || isWindowRemoving;
+
   useEffect(() => {
-    setIsChecked(selectedTabIds.includes(tab.id!));
+    setIsChecked(tab.id !== undefined && selectedTabIds.includes(tab.id));
   }, [selectedTabIds, tab.id]);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -47,10 +65,12 @@ const TabItem = ({ tab }: TabItemProps) => {
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (tab.id === undefined) return;
+    
     if (e.target.checked) {
-      addTabToSelection(tab.id!);
+      addTabToSelection(tab.id);
     } else {
-      removeTabFromSelection(tab.id!);
+      removeTabFromSelection(tab.id);
     }
     setIsChecked(e.target.checked);
   };
@@ -67,18 +87,48 @@ const TabItem = ({ tab }: TabItemProps) => {
   };
 
   const handleCloseButtonClick = () => {
-    chrome.tabs.remove(tab.id!, () => {
-      if (chrome.runtime.lastError) {
-        showToast(<Alert message="Failed to close tab" />);
-        console.error('Failed to close tab:', chrome.runtime.lastError);
-      }
-    });
+    const tabId = tab.id;
+    const windowId = tab.windowId;
+
+    if (tabId === undefined || windowId === undefined) {
+      showToast(<Alert message="Cannot close tab: missing tab or window ID." />);
+      console.error('Cannot close tab: tabId or windowId is undefined', { tabId, windowId });
+      return;
+    }
+    // Check if this is the last tab in the window
+    const isLastTab = isLastTabInWindow(tabId, windowTabs);
+
+    // Mark for removal based on whether it's the last tab
+    if (isLastTab && windowId !== undefined) {
+      markWindowAsRemoving(windowId);
+    } else {
+      markTabsAsRemoving([tabId]);
+    }
+
+    // Wait for animation to complete, then remove the tab
+    setTimeout(() => {
+      chrome.tabs.remove(tabId, () => {
+        if (chrome.runtime.lastError) {
+          // If removal failed, unmark based on type
+          if (isLastTab && windowId !== undefined) {
+            unmarkWindowAsRemoving(windowId);
+          } else {
+            unmarkTabsAsRemoving([tabId]);
+          }
+          showToast(<Alert message="Failed to close tab" />);
+          console.error('Failed to close tab:', chrome.runtime.lastError);
+        }
+        // Tab will be removed from DOM by background script update
+      });
+    }, ANIMATION_DURATIONS.REMOVAL_MS); // Match the duration-200 class
   };
 
   return (
     <li
+      ref={itemRef}
       tabIndex={0}
-      className="list-row p-2 items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem"
+      // duration-200 must match ANIMATION_DURATIONS.REMOVAL_MS (200ms)
+      className={`list-row p-2 items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem transition-opacity duration-200 ease-out ${isRemoving ? 'opacity-0' : 'opacity-100'}`}
       onKeyDown={handleKeyDown}
     >
       <input

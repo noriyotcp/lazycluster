@@ -217,7 +217,7 @@ const Manager = () => {
 
   return (
     <TabFocusProvider>
-      <Header searchQuery={searchQuery} onSearchQueryChange={handleSearchQueryChange} searchBarRef={searchBarRef} />
+      <Header searchQuery={searchQuery} onSearchQueryChange={handleSearchQueryChange} searchBarRef={searchBarRef} tabGroups={tabGroups} />
       <div className="p-5 pt-0">
         <WindowGroupList filteredTabGroups={filteredTabGroups} activeWindowId={activeWindowId} />
       </div>
