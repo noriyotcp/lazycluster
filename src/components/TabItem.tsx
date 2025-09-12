@@ -120,15 +120,15 @@ const TabItem = ({ tab, windowTabs }: TabItemProps) => {
         }
         // Tab will be removed from DOM by background script update
       });
-    }, ANIMATION_DURATIONS.REMOVAL_MS); // Match the duration-200 class
+    }, ANIMATION_DURATIONS.REMOVAL_MS); // Match the duration-150 class
   };
 
   return (
     <li
       ref={itemRef}
       tabIndex={0}
-      // duration-200 must match ANIMATION_DURATIONS.REMOVAL_MS (200ms)
-      className={`list-row items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem transition-all duration-200 ease-out overflow-hidden ${
+      // duration-150 must match ANIMATION_DURATIONS.REMOVAL_MS (150ms)
+      className={`list-row items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem transition-all duration-150 ease-out overflow-hidden ${
         isRemoving ? 'opacity-0 max-h-0 scale-y-0 py-0' : 'opacity-100 max-h-16 scale-y-100 py-2'
       }`}
       onKeyDown={handleKeyDown}
