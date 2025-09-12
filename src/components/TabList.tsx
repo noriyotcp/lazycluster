@@ -58,7 +58,7 @@ const TabList = ({ tabs }: TabListProps) => {
   return (
     <ul ref={listRef} className="list shadow-md" onKeyDown={handleKeyDown}>
       {tabs.map(tab => (
-        <TabItem key={tab.id} tab={tab} windowTabs={tabs} />
+        <TabItem key={tab.id} tab={tab} />
       ))}
     </ul>
   );

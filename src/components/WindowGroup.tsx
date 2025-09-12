@@ -2,7 +2,6 @@ import WindowHeader from './WindowHeader';
 import TabList from './TabList';
 import WindowActions from './WindowActions';
 import { useWindowGroupContext } from '../contexts/WindowGroupContext';
-import { useDeletionContext } from '../contexts/DeletionContext';
 
 interface WindowGroupProps {
   tabGroup: {
@@ -13,13 +12,10 @@ interface WindowGroupProps {
 }
 const WindowGroup = ({ tabGroup, activeWindowId }: WindowGroupProps) => {
   const { windowGroupNumber } = useWindowGroupContext();
-  const { removingWindowIds } = useDeletionContext();
-  const isWindowRemoving = removingWindowIds.has(tabGroup.windowId);
-
+  
   return (
-    <div
-      // duration-200 must match ANIMATION_DURATIONS.REMOVAL_MS (200ms)
-      className={`collapse collapse-arrow bg-base-100 border-base-300 border rounded-none mb-4 transition-opacity duration-200 ease-out ${isWindowRemoving ? 'opacity-0' : 'opacity-100'}`}
+    <div 
+      className="collapse collapse-arrow bg-base-100 border-base-300 border rounded-none mb-4"
       data-window-group-number={windowGroupNumber}
       data-window-id={tabGroup.windowId}
     >
