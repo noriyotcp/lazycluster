@@ -51,8 +51,8 @@ jobs:
         with:
           name: unit-test-results
           path: |
-            coverage/
-            test-results/
+            coverage/**/*
+            test-results/**/*
           retention-days: 7
 
   # Build and E2E tests - depends on static analysis and unit tests passing
@@ -61,6 +61,8 @@ jobs:
     needs: [static-analysis, unit-tests]
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      BUILD_OUTPUT_DIR: .output/chrome-mv3
     steps:
       - uses: actions/checkout@v4
 
@@ -77,12 +79,12 @@ jobs:
 
       - name: Verify build output
         run: |
-          if [ -d .output/chrome-mv3 ]; then
-            echo "✅ Build output exists"
+          if [ -d "$BUILD_OUTPUT_DIR" ]; then
+            echo "✅ Build output exists at $BUILD_OUTPUT_DIR"
             echo "Build contents:"
-            ls -la .output/chrome-mv3
+            ls -la "$BUILD_OUTPUT_DIR"
           else
-            echo "❌ Build output missing"
+            echo "❌ Build output missing at $BUILD_OUTPUT_DIR"
             exit 1
           fi
 
@@ -97,7 +99,7 @@ jobs:
         if: success()
         with:
           name: chrome-extension-build
-          path: .output/chrome-mv3
+          path: ${{ env.BUILD_OUTPUT_DIR }}
           retention-days: 7
 
       - name: Upload Playwright report
