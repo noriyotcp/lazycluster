@@ -3,6 +3,7 @@ import SearchBar from './SearchBar';
 import ThemeSwitcher from './ThemeSwitcher';
 import TabCountBadge from './TabCountBadge';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
+import { useDeletionState } from '../contexts/DeletionStateContext';
 import { useToast } from '../../src/components/ToastProvider';
 import Alert from '../../src/components/Alert';
 import { useTotalTabCount } from '../hooks/useTotalTabCount';
@@ -15,17 +16,22 @@ interface HeaderProps {
 
 const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps) => {
   const { selectedTabIds, removeTabsFromSelection } = useTabSelectionContext();
+  const { setDeletingState } = useDeletionState();
   const { showToast } = useToast();
   const totalTabCount = useTotalTabCount();
 
   const handleCloseSelectedTabs = async () => {
     const tabsToClose = [...selectedTabIds]; // Copy the array before removal
+    // Mark all tabs as deleting
+    tabsToClose.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: true }));
     try {
       await chrome.tabs.remove(tabsToClose);
       // Success: remove all from selection
       removeTabsFromSelection(tabsToClose);
       showToast(<Alert message={`Selected ${tabsToClose.length} tabs closed successfully.`} variant="success" />);
     } catch (error) {
+      // Reset deleting state for all tabs that failed to close
+      tabsToClose.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: false }));
       // On error, don't update selection - let syncWithExistingTabs handle cleanup
       // This prevents state inconsistency when tab removal fails
       showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);

@@ -6,6 +6,7 @@ import type { Tabs } from 'webextension-polyfill';
 import { TabFocusProvider } from '../../src/contexts/TabFocusContext';
 import { useTabGroupContext } from '../../src/contexts/TabGroupContext';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext'; // Import TabSelectionContext
+import { useDeletionState } from '../../src/contexts/DeletionStateContext'; // Import DeletionStateContext
 import { useBackgroundConnection } from '../../src/hooks/useBackgroundConnection'; // Import the hook
 import './style.css';
 
@@ -22,6 +23,7 @@ interface BackgroundMessage {
 const Manager = () => {
   const { tabGroups, updateTabGroups } = useTabGroupContext();
   const { clearSelection, syncWithExistingTabs } = useTabSelectionContext();
+  const { cleanupNonExistentItems } = useDeletionState();
   const [activeWindowId, setActiveWindowId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sequenceActive, setSequenceActive] = useState<boolean>(false);
@@ -39,12 +41,18 @@ const Manager = () => {
         // Sync selected tabs with existing tabs
         const existingTabIds = message.tabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
         syncWithExistingTabs(existingTabIds);
+
+        // Clean up deletion state for non-existent items
+        const existingWindowIds = [
+          ...new Set(message.tabs.map(tab => tab.windowId).filter((id): id is number => id !== undefined)),
+        ];
+        cleanupNonExistentItems({ existingTabIds, existingWindowIds });
       } else if (message.type === 'BACKGROUND_INITIALIZED') {
         devLog(`${new Date()} - Background script initialized`);
       }
       // No need to handle REQUEST_INITIAL_DATA here, it's sent from client
     },
-    [updateTabGroups, syncWithExistingTabs]
+    [updateTabGroups, syncWithExistingTabs, cleanupNonExistentItems]
   );
 
   // Sync sequenceActive with its ref
