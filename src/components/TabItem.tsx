@@ -74,6 +74,7 @@ const TabItem = ({ tab }: TabItemProps) => {
     try {
       await chrome.tabs.remove(tab.id!);
     } catch (error) {
+      setDeletingState({ type: 'tab', id: tab.id!, isDeleting: false });
       showToast(<Alert message="Failed to close tab" />);
       console.error('Failed to close tab:', error);
     }

@@ -30,6 +30,8 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps)
       removeTabsFromSelection(tabsToClose);
       showToast(<Alert message={`Selected ${tabsToClose.length} tabs closed successfully.`} variant="success" />);
     } catch (error) {
+      // Reset deleting state for all tabs that failed to close
+      tabsToClose.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: false }));
       // On error, don't update selection - let syncWithExistingTabs handle cleanup
       // This prevents state inconsistency when tab removal fails
       showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);

@@ -45,6 +45,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
       // Remove these tabs from selection after successful close
       removeTabsFromSelection(tabIds);
     } catch (error) {
+      setDeletingState({ type: 'window', id: windowId, isDeleting: false });
       console.error('Error closing window:', error);
       // Add user notification
       showToast(<Alert message="Failed to close window" variant="error" />);
@@ -76,6 +77,8 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
       removeTabsFromSelection(tabIdsInWindow);
       showToast(<Alert message={`Selected ${tabIdsInWindow.length} tabs closed successfully.`} variant="success" />);
     } catch (error) {
+      // Reset deleting state for all tabs that failed to close
+      tabIdsInWindow.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: false }));
       showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
       console.error('Error closing tabs:', error);
     }
