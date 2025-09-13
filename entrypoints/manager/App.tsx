@@ -142,7 +142,7 @@ const Manager = () => {
       }
 
       // Handle '?' (Shift + /) for keyboard shortcuts modal
-      if (event.key === '?' || (event.key === '/' && event.shiftKey)) {
+      if (event.key === '?') {
         event.preventDefault();
         const modal = document.getElementById('keyboard-shortcuts-modal') as HTMLDialogElement;
         if (modal) {
