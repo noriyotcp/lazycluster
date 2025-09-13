@@ -54,22 +54,24 @@ export const DeletionStateProvider: React.FC<{ children: ReactNode }> = ({ child
 
   const cleanupNonExistentItems = useCallback(
     ({ existingTabIds, existingWindowIds }: { existingTabIds: number[]; existingWindowIds: number[] }) => {
+      const existingTabIdsSet = new Set(existingTabIds);
       // Clean up tab IDs that no longer exist
       setDeletingTabIds(prev => {
         const next = new Set<number>();
         prev.forEach(id => {
-          if (existingTabIds.includes(id)) {
+          if (existingTabIdsSet.has(id)) {
             next.add(id);
           }
         });
         return next.size === prev.size ? prev : next;
       });
 
+      const existingWindowIdsSet = new Set(existingWindowIds);
       // Clean up window IDs that no longer exist
       setDeletingWindowIds(prev => {
         const next = new Set<number>();
         prev.forEach(id => {
-          if (existingWindowIds.includes(id)) {
+          if (existingWindowIdsSet.has(id)) {
             next.add(id);
           }
         });
