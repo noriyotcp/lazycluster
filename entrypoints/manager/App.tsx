@@ -8,6 +8,7 @@ import { useTabGroupContext } from '../../src/contexts/TabGroupContext';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext'; // Import TabSelectionContext
 import { useDeletionState } from '../../src/contexts/DeletionStateContext'; // Import DeletionStateContext
 import { useBackgroundConnection } from '../../src/hooks/useBackgroundConnection'; // Import the hook
+import KeyboardShortcutsModal from '../../src/components/KeyboardShortcutsModal';
 import './style.css';
 
 // Constants for keyboard navigation
@@ -140,6 +141,16 @@ const Manager = () => {
         return;
       }
 
+      // Handle '?' (Shift + /) for keyboard shortcuts modal
+      if (event.key === '?' || (event.key === '/' && event.shiftKey)) {
+        event.preventDefault();
+        const modal = document.getElementById('keyboard-shortcuts-modal') as HTMLDialogElement;
+        if (modal) {
+          modal.showModal();
+        }
+        return;
+      }
+
       // Handle ESC key to cancel sequence
       if (event.key === 'Escape' && sequenceActiveRef.current) {
         event.preventDefault();
@@ -234,6 +245,7 @@ const Manager = () => {
           Press 0-9 to jump to Window Group
         </div>
       )}
+      <KeyboardShortcutsModal />
     </TabFocusProvider>
   );
 };
