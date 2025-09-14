@@ -12,6 +12,7 @@ A Chrome extension for enhanced tab and window management, inspired by the origi
   - Tab Count Badges: See the number of tabs in each window and total across all windows
   - Selection Counter: Real-time display of how many tabs you have selected
 - **Intuitive Keyboard Navigation:** Navigate and select tabs efficiently using familiar keyboard shortcuts for a smooth workflow:
+  - `?`: Show keyboard shortcuts help modal
   - `j/k`: Navigate up/down through tabs
   - `gg/G`: Jump to first/last tab (double press `g` for first, `Shift+g` for last)
   - `Space`: Toggle tab selection
