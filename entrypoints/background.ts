@@ -31,10 +31,13 @@ export default defineBackground(() => {
   });
 
   // Listen for tab updates
-  browser.tabs.onUpdated.addListener(async () => {
-    devLog(`${new Date()} - onUpdated:`, port);
-    if (port) {
-      updateTabs(port);
+  browser.tabs.onUpdated.addListener(async (tabId, changeInfo, _tab) => {
+    // Only process when the tab status is 'complete' to avoid multiple updates during loading
+    if (changeInfo.status === 'complete') {
+      devLog(`${new Date()} - onUpdated (complete) for tab ${tabId}`);
+      if (port) {
+        updateTabs(port);
+      }
     }
   });
 
