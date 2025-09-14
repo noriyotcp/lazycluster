@@ -374,4 +374,77 @@ test.describe('Manager Tab E2E Tests', () => {
       expect(focusedElement).toBe('2');
     }
   });
+
+  test('Current Window label should persist and no Window 0 should appear', async ({ page, extensionId }) => {
+    // Open the manager tab
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+
+    // Wait for the window groups to load
+    await page.locator('[data-window-group-number]').first().waitFor({ state: 'visible' });
+
+    // Verify Current Window is displayed for the window with the extension
+    // Use more specific selector to avoid matching help text
+    await expect(page.locator('.window-title:has-text("Current Window")')).toBeVisible();
+
+    // Verify Window 0 is NOT displayed
+    await expect(page.locator('.window-title:has-text("Window 0")')).not.toBeVisible();
+
+    // Get all window titles to verify numbering starts from 1
+    const windowTitles = await page.locator('.window-title').allTextContents();
+
+    // Filter out "Current Window" and check remaining titles
+    const numberedWindows = windowTitles.filter(title => title.startsWith('Window '));
+
+    // If there are other windows, they should be numbered from 1
+    for (const title of numberedWindows) {
+      const match = title.match(/Window (\d+)/);
+      if (match) {
+        const windowNumber = parseInt(match[1], 10);
+        expect(windowNumber).toBeGreaterThan(0); // Should be 1, 2, 3... never 0
+      }
+    }
+  });
+
+  test('Current Window label updates dynamically when tabs change', async ({ page, context, extensionId }) => {
+    // Open the manager tab
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+
+    // Wait for initial load
+    await page.locator('[data-window-group-number]').first().waitFor({ state: 'visible' });
+
+    // Verify Current Window is initially displayed
+    // Use more specific selector to avoid matching help text
+    await expect(page.locator('.window-title:has-text("Current Window")')).toBeVisible();
+
+    // Get initial tab count
+    const initialTabCount = await page.locator('.group\\/tabitem').count();
+
+    // Open a new tab in the same window (this will trigger tabGroups update)
+    const newTab = await context.newPage();
+    await newTab.goto('https://example.com');
+
+    // Wait for the tab count to increase (CSP-safe approach)
+    await expect(page.locator('.group\\/tabitem')).toHaveCount(
+      initialTabCount + 1,
+      { timeout: 5000 }
+    );
+
+    // Current Window should still be visible
+    await expect(page.locator('.window-title:has-text("Current Window")')).toBeVisible();
+
+    // Window 0 should never appear
+    await expect(page.locator('.window-title:has-text("Window 0")')).not.toBeVisible();
+
+    // Close the new tab
+    await newTab.close();
+
+    // Wait for the tab count to decrease (CSP-safe approach)
+    await expect(page.locator('.group\\/tabitem')).toHaveCount(
+      initialTabCount,
+      { timeout: 5000 }
+    );
+
+    // Current Window should still be visible after tab removal
+    await expect(page.locator('.window-title:has-text("Current Window")')).toBeVisible();
+  });
 });

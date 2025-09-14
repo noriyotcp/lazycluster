@@ -192,14 +192,17 @@ const Manager = () => {
     [handleWindowGroupFocus]
   );
 
-  // Effect for getting current window ID and setting up keydown listener
+  // Effect for initial activeWindowId setup on mount
   useEffect(() => {
     chrome.windows.getCurrent().then(window => {
       if (window.id !== undefined) {
         setActiveWindowId(window.id);
       }
     });
+  }, []); // Run once on mount
 
+  // Effect for keyboard event listener setup
+  useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
 
     // Cleanup
@@ -209,7 +212,16 @@ const Manager = () => {
         clearTimeout(sequenceTimeoutRef.current);
       }
     };
-  }, [handleKeyDown]); // Depend only on handleKeyDown
+  }, [handleKeyDown]); // Depend on handleKeyDown
+
+  // Effect to update activeWindowId when tabGroups changes (e.g., when tab is moved to another window)
+  useEffect(() => {
+    chrome.windows.getCurrent().then(window => {
+      if (window.id !== undefined) {
+        setActiveWindowId(window.id);
+      }
+    });
+  }, [tabGroups]); // Update whenever tabs change
 
   const handleSearchQueryChange = useCallback(
     (query: string) => {
