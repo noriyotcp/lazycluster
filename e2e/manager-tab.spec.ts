@@ -423,10 +423,10 @@ test.describe('Manager Tab E2E Tests', () => {
     const newTab = await context.newPage();
     await newTab.goto('https://example.com');
 
-    // Wait for the tab count to increase
-    await page.waitForFunction(
-      expectedCount => document.querySelectorAll('.group\\/tabitem').length > expectedCount,
-      initialTabCount
+    // Wait for the tab count to increase (CSP-safe approach)
+    await expect(page.locator('.group\\/tabitem')).toHaveCount(
+      initialTabCount + 1,
+      { timeout: 5000 }
     );
 
     // Current Window should still be visible
@@ -435,16 +435,13 @@ test.describe('Manager Tab E2E Tests', () => {
     // Window 0 should never appear
     await expect(page.locator('.window-title:has-text("Window 0")')).not.toBeVisible();
 
-    // Get tab count before closing
-    const beforeCloseCount = await page.locator('.group\\/tabitem').count();
-
     // Close the new tab
     await newTab.close();
 
-    // Wait for the tab count to decrease
-    await page.waitForFunction(
-      expectedCount => document.querySelectorAll('.group\\/tabitem').length < expectedCount,
-      beforeCloseCount
+    // Wait for the tab count to decrease (CSP-safe approach)
+    await expect(page.locator('.group\\/tabitem')).toHaveCount(
+      initialTabCount,
+      { timeout: 5000 }
     );
 
     // Current Window should still be visible after tab removal
