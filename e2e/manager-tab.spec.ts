@@ -416,12 +416,18 @@ test.describe('Manager Tab E2E Tests', () => {
     // Use more specific selector to avoid matching help text
     await expect(page.locator('.window-title:has-text("Current Window")')).toBeVisible();
 
+    // Get initial tab count
+    const initialTabCount = await page.locator('.group\\/tabitem').count();
+
     // Open a new tab in the same window (this will trigger tabGroups update)
     const newTab = await context.newPage();
     await newTab.goto('https://example.com');
 
-    // Wait for the tab update to propagate
-    await page.waitForTimeout(500);
+    // Wait for the tab count to increase
+    await page.waitForFunction(
+      expectedCount => document.querySelectorAll('.group\\/tabitem').length > expectedCount,
+      initialTabCount
+    );
 
     // Current Window should still be visible
     await expect(page.locator('.window-title:has-text("Current Window")')).toBeVisible();
@@ -429,11 +435,17 @@ test.describe('Manager Tab E2E Tests', () => {
     // Window 0 should never appear
     await expect(page.locator('.window-title:has-text("Window 0")')).not.toBeVisible();
 
+    // Get tab count before closing
+    const beforeCloseCount = await page.locator('.group\\/tabitem').count();
+
     // Close the new tab
     await newTab.close();
 
-    // Wait for the tab removal to propagate
-    await page.waitForTimeout(500);
+    // Wait for the tab count to decrease
+    await page.waitForFunction(
+      expectedCount => document.querySelectorAll('.group\\/tabitem').length < expectedCount,
+      beforeCloseCount
+    );
 
     // Current Window should still be visible after tab removal
     await expect(page.locator('.window-title:has-text("Current Window")')).toBeVisible();
