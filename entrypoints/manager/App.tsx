@@ -211,6 +211,15 @@ const Manager = () => {
     };
   }, [handleKeyDown]); // Depend only on handleKeyDown
 
+  // Effect to update activeWindowId when tabGroups changes (e.g., when tab is moved to another window)
+  useEffect(() => {
+    chrome.windows.getCurrent().then(window => {
+      if (window.id !== undefined) {
+        setActiveWindowId(window.id);
+      }
+    });
+  }, [tabGroups]); // Update whenever tabs change
+
   const handleSearchQueryChange = useCallback(
     (query: string) => {
       setSearchQuery(query);
