@@ -1,7 +1,7 @@
 import { devLog } from '../src/utils/devLog';
 
 export default defineBackground(() => {
-  devLog('Hello background!', { id: browser.runtime.id });
+  devLog('Hello background!', { id: chrome.runtime.id });
 
   let port: chrome.runtime.Port | null = null;
 
@@ -23,7 +23,7 @@ export default defineBackground(() => {
   };
 
   // Listen for tab creation
-  browser.tabs.onCreated.addListener(async () => {
+  chrome.tabs.onCreated.addListener(async () => {
     devLog(`${new Date()} - onCreated:`, port);
     if (port) {
       updateTabs(port);
@@ -31,7 +31,7 @@ export default defineBackground(() => {
   });
 
   // Listen for tab updates
-  browser.tabs.onUpdated.addListener(async (tabId, changeInfo, _tab) => {
+  chrome.tabs.onUpdated.addListener(async (tabId: number, changeInfo: { status?: string }, _tab: chrome.tabs.Tab) => {
     // Only process when the tab status is 'complete' to avoid multiple updates during loading
     if (changeInfo.status === 'complete') {
       devLog(`${new Date()} - onUpdated (complete) for tab ${tabId}`);
@@ -42,7 +42,7 @@ export default defineBackground(() => {
   });
 
   // Listen for tab removal
-  browser.tabs.onRemoved.addListener(async () => {
+  chrome.tabs.onRemoved.addListener(async () => {
     devLog(`${new Date()} - onRemoved:`, port);
     if (port) {
       updateTabs(port);
@@ -50,7 +50,7 @@ export default defineBackground(() => {
   });
 
   // Listen for tab movement within a window
-  browser.tabs.onMoved.addListener(async () => {
+  chrome.tabs.onMoved.addListener(async () => {
     devLog(`${new Date()} - onMoved:`, port);
     if (port) {
       updateTabs(port);
@@ -58,7 +58,7 @@ export default defineBackground(() => {
   });
 
   // Listen for tab attachment (moved into a window)
-  browser.tabs.onAttached.addListener(async () => {
+  chrome.tabs.onAttached.addListener(async () => {
     devLog(`${new Date()} - onAttached:`, port);
     if (port) {
       updateTabs(port);
@@ -66,7 +66,7 @@ export default defineBackground(() => {
   });
 
   // Listen for tab detachment (moved out of a window)
-  browser.tabs.onDetached.addListener(async () => {
+  chrome.tabs.onDetached.addListener(async () => {
     devLog(`${new Date()} - onDetached:`, port);
     if (port) {
       updateTabs(port);
@@ -101,9 +101,9 @@ export default defineBackground(() => {
     }
   };
 
-  browser.runtime.onConnect.addListener(connect);
+  chrome.runtime.onConnect.addListener(connect);
 
-  browser.runtime.onMessage.addListener(request => {
+  chrome.runtime.onMessage.addListener((request: { action?: string; tabId?: number }) => {
     if (request.action === 'closeTab' && request.tabId) {
       chrome.tabs.remove(request.tabId);
     }

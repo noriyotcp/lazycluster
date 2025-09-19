@@ -2,7 +2,6 @@ import { useEffect, useState, useRef, useCallback } from 'react'; // Add useCall
 import { devLog } from '../../src/utils/devLog';
 import Header from '../../src/components/Header';
 import WindowGroupList from '../../src/components/WindowGroupList';
-import type { Tabs } from 'webextension-polyfill';
 import { TabFocusProvider } from '../../src/contexts/TabFocusContext';
 import { useTabGroupContext } from '../../src/contexts/TabGroupContext';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext'; // Import TabSelectionContext
@@ -240,7 +239,7 @@ const Manager = () => {
       ...group,
       tabs: group.tabs.filter(tab =>
         ['title', 'url'].some(target => {
-          const value = (tab as Tabs.Tab)[target as keyof Tabs.Tab];
+          const value = (tab as chrome.tabs.Tab)[target as keyof chrome.tabs.Tab];
           return typeof value === 'string' && value.toLowerCase().includes(searchQuery.toLowerCase());
         })
       ) as chrome.tabs.Tab[],
