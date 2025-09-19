@@ -34,7 +34,7 @@
     "@playwright/test": "^1.55.0",
     "@types/chrome": "^0.1.9",
     "@types/node": "^22.18.1",
-    "@types/react": "^19.0.1",
+    "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@types/tmp": "^0.2.6",
     "@vitest/ui": "^3.2.4",
