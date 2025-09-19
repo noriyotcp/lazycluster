@@ -39,7 +39,7 @@
     "@types/tmp": "^0.2.6",
     "@vitest/ui": "^3.2.4",
     "@wxt-dev/module-react": "^1.1.5",
-    "eslint": "^9.22.0",
+    "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^16.0.0",
