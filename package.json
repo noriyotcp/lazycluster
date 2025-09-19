@@ -23,7 +23,7 @@
     "submit": "wxt submit"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.0.14",
+    "@tailwindcss/vite": "^4.1.13",
     "daisyui": "^5.0.6",
     "react": "^19.0.0",
     "react-dom": "^19.1.1",
