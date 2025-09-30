@@ -33,6 +33,11 @@ const TabList = ({ tabs }: TabListProps) => {
       case 'j':
         nextIndex = (activeIndex + 1) % tabItems.length;
         break;
+      case 'M':
+        if (tabItems.length >= 3) {
+          nextIndex = Math.floor(tabItems.length / 2);
+        }
+        break;
       case 'g': {
         const now = Date.now();
         if (lastKey === 'g' && now - lastKeyTime < 500) {

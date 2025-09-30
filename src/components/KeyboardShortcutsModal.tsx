@@ -10,6 +10,7 @@ const KeyboardShortcutsModal = () => {
     'Tab Navigation': [
       { key: 'j', description: 'Move to next tab (down)' },
       { key: 'k', description: 'Move to previous tab (up)' },
+      { key: 'Shift + m', description: 'Jump to middle tab' },
       { key: 'gg', description: 'Jump to first tab (press g twice)' },
       { key: 'Shift + g', description: 'Jump to last tab' },
     ],
