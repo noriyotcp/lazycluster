@@ -8,9 +8,6 @@ interface TabListProps {
 const TabList = ({ tabs }: TabListProps) => {
   const listRef = useRef<HTMLUListElement>(null);
 
-  let lastKeyTime = 0;
-  let lastKey = '';
-
   const handleKeyDown = (event: React.KeyboardEvent<HTMLUListElement>) => {
     const activeElement = document.activeElement;
     if (!activeElement || !listRef.current?.contains(activeElement)) {
@@ -33,24 +30,20 @@ const TabList = ({ tabs }: TabListProps) => {
       case 'j':
         nextIndex = (activeIndex + 1) % tabItems.length;
         break;
+      case 'H':
+        if (event.shiftKey) {
+          nextIndex = 0;
+        }
+        break;
       case 'M':
-        if (tabItems.length >= 3) {
+        if (event.shiftKey && tabItems.length >= 3) {
           nextIndex = Math.floor(tabItems.length / 2);
         }
         break;
-      case 'g': {
-        const now = Date.now();
-        if (lastKey === 'g' && now - lastKeyTime < 500) {
-          nextIndex = 0;
-        } else if (event.shiftKey) {
+      case 'L':
+        if (event.shiftKey) {
           nextIndex = tabItems.length - 1;
         }
-        lastKey = 'g';
-        lastKeyTime = now;
-        break;
-      }
-      case 'G':
-        nextIndex = tabItems.length - 1;
         break;
     }
 

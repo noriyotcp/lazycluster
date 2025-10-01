@@ -14,8 +14,8 @@ A Chrome extension for enhanced tab and window management, inspired by the origi
 - **Intuitive Keyboard Navigation:** Navigate and select tabs efficiently using familiar keyboard shortcuts for a smooth workflow:
   - `?`: Show keyboard shortcuts help modal
   - `j/k`: Navigate up/down through tabs
-  - `gg/G`: Jump to first/last tab (double press `g` for first, `Shift+g` for last)
-  - `Shift+m`: Jump to middle tab
+  - `Shift+h/l`: Jump to first/last tab in current window group (vim-style: High/Low)
+  - `Shift+m`: Jump to middle tab in current window group (vim-style: Middle)
   - `Space`: Toggle tab selection
   - `w + [0-9]`: Quick jump to Window Groups
     - `w` then `1-9`: Jump to specific Window Group
