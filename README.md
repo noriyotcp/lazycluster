@@ -11,6 +11,7 @@ A Chrome extension for enhanced tab and window management, inspired by the origi
 - **Visual Tab Metrics:** Stay informed about your tab usage with visual badges:
   - Tab Count Badges: See the number of tabs in each window and total across all windows
   - Selection Counter: Real-time display of how many tabs you have selected
+  - Tab Group Colors: Visual indicators showing Chrome tab group colors on the left border of each tab
 - **Intuitive Keyboard Navigation:** Navigate and select tabs efficiently using familiar keyboard shortcuts for a smooth workflow:
   - `?`: Show keyboard shortcuts help modal
   - `j/k`: Navigate up/down through tabs
