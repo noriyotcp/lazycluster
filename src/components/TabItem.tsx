@@ -4,6 +4,8 @@ import { useTabFocusContext } from '../../src/contexts/TabFocusContext';
 import { useDeletionState } from '../contexts/DeletionStateContext';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
+import { TabGroupColor } from '../types/tabGroup';
+import { getTabGroupBorderColorClass } from '../utils/tabGroupColors';
 
 const extractDomain = (url: string): string => {
   try {
@@ -37,10 +39,28 @@ const TabItem = ({ tab }: TabItemProps) => {
   const { showToast } = useToast();
   const { isDeleting, setDeletingState } = useDeletionState();
   const isDeletingTab = isDeleting({ type: 'tab', id: tab.id! });
+  const [groupColor, setGroupColor] = useState<TabGroupColor | null>(null);
 
   useEffect(() => {
     setIsChecked(selectedTabIds.includes(tab.id!));
   }, [selectedTabIds, tab.id]);
+
+  useEffect(() => {
+    const fetchGroupColor = async () => {
+      if (tab.groupId && tab.groupId !== chrome.tabGroups.TAB_GROUP_ID_NONE) {
+        try {
+          const group = await chrome.tabGroups.get(tab.groupId);
+          setGroupColor(group.color as TabGroupColor);
+        } catch (error) {
+          console.error('Failed to fetch tab group:', error);
+          setGroupColor(null);
+        }
+      } else {
+        setGroupColor(null);
+      }
+    };
+    fetchGroupColor();
+  }, [tab]);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -80,11 +100,14 @@ const TabItem = ({ tab }: TabItemProps) => {
     }
   };
 
+  // Apply group color if tab belongs to a group, otherwise use transparent border
+  const borderColorClass = groupColor ? getTabGroupBorderColorClass(groupColor) : 'border-l-transparent';
+
   return (
     <div inert={isDeletingTab || undefined} className="inert:opacity-50">
       <li
         tabIndex={0}
-        className="list-row p-2 items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem"
+        className={`list-row p-2 items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem border-l-[3px] ${borderColorClass}`}
         onKeyDown={handleKeyDown}
       >
         <input
