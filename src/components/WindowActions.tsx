@@ -91,7 +91,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
   return (
     <>
       <ul className="list shadow-md">
-        <li className="list-row p-2 items-center rounded-none gap-1.5">
+        <li className="list-row p-2 items-center rounded-none gap-1.5 border-l-[3px] border-l-transparent">
           <div>
             <input
               id={`bulk-select-tabs-on-window-${windowId}`}
