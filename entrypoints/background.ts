@@ -31,15 +31,17 @@ export default defineBackground(() => {
   });
 
   // Listen for tab updates
-  chrome.tabs.onUpdated.addListener(async (tabId: number, changeInfo: { status?: string }, _tab: chrome.tabs.Tab) => {
-    // Only process when the tab status is 'complete' to avoid multiple updates during loading
-    if (changeInfo.status === 'complete') {
-      devLog(`${new Date()} - onUpdated (complete) for tab ${tabId}`);
-      if (port) {
-        updateTabs(port);
+  chrome.tabs.onUpdated.addListener(
+    async (tabId: number, changeInfo: { status?: string; groupId?: number }, _tab: chrome.tabs.Tab) => {
+      // Process when the tab status is 'complete' or groupId changes
+      if (changeInfo.status === 'complete' || changeInfo.groupId !== undefined) {
+        devLog(`${new Date()} - onUpdated for tab ${tabId}`, changeInfo);
+        if (port) {
+          updateTabs(port);
+        }
       }
-    }
-  });
+    },
+  );
 
   // Listen for tab removal
   chrome.tabs.onRemoved.addListener(async () => {
@@ -68,6 +70,30 @@ export default defineBackground(() => {
   // Listen for tab detachment (moved out of a window)
   chrome.tabs.onDetached.addListener(async () => {
     devLog(`${new Date()} - onDetached:`, port);
+    if (port) {
+      updateTabs(port);
+    }
+  });
+
+  // Listen for tab group creation
+  chrome.tabGroups.onCreated.addListener(async () => {
+    devLog(`${new Date()} - tabGroups.onCreated:`, port);
+    if (port) {
+      updateTabs(port);
+    }
+  });
+
+  // Listen for tab group updates (color change, title change, etc.)
+  chrome.tabGroups.onUpdated.addListener(async () => {
+    devLog(`${new Date()} - tabGroups.onUpdated:`, port);
+    if (port) {
+      updateTabs(port);
+    }
+  });
+
+  // Listen for tab group removal
+  chrome.tabGroups.onRemoved.addListener(async () => {
+    devLog(`${new Date()} - tabGroups.onRemoved:`, port);
     if (port) {
       updateTabs(port);
     }

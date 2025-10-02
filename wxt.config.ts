@@ -11,7 +11,7 @@ export default defineConfig({
   },
   manifest: ({ mode }) => ({
     name: mode === 'development' ? 'lazycluster-dev' : 'lazycluster',
-    permissions: ['tabs'],
+    permissions: ['tabs', 'tabGroups'],
     description: 'Organize Chrome tabs & windows. Enjoy comfortable browsing & boost productivity.',
     content_security_policy: {
       extension_pages: "script-src 'self'; object-src 'self'",
