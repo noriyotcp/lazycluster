@@ -60,7 +60,7 @@ const TabItem = ({ tab }: TabItemProps) => {
       }
     };
     fetchGroupColor();
-  }, [tab]);
+  }, [tab.groupId]);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
