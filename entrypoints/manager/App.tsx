@@ -6,6 +6,7 @@ import { TabFocusProvider } from '../../src/contexts/TabFocusContext';
 import { useTabGroupContext } from '../../src/contexts/TabGroupContext';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext'; // Import TabSelectionContext
 import { useDeletionState } from '../../src/contexts/DeletionStateContext'; // Import DeletionStateContext
+import { useTabGroupColor } from '../../src/contexts/TabGroupColorContext'; // Import TabGroupColorContext
 import { useBackgroundConnection } from '../../src/hooks/useBackgroundConnection'; // Import the hook
 import KeyboardShortcutsModal from '../../src/components/KeyboardShortcutsModal';
 import './style.css';
@@ -24,6 +25,7 @@ const Manager = () => {
   const { tabGroups, updateTabGroups } = useTabGroupContext();
   const { clearSelection, syncWithExistingTabs } = useTabSelectionContext();
   const { cleanupNonExistentItems } = useDeletionState();
+  const { updateGroupColors } = useTabGroupColor();
   const [activeWindowId, setActiveWindowId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sequenceActive, setSequenceActive] = useState<boolean>(false);
@@ -37,6 +39,9 @@ const Manager = () => {
       devLog(`${new Date()} - Received message from background:`, message); // Log received messages
       if (message.type === 'UPDATE_TABS' && message.tabs) {
         updateTabGroups(message.tabs); // Use the updated tabs
+
+        // Update group colors
+        updateGroupColors(message.tabs);
 
         // Sync selected tabs with existing tabs
         const existingTabIds = message.tabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
@@ -52,7 +57,7 @@ const Manager = () => {
       }
       // No need to handle REQUEST_INITIAL_DATA here, it's sent from client
     },
-    [updateTabGroups, syncWithExistingTabs, cleanupNonExistentItems]
+    [updateTabGroups, syncWithExistingTabs, cleanupNonExistentItems, updateGroupColors]
   );
 
   // Sync sequenceActive with its ref

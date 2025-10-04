@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useTabFocusContext } from '../../src/contexts/TabFocusContext';
 import { useDeletionState } from '../contexts/DeletionStateContext';
+import { useTabGroupColor } from '../contexts/TabGroupColorContext';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
-import { TabGroupColor } from '../types/tabGroup';
 import { getTabGroupBorderColorClass } from '../utils/tabGroupColors';
 
 const extractDomain = (url: string): string => {
@@ -39,28 +39,12 @@ const TabItem = ({ tab }: TabItemProps) => {
   const { showToast } = useToast();
   const { isDeleting, setDeletingState } = useDeletionState();
   const isDeletingTab = isDeleting({ type: 'tab', id: tab.id! });
-  const [groupColor, setGroupColor] = useState<TabGroupColor | null>(null);
+  const { getGroupColor } = useTabGroupColor();
+  const groupColor = getGroupColor(tab.groupId ?? chrome.tabGroups.TAB_GROUP_ID_NONE);
 
   useEffect(() => {
     setIsChecked(selectedTabIds.includes(tab.id!));
   }, [selectedTabIds, tab.id]);
-
-  useEffect(() => {
-    const fetchGroupColor = async () => {
-      if (tab.groupId && tab.groupId !== chrome.tabGroups.TAB_GROUP_ID_NONE) {
-        try {
-          const group = await chrome.tabGroups.get(tab.groupId);
-          setGroupColor(group.color as TabGroupColor);
-        } catch (error) {
-          console.error('Failed to fetch tab group:', error);
-          setGroupColor(null);
-        }
-      } else {
-        setGroupColor(null);
-      }
-    };
-    fetchGroupColor();
-  }, [tab.groupId]);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
