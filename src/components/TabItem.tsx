@@ -117,20 +117,6 @@ const TabItem = ({ tab, isFiltered = false }: TabItemProps) => {
         {...attributes}
         tabIndex={0}
       >
-        {/* Drag handle */}
-        <button
-          ref={setActivatorNodeRef}
-          {...listeners}
-          disabled={isFiltered}
-          className={
-            isFiltered
-              ? 'text-gray-400 opacity-40 cursor-not-allowed px-1'
-              : 'text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing px-1'
-          }
-          aria-label="Drag to reorder"
-        >
-          ⋮⋮
-        </button>
         <input
           id={`tab-${tab.id}`}
           type="checkbox"
@@ -163,6 +149,20 @@ const TabItem = ({ tab, isFiltered = false }: TabItemProps) => {
         </a>
         <button className="btn btn-outline btn-error btn-xs" onClick={handleCloseButtonClick}>
           Close
+        </button>
+        {/* Drag handle */}
+        <button
+          ref={setActivatorNodeRef}
+          {...listeners}
+          disabled={isFiltered}
+          className={
+            isFiltered
+              ? 'text-gray-400 opacity-40 cursor-not-allowed px-1'
+              : 'text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing px-1'
+          }
+          aria-label="Drag to reorder"
+        >
+          ⋮⋮
         </button>
       </li>
     </div>
