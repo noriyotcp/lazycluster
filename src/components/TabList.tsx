@@ -21,6 +21,11 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
+      keyboardCodes: {
+        start: ['Enter'], // Only Enter key activates drag (Space is reserved for checkbox toggle)
+        cancel: ['Escape'],
+        end: ['Enter'],
+      },
     })
   );
 
