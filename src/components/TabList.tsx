@@ -1,5 +1,14 @@
-import React, { useRef } from 'react';
-import { DndContext, DragEndEvent, PointerSensor, KeyboardSensor, useSensor, useSensors, closestCenter } from '@dnd-kit/core';
+import React, { useRef, useState } from 'react';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+} from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import TabItem from './TabItem';
 import { useToast } from './ToastProvider';
@@ -13,6 +22,10 @@ interface TabListProps {
 const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
   const listRef = useRef<HTMLUListElement>(null);
   const { showToast } = useToast();
+
+  // Track drop indicator position
+  const [overId, setOverId] = useState<number | null>(null);
+  const [dropPosition, setDropPosition] = useState<'top' | 'bottom'>('bottom');
 
   // Configure sensors for drag-and-drop
   const sensors = useSensors(
@@ -29,9 +42,27 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
     })
   );
 
+  // Handle drag over event to show drop indicator
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+
+    if (over) {
+      setOverId(over.id as number);
+
+      // Determine drop position based on active and over indices
+      const activeIndex = tabs.findIndex(t => t.id === active.id);
+      const overIndex = tabs.findIndex(t => t.id === over.id);
+
+      setDropPosition(activeIndex > overIndex ? 'top' : 'bottom');
+    }
+  };
+
   // Handle drag end event
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
+
+    // Reset drop indicator
+    setOverId(null);
 
     // Early return: no drop target or dropped on itself
     if (!over || active.id === over.id) return;
@@ -94,11 +125,30 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
   };
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+    >
       <SortableContext items={tabs.map(t => t.id!)} strategy={verticalListSortingStrategy} disabled={isFiltered}>
         <ul ref={listRef} className="list shadow-md" onKeyDown={handleKeyDown}>
           {tabs.map(tab => (
-            <TabItem key={tab.id} tab={tab} isFiltered={isFiltered} />
+            <div key={tab.id}>
+              {/* Top drop indicator */}
+              <div
+                className={`h-0.5 bg-info transition-opacity ${
+                  overId === tab.id && dropPosition === 'top' ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+              <TabItem tab={tab} isFiltered={isFiltered} />
+              {/* Bottom drop indicator */}
+              <div
+                className={`h-0.5 bg-info transition-opacity ${
+                  overId === tab.id && dropPosition === 'bottom' ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+            </div>
           ))}
         </ul>
       </SortableContext>
