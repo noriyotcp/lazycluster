@@ -1,12 +1,47 @@
 import React, { useRef } from 'react';
+import { DndContext, DragEndEvent, PointerSensor, KeyboardSensor, useSensor, useSensors, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import TabItem from './TabItem';
+import { useToast } from './ToastProvider';
+import Alert from './Alert';
 
 interface TabListProps {
   tabs: chrome.tabs.Tab[];
+  isFiltered?: boolean;
 }
 
-const TabList = ({ tabs }: TabListProps) => {
+const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
   const listRef = useRef<HTMLUListElement>(null);
+  const { showToast } = useToast();
+
+  // Configure sensors for drag-and-drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 }, // Prevent accidental drags
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end event
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    // Early return: no drop target or dropped on itself
+    if (!over || active.id === over.id) return;
+
+    // Find target index in current window's tabs
+    const newIndex = tabs.findIndex(t => t.id === over.id);
+
+    try {
+      // Move tab within same window (windowId omitted = current window)
+      await chrome.tabs.move(active.id as number, { index: newIndex });
+    } catch (error) {
+      showToast(<Alert message="Failed to move tab" variant="error" />);
+      console.error('Error moving tab:', error);
+    }
+  };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLUListElement>) => {
     const activeElement = document.activeElement;
@@ -54,11 +89,15 @@ const TabList = ({ tabs }: TabListProps) => {
   };
 
   return (
-    <ul ref={listRef} className="list shadow-md" onKeyDown={handleKeyDown}>
-      {tabs.map(tab => (
-        <TabItem key={tab.id} tab={tab} />
-      ))}
-    </ul>
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={tabs.map(t => t.id!)} strategy={verticalListSortingStrategy} disabled={isFiltered}>
+        <ul ref={listRef} className="list shadow-md" onKeyDown={handleKeyDown}>
+          {tabs.map(tab => (
+            <TabItem key={tab.id} tab={tab} isFiltered={isFiltered} />
+          ))}
+        </ul>
+      </SortableContext>
+    </DndContext>
   );
 };
 
