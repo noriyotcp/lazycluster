@@ -46,14 +46,19 @@ const TabItem = ({ tab, isFiltered = false }: TabItemProps) => {
   const groupColor = getGroupColor(tab.groupId ?? chrome.tabGroups.TAB_GROUP_ID_NONE);
 
   // useSortable hook for drag-and-drop
-  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
-    id: tab.id!,
-    disabled: isFiltered,
-  });
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging, isSorting } =
+    useSortable({
+      id: tab.id!,
+      disabled: isFiltered,
+      // Disable layout animation during sorting to prevent items from moving immediately
+      animateLayoutChanges: ({ isSorting }) => !isSorting,
+    });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    // Disable transform during sorting to prevent other items from moving
+    transform: isSorting ? undefined : CSS.Transform.toString(transform),
     transition,
+    // Show original item with reduced opacity during drag (DragOverlay will show the clone)
     opacity: isDragging ? 0.5 : 1,
   };
 

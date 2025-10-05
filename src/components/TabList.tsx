@@ -3,6 +3,8 @@ import {
   DndContext,
   DragEndEvent,
   DragOverEvent,
+  DragOverlay,
+  DragStartEvent,
   PointerSensor,
   KeyboardSensor,
   useSensor,
@@ -23,6 +25,9 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
   const listRef = useRef<HTMLUListElement>(null);
   const { showToast } = useToast();
 
+  // Track active dragging item for DragOverlay
+  const [activeId, setActiveId] = useState<number | null>(null);
+
   // Track drop indicator position
   const [overId, setOverId] = useState<number | null>(null);
   const [dropPosition, setDropPosition] = useState<'top' | 'bottom'>('bottom');
@@ -41,6 +46,11 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
       },
     })
   );
+
+  // Handle drag start to track active item for DragOverlay
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as number);
+  };
 
   // Handle drag over event to show drop indicator
   const handleDragOver = (event: DragOverEvent) => {
@@ -61,7 +71,8 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
-    // Reset drop indicator
+    // Reset drag overlay and drop indicator
+    setActiveId(null);
     setOverId(null);
 
     // Early return: no drop target or dropped on itself
@@ -128,6 +139,7 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
@@ -152,6 +164,15 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
           ))}
         </ul>
       </SortableContext>
+
+      {/* DragOverlay shows clone of dragged item */}
+      <DragOverlay>
+        {activeId ? (
+          <ul className="list shadow-md">
+            <TabItem tab={tabs.find(t => t.id === activeId)!} isFiltered={false} />
+          </ul>
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 };
