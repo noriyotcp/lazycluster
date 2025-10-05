@@ -3,18 +3,18 @@
  */
 
 /**
- * Count how many IDs from the first array are present in the second array
+ * Count how many IDs from the first array are present in the Set
  */
-export const countSelectedIds = (visibleTabIds: number[], selectedTabIds: number[]): number => {
-  return visibleTabIds.filter(id => selectedTabIds.includes(id)).length;
+export const countSelectedIds = (visibleTabIds: number[], selectedTabIds: Set<number>): number => {
+  return visibleTabIds.filter(id => selectedTabIds.has(id)).length;
 };
 
 /**
  * Determine if the bulk select checkbox should be checked
  * (all visible tabs are selected)
  */
-export const shouldBulkSelectBeChecked = (visibleTabIds: number[], selectedTabIds: number[]): boolean => {
-  return visibleTabIds.length > 0 && visibleTabIds.every(id => selectedTabIds.includes(id));
+export const shouldBulkSelectBeChecked = (visibleTabIds: number[], selectedTabIds: Set<number>): boolean => {
+  return visibleTabIds.length > 0 && visibleTabIds.every(id => selectedTabIds.has(id));
 };
 
 /**
@@ -34,6 +34,6 @@ export const filterTabIdsByWindow = (
 /**
  * Determine if the Close Tabs button should be disabled
  */
-export const shouldCloseTabsBeDisabled = (visibleTabIds: number[], selectedTabIds: number[]): boolean => {
+export const shouldCloseTabsBeDisabled = (visibleTabIds: number[], selectedTabIds: Set<number>): boolean => {
   return countSelectedIds(visibleTabIds, selectedTabIds) === 0;
 };

@@ -56,7 +56,7 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
     let tabIdsInWindow: number[] = [];
     try {
       const results = await Promise.all(
-        selectedTabIds.map(async tabId => {
+        Array.from(selectedTabIds).map(async tabId => {
           try {
             const tab = await chrome.tabs.get(tabId);
             return tab.windowId === windowId ? tabId : null;

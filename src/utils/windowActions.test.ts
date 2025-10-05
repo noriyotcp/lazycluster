@@ -10,35 +10,35 @@ describe('windowActions utilities', () => {
   describe('countSelectedIds', () => {
     it('returns 0 when no IDs are selected', () => {
       const visibleTabIds = [1, 2];
-      const selectedTabIds: number[] = [];
+      const selectedTabIds = new Set<number>();
 
       expect(countSelectedIds(visibleTabIds, selectedTabIds)).toBe(0);
     });
 
     it('counts matching IDs correctly', () => {
       const visibleTabIds = [1, 2];
-      const selectedTabIds = [1, 2, 3, 4]; // 3, 4 are not in visibleTabIds
+      const selectedTabIds = new Set([1, 2, 3, 4]); // 3, 4 are not in visibleTabIds
 
       expect(countSelectedIds(visibleTabIds, selectedTabIds)).toBe(2);
     });
 
     it('handles empty visible IDs', () => {
       const visibleTabIds: number[] = [];
-      const selectedTabIds = [1, 2, 3];
+      const selectedTabIds = new Set([1, 2, 3]);
 
       expect(countSelectedIds(visibleTabIds, selectedTabIds)).toBe(0);
     });
 
     it('returns 0 when no IDs match', () => {
       const visibleTabIds = [1, 2];
-      const selectedTabIds = [3, 4]; // No overlap
+      const selectedTabIds = new Set([3, 4]); // No overlap
 
       expect(countSelectedIds(visibleTabIds, selectedTabIds)).toBe(0);
     });
 
     it('counts partial matches correctly', () => {
       const visibleTabIds = [1, 2, 3, 4, 5];
-      const selectedTabIds = [2, 4, 6, 8]; // Only 2 and 4 match
+      const selectedTabIds = new Set([2, 4, 6, 8]); // Only 2 and 4 match
 
       expect(countSelectedIds(visibleTabIds, selectedTabIds)).toBe(2);
     });
@@ -47,42 +47,42 @@ describe('windowActions utilities', () => {
   describe('shouldBulkSelectBeChecked', () => {
     it('returns false when no IDs exist', () => {
       const visibleTabIds: number[] = [];
-      const selectedTabIds: number[] = [];
+      const selectedTabIds = new Set<number>();
 
       expect(shouldBulkSelectBeChecked(visibleTabIds, selectedTabIds)).toBe(false);
     });
 
     it('returns true when all visible IDs are selected', () => {
       const visibleTabIds = [1, 2];
-      const selectedTabIds = [1, 2, 3]; // Including extra selections
+      const selectedTabIds = new Set([1, 2, 3]); // Including extra selections
 
       expect(shouldBulkSelectBeChecked(visibleTabIds, selectedTabIds)).toBe(true);
     });
 
     it('returns false when only some visible IDs are selected', () => {
       const visibleTabIds = [1, 2];
-      const selectedTabIds = [1]; // Only one selected
+      const selectedTabIds = new Set([1]); // Only one selected
 
       expect(shouldBulkSelectBeChecked(visibleTabIds, selectedTabIds)).toBe(false);
     });
 
     it('returns false when no visible IDs are selected', () => {
       const visibleTabIds = [1, 2];
-      const selectedTabIds = [3, 4]; // Other IDs
+      const selectedTabIds = new Set([3, 4]); // Other IDs
 
       expect(shouldBulkSelectBeChecked(visibleTabIds, selectedTabIds)).toBe(false);
     });
 
     it('returns true when exact match of IDs', () => {
       const visibleTabIds = [1, 2, 3];
-      const selectedTabIds = [1, 2, 3];
+      const selectedTabIds = new Set([1, 2, 3]);
 
       expect(shouldBulkSelectBeChecked(visibleTabIds, selectedTabIds)).toBe(true);
     });
 
     it('returns true when all visible IDs are in larger selection', () => {
       const visibleTabIds = [2, 4];
-      const selectedTabIds = [1, 2, 3, 4, 5]; // Superset
+      const selectedTabIds = new Set([1, 2, 3, 4, 5]); // Superset
 
       expect(shouldBulkSelectBeChecked(visibleTabIds, selectedTabIds)).toBe(true);
     });
@@ -131,28 +131,28 @@ describe('windowActions utilities', () => {
   describe('shouldCloseTabsBeDisabled', () => {
     it('returns true when no IDs are selected', () => {
       const visibleTabIds = [1, 2];
-      const selectedTabIds: number[] = [];
+      const selectedTabIds = new Set<number>();
 
       expect(shouldCloseTabsBeDisabled(visibleTabIds, selectedTabIds)).toBe(true);
     });
 
     it('returns false when IDs are selected', () => {
       const visibleTabIds = [1, 2];
-      const selectedTabIds = [1, 2];
+      const selectedTabIds = new Set([1, 2]);
 
       expect(shouldCloseTabsBeDisabled(visibleTabIds, selectedTabIds)).toBe(false);
     });
 
     it('returns true when no matching IDs are selected', () => {
       const visibleTabIds = [1, 2];
-      const selectedTabIds = [3, 4]; // No overlap
+      const selectedTabIds = new Set([3, 4]); // No overlap
 
       expect(shouldCloseTabsBeDisabled(visibleTabIds, selectedTabIds)).toBe(true);
     });
 
     it('returns false when at least one ID matches', () => {
       const visibleTabIds = [1, 2];
-      const selectedTabIds = [1, 3, 4]; // Only 1 matches
+      const selectedTabIds = new Set([1, 3, 4]); // Only 1 matches
 
       expect(shouldCloseTabsBeDisabled(visibleTabIds, selectedTabIds)).toBe(false);
     });

@@ -43,7 +43,7 @@ const TabItem = ({ tab }: TabItemProps) => {
   const groupColor = getGroupColor(tab.groupId ?? chrome.tabGroups.TAB_GROUP_ID_NONE);
 
   useEffect(() => {
-    setIsChecked(selectedTabIds.includes(tab.id!));
+    setIsChecked(selectedTabIds.has(tab.id!));
   }, [selectedTabIds, tab.id]);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
