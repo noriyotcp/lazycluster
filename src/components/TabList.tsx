@@ -90,6 +90,12 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
     }
   };
 
+  // Handle drag cancel event (e.g., ESC key pressed)
+  const handleDragCancel = () => {
+    setActiveId(null);
+    setOverId(null);
+  };
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLUListElement>) => {
     const activeElement = document.activeElement;
     if (!activeElement || !listRef.current?.contains(activeElement)) {
@@ -142,6 +148,7 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
     >
       <SortableContext items={tabs.map(t => t.id!)} strategy={verticalListSortingStrategy} disabled={isFiltered}>
         <ul ref={listRef} className="list shadow-md" onKeyDown={handleKeyDown}>
