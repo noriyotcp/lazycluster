@@ -119,7 +119,7 @@ const TabItem = ({ tab, isFiltered = false }: TabItemProps) => {
           disabled={isFiltered}
           className={
             isFiltered
-              ? 'text-gray-300 cursor-not-allowed px-1'
+              ? 'text-gray-400 opacity-40 cursor-not-allowed px-1'
               : 'text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing px-1'
           }
           aria-label="Drag to reorder"
