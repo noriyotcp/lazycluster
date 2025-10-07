@@ -14,6 +14,9 @@ type MessageHandler<T extends BaseMessage> = (message: T) => void;
 
 import { calculateBackoff } from '../utils/backoff';
 
+// Threshold for considering a connection "stable" (60 seconds)
+const STABLE_CONNECTION_THRESHOLD = 60000;
+
 /**
  * Custom hook to manage a persistent connection to the background script.
  * Handles automatic reconnection on disconnect or connection errors.
@@ -26,6 +29,7 @@ import { calculateBackoff } from '../utils/backoff';
 export const useBackgroundConnection = <T extends BaseMessage>(portName: string, messageHandler: MessageHandler<T>) => {
   const portRef = useRef<chrome.runtime.Port | null>(null);
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const stableConnectionTimerRef = useRef<NodeJS.Timeout | null>(null); // Timer to detect stable connections
   const messageHandlerRef = useRef<MessageHandler<T>>(messageHandler);
   const attemptRef = useRef<number>(0); // Track retry attempts
   const [isConnected, setIsConnected] = useState(false); // Track connection status
@@ -49,7 +53,20 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
 
       devLog(`${new Date()} - Successfully connected to background script.`);
       setIsConnected(true); // Update connection status
-      attemptRef.current = 0; // Reset retry attempts on success
+
+      // Clear any existing stability timer
+      if (stableConnectionTimerRef.current) {
+        clearTimeout(stableConnectionTimerRef.current);
+      }
+
+      // Start stability timer - reset retry counter only after stable connection
+      stableConnectionTimerRef.current = setTimeout(() => {
+        devLog(`${new Date()} - Connection stable for ${STABLE_CONNECTION_THRESHOLD}ms, resetting retry counter.`);
+        attemptRef.current = 0;
+        stableConnectionTimerRef.current = null;
+      }, STABLE_CONNECTION_THRESHOLD);
+
+      devLog(`${new Date()} - Waiting ${STABLE_CONNECTION_THRESHOLD}ms to confirm stable connection (current attempt: ${attemptRef.current})...`);
 
       portRef.current.onMessage.addListener((message: T) => {
         // Add type annotation
@@ -59,6 +76,14 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
 
       portRef.current.onDisconnect.addListener(() => {
         setIsConnected(false); // Update connection status
+
+        // Cancel stability timer - connection was not stable
+        if (stableConnectionTimerRef.current) {
+          clearTimeout(stableConnectionTimerRef.current);
+          stableConnectionTimerRef.current = null;
+          devLog(`${new Date()} - Connection lost before stability threshold. Retry attempt preserved: ${attemptRef.current}`);
+        }
+
         devLog(`${new Date()} - Port disconnected.`);
         if (chrome.runtime.lastError) {
           console.error(`${new Date()} - Disconnect error:`, chrome.runtime.lastError.message);
@@ -118,6 +143,9 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
 
     return () => {
       // Cleanup on unmount
+      if (stableConnectionTimerRef.current) {
+        clearTimeout(stableConnectionTimerRef.current);
+      }
       if (reconnectTimerRef.current) {
         clearTimeout(reconnectTimerRef.current);
       }
