@@ -4,6 +4,7 @@ A Chrome extension for enhanced tab and window management, inspired by the origi
 
 ## Features
 
+- **Drag-and-Drop Tab Reordering:** Reorder tabs within the same window by dragging with mouse or keyboard for intuitive tab organization.
 - **Effortless Bulk Tab Management:** Quickly select and close multiple tabs across all windows or within specific windows, saving time and reducing clutter.
   - Global Bulk Close: Close tabs from any window with a single action.
   - Window-Specific Bulk Close: Target tabs within a particular window for closing.
@@ -18,6 +19,7 @@ A Chrome extension for enhanced tab and window management, inspired by the origi
   - `Shift+h/l`: Jump to first/last tab in current window group (vim-style: High/Low)
   - `Shift+m`: Jump to middle tab in current window group (vim-style: Middle)
   - `Space`: Toggle tab selection
+  - `Enter` (when drag handle focused): Activate/deactivate drag mode for tab reordering
   - `w + [0-9]`: Quick jump to Window Groups
     - `w` then `1-9`: Jump to specific Window Group
     - `w` then `0`: Jump to current window
@@ -37,3 +39,4 @@ LazyCluster provides a streamlined and intuitive way to manage your browser tabs
 - [React](https://react.dev/): A JavaScript library for building user interfaces.
 - [TypeScript](https://www.typescriptlang.org/): A typed superset of JavaScript for enhanced code quality and maintainability.
 - [daisyUI](https://daisyui.com/): A Tailwind CSS component library that provides ready-to-use UI components for faster development with cleaner HTML. It's pure CSS and works with all frameworks.
+- [@dnd-kit](https://dndkit.com/): A modern drag-and-drop toolkit for React with keyboard accessibility support.

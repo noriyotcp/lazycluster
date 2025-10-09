@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useTabFocusContext } from '../../src/contexts/TabFocusContext';
 import { useDeletionState } from '../contexts/DeletionStateContext';
@@ -17,6 +19,7 @@ const extractDomain = (url: string): string => {
 
 interface TabItemProps {
   tab: chrome.tabs.Tab;
+  isFiltered?: boolean;
 }
 
 const globeIcon = () => {
@@ -31,7 +34,7 @@ const globeIcon = () => {
   );
 };
 
-const TabItem = ({ tab }: TabItemProps) => {
+const TabItem = ({ tab, isFiltered = false }: TabItemProps) => {
   const { selectedTabIds, addTabToSelection, removeTabFromSelection } = useTabSelectionContext();
   const [isChecked, setIsChecked] = useState(false);
   const { focusActiveTab } = useTabFocusContext();
@@ -42,8 +45,25 @@ const TabItem = ({ tab }: TabItemProps) => {
   const { getGroupColor } = useTabGroupColor();
   const groupColor = getGroupColor(tab.groupId ?? chrome.tabGroups.TAB_GROUP_ID_NONE);
 
+  // useSortable hook for drag-and-drop
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging, isSorting } =
+    useSortable({
+      id: tab.id!,
+      disabled: isFiltered,
+      // Disable layout animation during sorting to prevent items from moving immediately
+      animateLayoutChanges: ({ isSorting }) => !isSorting,
+    });
+
+  const style = {
+    // Disable transform during sorting to prevent other items from moving
+    transform: isSorting ? undefined : CSS.Transform.toString(transform),
+    transition,
+    // Show original item with reduced opacity during drag (DragOverlay will show the clone)
+    opacity: isDragging ? 0.5 : 1,
+  };
+
   useEffect(() => {
-    setIsChecked(selectedTabIds.includes(tab.id!));
+    setIsChecked(selectedTabIds.has(tab.id!));
   }, [selectedTabIds, tab.id]);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -90,9 +110,12 @@ const TabItem = ({ tab }: TabItemProps) => {
   return (
     <div inert={isDeletingTab || undefined} className="inert:opacity-50">
       <li
-        tabIndex={0}
+        ref={setNodeRef}
+        style={style}
         className={`list-row p-2 items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem border-l-[3px] ${borderColorClass}`}
         onKeyDown={handleKeyDown}
+        {...attributes}
+        tabIndex={0}
       >
         <input
           id={`tab-${tab.id}`}
@@ -126,6 +149,20 @@ const TabItem = ({ tab }: TabItemProps) => {
         </a>
         <button className="btn btn-outline btn-error btn-xs" onClick={handleCloseButtonClick}>
           Close
+        </button>
+        {/* Drag handle */}
+        <button
+          ref={setActivatorNodeRef}
+          {...listeners}
+          disabled={isFiltered}
+          className={
+            isFiltered
+              ? 'text-gray-400 opacity-40 cursor-not-allowed px-1'
+              : 'text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing px-1'
+          }
+          aria-label="Drag to reorder"
+        >
+          ⋮⋮
         </button>
       </li>
     </div>

@@ -1,12 +1,100 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+} from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import TabItem from './TabItem';
+import { useToast } from './ToastProvider';
+import Alert from './Alert';
 
 interface TabListProps {
   tabs: chrome.tabs.Tab[];
+  isFiltered?: boolean;
 }
 
-const TabList = ({ tabs }: TabListProps) => {
+const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
   const listRef = useRef<HTMLUListElement>(null);
+  const { showToast } = useToast();
+
+  // Track active dragging item for DragOverlay
+  const [activeId, setActiveId] = useState<number | null>(null);
+
+  // Track drop indicator position
+  const [overId, setOverId] = useState<number | null>(null);
+  const [dropPosition, setDropPosition] = useState<'top' | 'bottom'>('bottom');
+
+  // Configure sensors for drag-and-drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 }, // Prevent accidental drags
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+      keyboardCodes: {
+        start: ['Enter'], // Only Enter key activates drag (Space is reserved for checkbox toggle)
+        cancel: ['Escape'],
+        end: ['Enter'],
+      },
+    })
+  );
+
+  // Handle drag start to track active item for DragOverlay
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as number);
+  };
+
+  // Handle drag over event to show drop indicator
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+
+    if (over) {
+      setOverId(over.id as number);
+
+      // Determine drop position based on active and over indices
+      const activeIndex = tabs.findIndex(t => t.id === active.id);
+      const overIndex = tabs.findIndex(t => t.id === over.id);
+
+      setDropPosition(activeIndex > overIndex ? 'top' : 'bottom');
+    }
+  };
+
+  // Handle drag end event
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    // Reset drag overlay and drop indicator
+    setActiveId(null);
+    setOverId(null);
+
+    // Early return: no drop target or dropped on itself
+    if (!over || active.id === over.id) return;
+
+    // Find target index in current window's tabs
+    const newIndex = tabs.findIndex(t => t.id === over.id);
+
+    try {
+      // Move tab within same window (windowId omitted = current window)
+      await chrome.tabs.move(active.id as number, { index: newIndex });
+    } catch (error) {
+      showToast(<Alert message="Failed to move tab" variant="error" />);
+      console.error('Error moving tab:', error);
+    }
+  };
+
+  // Handle drag cancel event (e.g., ESC key pressed)
+  const handleDragCancel = () => {
+    setActiveId(null);
+    setOverId(null);
+  };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLUListElement>) => {
     const activeElement = document.activeElement;
@@ -54,11 +142,45 @@ const TabList = ({ tabs }: TabListProps) => {
   };
 
   return (
-    <ul ref={listRef} className="list shadow-md" onKeyDown={handleKeyDown}>
-      {tabs.map(tab => (
-        <TabItem key={tab.id} tab={tab} />
-      ))}
-    </ul>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
+      <SortableContext items={tabs.map(t => t.id!)} strategy={verticalListSortingStrategy} disabled={isFiltered}>
+        <ul ref={listRef} className="list shadow-md" onKeyDown={handleKeyDown}>
+          {tabs.map(tab => (
+            <div key={tab.id}>
+              {/* Top drop indicator */}
+              <div
+                className={`h-0.5 bg-info transition-opacity ${
+                  overId === tab.id && dropPosition === 'top' ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+              <TabItem tab={tab} isFiltered={isFiltered} />
+              {/* Bottom drop indicator */}
+              <div
+                className={`h-0.5 bg-info transition-opacity ${
+                  overId === tab.id && dropPosition === 'bottom' ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+            </div>
+          ))}
+        </ul>
+      </SortableContext>
+
+      {/* DragOverlay shows clone of dragged item */}
+      <DragOverlay>
+        {activeId ? (
+          <ul className="list shadow-md">
+            <TabItem tab={tabs.find(t => t.id === activeId)!} isFiltered={false} />
+          </ul>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   );
 };
 

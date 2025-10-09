@@ -254,7 +254,7 @@ const Manager = () => {
     <TabFocusProvider>
       <Header searchQuery={searchQuery} onSearchQueryChange={handleSearchQueryChange} searchBarRef={searchBarRef} />
       <div className="p-5 pt-0">
-        <WindowGroupList filteredTabGroups={filteredTabGroups} activeWindowId={activeWindowId} />
+        <WindowGroupList filteredTabGroups={filteredTabGroups} activeWindowId={activeWindowId} isFiltered={searchQuery !== ''} />
       </div>
       {sequenceActive && (
         <div className="fixed bottom-4 right-4 badge badge-soft badge-primary badge-jump-to-window-group">
