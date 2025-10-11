@@ -12,6 +12,12 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+    # 関連パッケージをグループ化
+    groups:
+      react:
+        patterns:
+          - "react*"
+          - "@types/react*"
     # プルリクエストの設定
     open-pull-requests-limit: 10
     labels:
