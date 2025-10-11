@@ -21,7 +21,7 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps)
   const totalTabCount = useTotalTabCount();
 
   const handleCloseSelectedTabs = async () => {
-    const tabsToClose = [...selectedTabIds]; // Copy the array before removal
+    const tabsToClose = Array.from(selectedTabIds); // Convert Set to array
     // Mark all tabs as deleting
     tabsToClose.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: true }));
     try {
@@ -45,7 +45,7 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps)
         <SearchBar searchQuery={searchQuery} onSearchQueryChange={onSearchQueryChange} ref={searchBarRef} />
         <div className="flex items-center gap-x-4">
           <TabCountBadge count={totalTabCount} />
-          <button className="btn btn-ghost" onClick={handleCloseSelectedTabs} disabled={selectedTabIds.length === 0}>
+          <button className="btn btn-ghost" onClick={handleCloseSelectedTabs} disabled={selectedTabIds.size === 0}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
               <path
                 fillRule="evenodd"
@@ -53,7 +53,7 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps)
                 clipRule="evenodd"
               />
             </svg>
-            {selectedTabIds.length > 0 && <div className="badge badge-sm">{selectedTabIds.length}</div>}
+            {selectedTabIds.size > 0 && <div className="badge badge-sm">{selectedTabIds.size}</div>}
           </button>
           <ThemeSwitcher />
         </div>
