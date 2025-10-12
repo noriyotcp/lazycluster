@@ -20,11 +20,12 @@ A Chrome extension for enhanced tab and window management, inspired by the origi
   - `Shift+m`: Jump to middle tab in current window group (vim-style: Middle)
   - `Space`: Toggle tab selection
   - `Enter` (when drag handle focused): Activate/deactivate drag mode for tab reordering
-  - `w + [0-9]`: Quick jump to Window Groups
-    - `w` then `1-9`: Jump to specific Window Group
-    - `w` then `0`: Jump to current window
+  - `w + <number> + Enter`: Quick jump to Window Groups (supports multi-digit numbers)
+    - `w` then type window group number, then `Enter`: Jump to specific Window Group (e.g., `w 1 2 Enter` → Window Group 12)
+    - `w` then `0` then `Enter`: Jump to current window
+    - `Backspace`: Delete last digit during input
     - `ESC`: Cancel the sequence
-    - Sequence times out after 3 seconds
+    - Sequence times out after 3 seconds of inactivity (timer resets with each keystroke)
   - `/`: Focus search bar
 - **Quick Domain Access:** Easily see and access a tab's domain by hovering, even when the title is long, providing quick context and navigation.
 - **Streamlined Selection:** Simple checkboxes allow for easy individual or window-wide tab selection for bulk actions.
