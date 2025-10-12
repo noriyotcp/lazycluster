@@ -9,6 +9,10 @@ import { useDeletionState } from '../../src/contexts/DeletionStateContext'; // I
 import { useTabGroupColor } from '../../src/contexts/TabGroupColorContext'; // Import TabGroupColorContext
 import { useBackgroundConnection } from '../../src/hooks/useBackgroundConnection'; // Import the hook
 import KeyboardShortcutsModal from '../../src/components/KeyboardShortcutsModal';
+import {
+  getWindowGroupElement,
+  focusAndScrollToWindowGroup,
+} from '../../src/utils/windowGroupNavigation';
 import './style.css';
 
 // Constants for keyboard navigation
@@ -85,34 +89,10 @@ const Manager = () => {
 
   // Window Group focus handler
   const handleWindowGroupFocus = useCallback(
-    (digit: string) => {
-      let targetElement: HTMLElement | null = null;
-
-      if (digit === '0') {
-        // Current Window handling
-        targetElement = document.querySelector(`[data-window-id="${activeWindowId}"]`) as HTMLElement;
-      } else {
-        // 1-9 handling - use the digit directly as the window group number
-        const targetIndex = parseInt(digit, 10);
-        targetElement = document.querySelector(`[data-window-group-number="${targetIndex}"]`) as HTMLElement;
-      }
-
+    (input: string) => {
+      const targetElement = getWindowGroupElement(input, activeWindowId);
       if (targetElement) {
-        // Open collapse if closed
-        const collapseInput = targetElement.querySelector('input[type="checkbox"]') as HTMLInputElement;
-
-        if (collapseInput && !collapseInput.checked) {
-          collapseInput.checked = true;
-        }
-
-        // Focus first tab item (always exists due to WindowGroupList filtering)
-        const firstTab = targetElement.querySelector('.collapse-content li[tabindex="0"]') as HTMLElement;
-        firstTab.focus();
-        // Smooth scroll into view
-        firstTab.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        });
+        focusAndScrollToWindowGroup(targetElement);
       }
     },
     [activeWindowId]

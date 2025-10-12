@@ -66,3 +66,49 @@ export function parseNavigationKey(event: KeyboardEvent): NavigationKey | null {
   if (event.key === '?') return { type: 'HELP' };
   return null;
 }
+
+/**
+ * Get the target window group element to focus
+ *
+ * @param input - Input buffer ("0" for current window, "1-999" for window groups)
+ * @param activeWindowId - Current window ID (for "0" handling)
+ * @returns Target HTML element or null if not found
+ */
+export function getWindowGroupElement(
+  input: string,
+  activeWindowId: number | null
+): HTMLElement | null {
+  if (input === '0') {
+    // Current Window handling
+    return document.querySelector(`[data-window-id="${activeWindowId}"]`);
+  } else {
+    // Window Group 1-9, 10-99, 100-999, etc.
+    const targetIndex = parseInt(input, 10);
+    return document.querySelector(`[data-window-group-number="${targetIndex}"]`);
+  }
+}
+
+/**
+ * Focus on a window group and scroll it into view
+ * Opens collapsed group if needed
+ *
+ * @param targetElement - Window group element to focus
+ */
+export function focusAndScrollToWindowGroup(targetElement: HTMLElement): void {
+  // Open collapse if closed
+  const collapseInput = targetElement.querySelector('input[type="checkbox"]') as HTMLInputElement;
+  if (collapseInput && !collapseInput.checked) {
+    collapseInput.checked = true;
+  }
+
+  // Focus first tab item (guaranteed by WindowGroupList filtering)
+  const firstTab = targetElement.querySelector('.collapse-content li[tabindex="0"]') as HTMLElement;
+  if (firstTab) {
+    firstTab.focus();
+    // Smooth scroll into view
+    firstTab.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    });
+  }
+}
