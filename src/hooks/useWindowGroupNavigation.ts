@@ -45,7 +45,7 @@ export function useWindowGroupNavigation(
   const [inputBuffer, setInputBuffer] = useState<string>('');
 
   // Refs for avoiding stale closure issues
-  const sequenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const sequenceTimeoutRef = useRef<number | null>(null);
   const sequenceActiveRef = useRef<boolean>(false);
   const inputBufferRef = useRef<string>('');
 
