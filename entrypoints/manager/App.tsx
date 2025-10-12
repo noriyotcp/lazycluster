@@ -29,9 +29,11 @@ const Manager = () => {
   const [activeWindowId, setActiveWindowId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sequenceActive, setSequenceActive] = useState<boolean>(false);
+  const [inputBuffer, setInputBuffer] = useState<string>('');
   const searchBarRef = useRef<HTMLInputElement>(null);
   const sequenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const sequenceActiveRef = useRef<boolean>(false); // Ref to access latest sequenceActive value in event handlers to avoid stale closure issues
+  const inputBufferRef = useRef<string>(''); // Ref to access latest inputBuffer value to avoid dependency array issues
 
   // Define the message handler using useCallback to maintain reference stability
   const handleBackgroundMessage = useCallback(
@@ -64,6 +66,11 @@ const Manager = () => {
   useEffect(() => {
     sequenceActiveRef.current = sequenceActive;
   }, [sequenceActive]);
+
+  // Sync inputBuffer with its ref
+  useEffect(() => {
+    inputBufferRef.current = inputBuffer;
+  }, [inputBuffer]);
 
   // Use the custom hook to manage the connection
   const { sendMessage, isConnected } = useBackgroundConnection<BackgroundMessage>('manager', handleBackgroundMessage);
@@ -110,6 +117,20 @@ const Manager = () => {
     },
     [activeWindowId]
   );
+
+  // Debounce helper: Reset and restart the sequence timeout
+  const resetSequenceTimeout = useCallback(() => {
+    // Clear existing timeout
+    if (sequenceTimeoutRef.current) {
+      clearTimeout(sequenceTimeoutRef.current);
+    }
+
+    // Start new timeout (3 seconds)
+    sequenceTimeoutRef.current = setTimeout(() => {
+      setSequenceActive(false);
+      setInputBuffer('');
+    }, WINDOW_GROUP_SEQUENCE_TIMEOUT_MS);
+  }, []);
 
   // Define handleKeyDown with useCallback to maintain stable reference
   const handleKeyDown = useCallback(
@@ -170,30 +191,49 @@ const Manager = () => {
       if (event.key === 'w' && !sequenceActiveRef.current) {
         event.preventDefault();
         setSequenceActive(true);
+        setInputBuffer(''); // Clear buffer
 
-        if (sequenceTimeoutRef.current) {
-          clearTimeout(sequenceTimeoutRef.current);
-        }
-        sequenceTimeoutRef.current = setTimeout(() => {
-          setSequenceActive(false);
-        }, WINDOW_GROUP_SEQUENCE_TIMEOUT_MS);
+        // Debounce timer start
+        resetSequenceTimeout();
         return;
       }
 
       // Handle number keys when sequence is active
       if (sequenceActiveRef.current && /^[0-9]$/.test(event.key)) {
         event.preventDefault();
-        handleWindowGroupFocus(event.key);
+
+        // Reject if trying to add a digit after "0"
+        // "0" is reserved for Current Window, don't allow "01", "002", etc.
+        if (inputBufferRef.current === '0') {
+          return; // Don't add to buffer
+        }
+
+        setInputBuffer(prev => prev + event.key);
+
+        // Reset timer (Debounce - input continues sequence)
+        resetSequenceTimeout();
+        return;
+      }
+
+      // Handle Enter key to confirm and jump
+      if (sequenceActiveRef.current && event.key === 'Enter') {
+        event.preventDefault();
+
+        if (inputBufferRef.current.length > 0) {
+          handleWindowGroupFocus(inputBufferRef.current);
+        }
 
         // End sequence
         setSequenceActive(false);
+        setInputBuffer('');
         if (sequenceTimeoutRef.current) {
           clearTimeout(sequenceTimeoutRef.current);
           sequenceTimeoutRef.current = null;
         }
+        return;
       }
     },
-    [handleWindowGroupFocus]
+    [handleWindowGroupFocus, resetSequenceTimeout]
   );
 
   // Effect for initial activeWindowId setup on mount
@@ -254,11 +294,21 @@ const Manager = () => {
     <TabFocusProvider>
       <Header searchQuery={searchQuery} onSearchQueryChange={handleSearchQueryChange} searchBarRef={searchBarRef} />
       <div className="p-5 pt-0">
-        <WindowGroupList filteredTabGroups={filteredTabGroups} activeWindowId={activeWindowId} isFiltered={searchQuery !== ''} />
+        <WindowGroupList
+          filteredTabGroups={filteredTabGroups}
+          activeWindowId={activeWindowId}
+          isFiltered={searchQuery !== ''}
+        />
       </div>
       {sequenceActive && (
         <div className="fixed bottom-4 right-4 badge badge-soft badge-primary badge-jump-to-window-group">
-          Press 0-9 to jump to Window Group
+          {inputBuffer.length === 0 ? (
+            'Type window group number, then press Enter'
+          ) : (
+            <>
+              Jump to: <strong>{inputBuffer}</strong> (Press Enter to confirm)
+            </>
+          )}
         </div>
       )}
       <KeyboardShortcutsModal />
