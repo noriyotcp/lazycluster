@@ -25,7 +25,7 @@ export interface WindowGroupNavigationState {
  */
 export interface KeyboardEventHandlerRefs {
   /** Search bar ref for focus management */
-  searchBarRef: React.RefObject<HTMLInputElement>;
+  searchBarRef: React.RefObject<HTMLInputElement | null>;
 }
 
 /**
