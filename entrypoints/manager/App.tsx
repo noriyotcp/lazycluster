@@ -314,10 +314,10 @@ const Manager = () => {
       {sequenceActive && (
         <div className="fixed bottom-4 right-4 badge badge-soft badge-primary badge-jump-to-window-group">
           {inputBuffer.length === 0 ? (
-            'Type window group number, then press Enter'
+            'Type window group number'
           ) : (
             <>
-              Jump to: <strong>{inputBuffer}</strong> (Press Enter to confirm)
+              Jump to: <strong>{inputBuffer}</strong> + <kbd className="kbd kbd-sm">Enter</kbd>
             </>
           )}
         </div>
