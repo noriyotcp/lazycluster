@@ -80,10 +80,16 @@ export function getWindowGroupElement(
 ): HTMLElement | null {
   if (input === '0') {
     // Current Window handling
+    if (activeWindowId === null) {
+      return null;
+    }
     return doc.querySelector(`[data-window-id="${activeWindowId}"]`);
   } else {
     // Window Group 1-9, 10-99, 100-999, etc.
     const targetIndex = parseInt(input, 10);
+    if (isNaN(targetIndex) || targetIndex < 1) {
+      return null;
+    }
     return doc.querySelector(`[data-window-group-number="${targetIndex}"]`);
   }
 }

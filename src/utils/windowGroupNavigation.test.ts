@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
   canAddDigitToBuffer,
   shouldBlockKeyboardShortcut,
   parseNavigationKey,
+  getWindowGroupElement,
 } from './windowGroupNavigation';
 
 describe('windowGroupNavigation utilities', () => {
@@ -108,6 +109,72 @@ describe('windowGroupNavigation utilities', () => {
     it('returns null for modifier keys', () => {
       const event = new KeyboardEvent('keydown', { key: 'Shift' });
       expect(parseNavigationKey(event)).toBeNull();
+    });
+  });
+
+  describe('getWindowGroupElement', () => {
+    let mockDoc: Document;
+
+    beforeEach(() => {
+      // Create a fresh document for each test
+      mockDoc = document.implementation.createHTMLDocument('Test');
+    });
+
+    it('returns element for current window (input "0")', () => {
+      const element = mockDoc.createElement('div');
+      element.setAttribute('data-window-id', '123');
+      mockDoc.body.appendChild(element);
+
+      const result = getWindowGroupElement('0', 123, mockDoc);
+      expect(result).toBe(element);
+    });
+
+    it('returns null for current window with null activeWindowId', () => {
+      const result = getWindowGroupElement('0', null, mockDoc);
+      expect(result).toBeNull();
+    });
+
+    it('returns element for valid window group number', () => {
+      const element = mockDoc.createElement('div');
+      element.setAttribute('data-window-group-number', '5');
+      mockDoc.body.appendChild(element);
+
+      const result = getWindowGroupElement('5', null, mockDoc);
+      expect(result).toBe(element);
+    });
+
+    it('returns element for multi-digit window group number', () => {
+      const element = mockDoc.createElement('div');
+      element.setAttribute('data-window-group-number', '123');
+      mockDoc.body.appendChild(element);
+
+      const result = getWindowGroupElement('123', null, mockDoc);
+      expect(result).toBe(element);
+    });
+
+    it('returns null for invalid input (empty string)', () => {
+      const result = getWindowGroupElement('', null, mockDoc);
+      expect(result).toBeNull();
+    });
+
+    it('returns null for invalid input (non-numeric)', () => {
+      const result = getWindowGroupElement('abc', null, mockDoc);
+      expect(result).toBeNull();
+    });
+
+    it('returns null for invalid input (negative number)', () => {
+      const result = getWindowGroupElement('-1', null, mockDoc);
+      expect(result).toBeNull();
+    });
+
+    it('returns null for invalid input (mixed alphanumeric)', () => {
+      const result = getWindowGroupElement('1a', null, mockDoc);
+      expect(result).toBeNull();
+    });
+
+    it('returns null when element does not exist', () => {
+      const result = getWindowGroupElement('999', null, mockDoc);
+      expect(result).toBeNull();
     });
   });
 });
