@@ -81,6 +81,7 @@ test.describe('Manager Tab E2E Tests', () => {
     // Press w then the actual number of the first window group
     await page.keyboard.press('w');
     await page.keyboard.press(firstGroupNumber || '1');
+    await page.keyboard.press('Enter');
 
     // Verify focus moved to first tab in first window group
     const focusedElement = await page.evaluate(() => {
@@ -156,10 +157,11 @@ test.describe('Manager Tab E2E Tests', () => {
     // Check if visual feedback is shown
     const badge = page.locator('.badge-jump-to-window-group');
     await expect(badge).toBeVisible();
-    await expect(badge).toContainText('Press 0-9 to jump to Window Group');
+    await expect(badge).toContainText('Type window group number');
 
     // Press 1 to complete sequence
     await page.keyboard.press('1');
+    await page.keyboard.press('Enter');
 
     // Badge should disappear
     await expect(badge).not.toBeVisible();
@@ -182,6 +184,7 @@ test.describe('Manager Tab E2E Tests', () => {
       // Press w then 0
       await page.keyboard.press('w');
       await page.keyboard.press('0');
+      await page.keyboard.press('Enter');
 
       // Verify focus moved to current window
       const focusedWindowId = await page.evaluate(() => {
@@ -273,6 +276,7 @@ test.describe('Manager Tab E2E Tests', () => {
 
       // Press 1 to navigate to window group 1
       await page.keyboard.press('1');
+      await page.keyboard.press('Enter');
 
       // Verify navigation occurred to window group 1 (second window)
       const focusedElement = await page.evaluate(() => {
@@ -326,6 +330,7 @@ test.describe('Manager Tab E2E Tests', () => {
 
     // Press 1 to attempt navigation
     await page.keyboard.press('1');
+    await page.keyboard.press('Enter');
 
     // Verify checkbox still has focus (no navigation occurred)
     const stillFocusedId = await page.evaluate(() => document.activeElement?.id);
@@ -359,6 +364,7 @@ test.describe('Manager Tab E2E Tests', () => {
 
     // Press 2 to navigate to second window group
     await page.keyboard.press('2');
+    await page.keyboard.press('Enter');
 
     // Badge should disappear
     await expect(badge).not.toBeVisible();
@@ -403,6 +409,153 @@ test.describe('Manager Tab E2E Tests', () => {
         expect(windowNumber).toBeGreaterThan(0); // Should be 1, 2, 3... never 0
       }
     }
+  });
+
+  test('should support multi-digit window group numbers', async ({ page, extensionId }) => {
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+
+    // Create additional windows to have window group 12 available
+    const windowIds: number[] = [];
+    try {
+      // Create 12 additional windows (plus original window = 13 total, giving us window groups 0-12)
+      for (let i = 0; i < 12; i++) {
+        const windowId = await page.evaluate(() => {
+          return new Promise<number>(resolve => {
+            chrome.windows.create(
+              {
+                url: 'https://example.com',
+                type: 'normal',
+              },
+              window => {
+                if (window && window.id) {
+                  resolve(window.id);
+                }
+              }
+            );
+          });
+        });
+        windowIds.push(windowId);
+      }
+
+      // Wait for all windows to be created
+      await page.waitForTimeout(2000);
+
+      // Reload to get updated window list
+      await page.reload();
+
+      // Verify window group 12 exists
+      await page.locator('[data-window-group-number="12"]').waitFor({ timeout: 5000 });
+
+      // Press w, then 1, then 2, then Enter
+      await page.keyboard.press('w');
+      await page.keyboard.press('1');
+      await page.keyboard.press('2');
+      await page.keyboard.press('Enter');
+
+      // Verify navigation to window group 12
+      const focusedElement = await page.evaluate(() => {
+        return document.activeElement?.closest('[data-window-group-number]')?.getAttribute('data-window-group-number');
+      });
+
+      expect(focusedElement).toBe('12');
+    } finally {
+      // Cleanup: close all created windows
+      for (const windowId of windowIds) {
+        try {
+          await page.evaluate(
+            ({ id, cleanupDelay }: { id: number; cleanupDelay: number }) => {
+              return new Promise<void>(resolve => {
+                chrome.windows.remove(id, () => {
+                  setTimeout(resolve, cleanupDelay);
+                });
+              });
+            },
+            { id: windowId, cleanupDelay: CHROME_CLEANUP_DELAY_MS }
+          );
+        } catch (_e) {
+          // (expected error, no action needed)
+        }
+      }
+    }
+  });
+
+  test('should allow editing with Backspace key', async ({ page, extensionId }) => {
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+
+    // Wait for window groups to load
+    await page.locator('[data-window-group-number]').first().waitFor();
+
+    // Get the first window group number
+    const firstGroupNumber = await page
+      .locator('[data-window-group-number]')
+      .first()
+      .getAttribute('data-window-group-number');
+
+    // Press w, then 5, then 9, then Backspace twice, then the first group number
+    await page.keyboard.press('w');
+    await page.keyboard.press('5');
+    await page.keyboard.press('9');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.press(firstGroupNumber || '1');
+    await page.keyboard.press('Enter');
+
+    // Verify navigation to first window group
+    const focusedElement = await page.evaluate(() => {
+      return document.activeElement?.closest('[data-window-group-number]')?.getAttribute('data-window-group-number');
+    });
+
+    expect(focusedElement).toBe(firstGroupNumber);
+  });
+
+  test('should not navigate with empty buffer', async ({ page, extensionId }) => {
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+
+    // Wait for window groups to load
+    await page.locator('[data-window-group-number]').first().waitFor();
+
+    // Press w, then 1, then Backspace, then Enter
+    await page.keyboard.press('w');
+    await page.keyboard.press('1');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.press('Enter');
+
+    // Verify no navigation occurred (focus remains on body or non-tab element)
+    const focusedElement = await page.evaluate(() => {
+      return document.activeElement?.tagName;
+    });
+
+    // Should not be focused on a list item (tab element)
+    expect(focusedElement).not.toBe('LI');
+  });
+
+  test('should NOT timeout during continuous input (Debounce)', async ({ page, extensionId }) => {
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+
+    // Wait for window groups to load
+    await page.locator('[data-window-group-number]').first().waitFor();
+
+    const firstGroupNumber = await page
+      .locator('[data-window-group-number]')
+      .first()
+      .getAttribute('data-window-group-number');
+
+    // Press keys with 2-second intervals (less than 3-second timeout)
+    await page.keyboard.press('w');
+    await page.waitForTimeout(2000);
+    await page.keyboard.press(firstGroupNumber || '1');
+    await page.waitForTimeout(2000);
+    await page.keyboard.press('2');
+    await page.keyboard.press('Enter');
+
+    // Should successfully jump to window group (firstGroupNumber)2
+    // e.g., if firstGroupNumber is '1', this should jump to window group '12'
+    const focusedElement = await page.evaluate(() => {
+      return document.activeElement?.closest('[data-window-group-number]')?.getAttribute('data-window-group-number');
+    });
+
+    // Verify we navigated to some window group (test passes if focus moved to a tab)
+    expect(focusedElement).not.toBeNull();
   });
 
   test('Current Window label updates dynamically when tabs change', async ({ page, context, extensionId }) => {

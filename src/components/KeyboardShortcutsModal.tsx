@@ -3,8 +3,8 @@ const KeyboardShortcutsModal = () => {
     'Global Shortcuts': [
       { key: '/', description: 'Focus search bar' },
       { key: '?', description: 'Show keyboard shortcuts (this modal)' },
-      { key: 'w + 0', description: 'Jump to current window' },
-      { key: 'w + 1-9', description: 'Jump to Window Group by number' },
+      { key: 'w + <number> + Enter', description: 'Jump to Window Group by number' },
+      { key: 'w + 0 + Enter', description: 'Jump to current window' },
       { key: 'ESC', description: 'Cancel window jump sequence' },
     ],
     'Tab Navigation': [
