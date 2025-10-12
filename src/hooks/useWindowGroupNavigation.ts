@@ -64,7 +64,7 @@ export function useWindowGroupNavigation(
       clearTimeout(sequenceTimeoutRef.current);
     }
 
-    sequenceTimeoutRef.current = setTimeout(() => {
+    sequenceTimeoutRef.current = window.setTimeout(() => {
       setSequenceActive(false);
       setInputBuffer('');
     }, finalConfig.timeoutMs);
