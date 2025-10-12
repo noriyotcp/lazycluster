@@ -180,6 +180,7 @@ const Manager = () => {
       if (event.key === 'Escape' && sequenceActiveRef.current) {
         event.preventDefault();
         setSequenceActive(false);
+        setInputBuffer(''); // Clear buffer on cancel
         if (sequenceTimeoutRef.current) {
           clearTimeout(sequenceTimeoutRef.current);
           sequenceTimeoutRef.current = null;
@@ -230,6 +231,16 @@ const Manager = () => {
           clearTimeout(sequenceTimeoutRef.current);
           sequenceTimeoutRef.current = null;
         }
+        return;
+      }
+
+      // Handle Backspace key to delete last digit
+      if (sequenceActiveRef.current && event.key === 'Backspace') {
+        event.preventDefault();
+        setInputBuffer(prev => prev.slice(0, -1));
+
+        // Reset timer (editing is active input)
+        resetSequenceTimeout();
         return;
       }
     },
