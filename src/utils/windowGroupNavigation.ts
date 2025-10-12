@@ -76,15 +76,16 @@ export function parseNavigationKey(event: KeyboardEvent): NavigationKey | null {
  */
 export function getWindowGroupElement(
   input: string,
-  activeWindowId: number | null
+  activeWindowId: number | null,
+  doc: Document = document
 ): HTMLElement | null {
   if (input === '0') {
     // Current Window handling
-    return document.querySelector(`[data-window-id="${activeWindowId}"]`);
+    return doc.querySelector(`[data-window-id="${activeWindowId}"]`);
   } else {
     // Window Group 1-9, 10-99, 100-999, etc.
     const targetIndex = parseInt(input, 10);
-    return document.querySelector(`[data-window-group-number="${targetIndex}"]`);
+    return doc.querySelector(`[data-window-group-number="${targetIndex}"]`);
   }
 }
 
