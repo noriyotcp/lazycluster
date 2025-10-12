@@ -7,25 +7,18 @@ import {
 
 describe('windowGroupNavigation utilities', () => {
   describe('canAddDigitToBuffer', () => {
-    it('allows first digit "0"', () => {
-      expect(canAddDigitToBuffer('', '0')).toBe(true);
+    it('allows adding to empty buffer', () => {
+      expect(canAddDigitToBuffer('')).toBe(true);
     });
 
-    it('allows first digit "1-9"', () => {
-      expect(canAddDigitToBuffer('', '1')).toBe(true);
-      expect(canAddDigitToBuffer('', '9')).toBe(true);
+    it('rejects adding after "0"', () => {
+      expect(canAddDigitToBuffer('0')).toBe(false);
     });
 
-    it('rejects digit after "0"', () => {
-      expect(canAddDigitToBuffer('0', '1')).toBe(false);
-      expect(canAddDigitToBuffer('0', '0')).toBe(false);
-      expect(canAddDigitToBuffer('0', '9')).toBe(false);
-    });
-
-    it('allows multiple digits for non-zero buffers', () => {
-      expect(canAddDigitToBuffer('1', '2')).toBe(true);
-      expect(canAddDigitToBuffer('12', '3')).toBe(true);
-      expect(canAddDigitToBuffer('999', '9')).toBe(true);
+    it('allows adding to non-zero buffer', () => {
+      expect(canAddDigitToBuffer('1')).toBe(true);
+      expect(canAddDigitToBuffer('12')).toBe(true);
+      expect(canAddDigitToBuffer('999')).toBe(true);
     });
   });
 

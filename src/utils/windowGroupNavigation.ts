@@ -9,10 +9,9 @@ import type { NavigationKey } from '../types/windowGroupNavigation';
  * "0" is reserved for Current Window, so "01", "002" are invalid
  *
  * @param currentBuffer - Current input buffer
- * @param _digit - Digit to add (0-9) - currently unused but kept for API consistency
  * @returns true if valid, false otherwise
  */
-export function canAddDigitToBuffer(currentBuffer: string, _digit: string): boolean {
+export function canAddDigitToBuffer(currentBuffer: string): boolean {
   // Reject digits after "0" (Current Window is "0" only)
   if (currentBuffer === '0') {
     return false;

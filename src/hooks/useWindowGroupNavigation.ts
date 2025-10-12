@@ -147,7 +147,7 @@ export function useWindowGroupNavigation(
         event.preventDefault();
 
         // Validate digit addition
-        if (!canAddDigitToBuffer(inputBufferRef.current, navKey.value)) {
+        if (!canAddDigitToBuffer(inputBufferRef.current)) {
           return;
         }
 
