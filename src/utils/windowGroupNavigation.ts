@@ -101,7 +101,7 @@ export function getWindowGroupElement(
  * @param targetElement - Window group element to focus
  */
 export function focusAndScrollToWindowGroup(targetElement: HTMLElement): void {
-  // Open collapse if closed
+  // Open collapsed group if closed
   const collapseInput = targetElement.querySelector('input[type="checkbox"]') as HTMLInputElement;
   if (collapseInput && !collapseInput.checked) {
     collapseInput.checked = true;
