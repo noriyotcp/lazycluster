@@ -5,6 +5,10 @@ A Chrome extension for enhanced tab and window management, inspired by the origi
 ## Features
 
 - **Drag-and-Drop Tab Reordering:** Reorder tabs within the same window by dragging with mouse or keyboard for intuitive tab organization.
+  - **Multi-Select**: Cmd/Ctrl+click to select multiple non-consecutive tabs, Shift+click for range selection
+  - **Multi-Drag**: Drag any selected tab to move all selected tabs together while maintaining their order
+  - **Visual Feedback**: Selected tabs highlighted, drag count badge displayed during multi-drag
+  - **Direction-Aware**: Tabs always drop exactly where the indicator shows, regardless of selection size or direction
 - **Effortless Bulk Tab Management:** Quickly select and close multiple tabs across all windows or within specific windows, saving time and reducing clutter.
   - Global Bulk Close: Close tabs from any window with a single action.
   - Window-Specific Bulk Close: Target tabs within a particular window for closing.
