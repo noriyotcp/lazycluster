@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { TabSelectionContextProvider } from '../../src/contexts/TabSelectionContext';
+import { DragSelectionContextProvider } from '../../src/contexts/DragSelectionContext';
 import { TabGroupProvider } from '@/src/contexts/TabGroupContext';
 import { TabGroupColorProvider } from '../../src/contexts/TabGroupColorContext';
 import { DeletionStateProvider } from '../../src/contexts/DeletionStateContext';
@@ -13,9 +14,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <TabGroupColorProvider>
         <TabGroupProvider>
           <TabSelectionContextProvider>
-            <DeletionStateProvider>
-              <App />
-            </DeletionStateProvider>
+            <DragSelectionContextProvider>
+              <DeletionStateProvider>
+                <App />
+              </DeletionStateProvider>
+            </DragSelectionContextProvider>
           </TabSelectionContextProvider>
         </TabGroupProvider>
       </TabGroupColorProvider>
