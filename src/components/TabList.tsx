@@ -181,18 +181,24 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
         </ul>
       </SortableContext>
 
-      {/* DragOverlay shows clone of dragged item */}
+      {/* DragOverlay shows clone of dragged item with optional selection badge */}
       <DragOverlay>
         {activeId ? (
-          (() => {
-            const activeTab = tabs.find(t => t.id === activeId)!;
-            const activeIndex = tabs.findIndex(t => t.id === activeId);
-            return (
-              <ul className="list shadow-md">
-                <TabItem tab={activeTab} isFiltered={false} index={activeIndex} windowId={activeTab.windowId!} tabs={tabs} />
-              </ul>
-            );
-          })()
+          <div className="relative">
+            <ul className="list shadow-md">
+              <TabItem
+                tab={tabs.find(t => t.id === activeId)!}
+                isFiltered={false}
+                index={tabs.findIndex(t => t.id === activeId)}
+                windowId={tabs.find(t => t.id === activeId)!.windowId!}
+                tabs={tabs}
+              />
+            </ul>
+            {/* Show badge when dragging multiple selected tabs */}
+            {dragSelectedTabIds.has(activeId) && dragSelectedTabIds.size > 1 && (
+              <div className="absolute -top-2 -right-2 badge badge-sm badge-accent">{dragSelectedTabIds.size}</div>
+            )}
+          </div>
         ) : null}
       </DragOverlay>
     </DndContext>
