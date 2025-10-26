@@ -65,6 +65,12 @@ const TabItem = ({ tab, isFiltered = false, index, windowId, tabs }: TabItemProp
       disabled: isFiltered,
       // Disable layout animation during sorting to prevent items from moving immediately
       animateLayoutChanges: ({ isSorting }) => !isSorting,
+      // Pass drag selection data for multi-drag in handleDragEnd
+      data: {
+        selectedItems: Array.from(dragSelectedTabIds),
+        isSelected: dragSelectedTabIds.has(tab.id!),
+        index,
+      },
     });
 
   const style = {
@@ -166,10 +172,8 @@ const TabItem = ({ tab, isFiltered = false, index, windowId, tabs }: TabItemProp
   // Determine background color based on selection states
   const getBgColor = () => {
     const isDragSelected = dragSelectedTabIds.has(tab.id!);
-    const isCheckboxSelected = selectedTabIds.has(tab.id!);
 
     if (isDragSelected) return 'bg-accent/10'; // Purple-ish for drag selection
-    if (isCheckboxSelected) return 'bg-primary/10'; // Blue-ish for checkbox selection
     return 'even:bg-base-200'; // Default zebra stripe
   };
 
