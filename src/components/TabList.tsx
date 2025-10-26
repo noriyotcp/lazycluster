@@ -152,7 +152,7 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
     >
       <SortableContext items={tabs.map(t => t.id!)} strategy={verticalListSortingStrategy} disabled={isFiltered}>
         <ul ref={listRef} className="list shadow-md" onKeyDown={handleKeyDown}>
-          {tabs.map(tab => (
+          {tabs.map((tab, index) => (
             <div key={tab.id}>
               {/* Top drop indicator */}
               <div
@@ -160,7 +160,7 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
                   overId === tab.id && dropPosition === 'top' ? 'opacity-100' : 'opacity-0'
                 }`}
               />
-              <TabItem tab={tab} isFiltered={isFiltered} />
+              <TabItem tab={tab} isFiltered={isFiltered} index={index} windowId={tab.windowId!} tabs={tabs} />
               {/* Bottom drop indicator */}
               <div
                 className={`h-0.5 bg-info transition-opacity ${
@@ -175,9 +175,15 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
       {/* DragOverlay shows clone of dragged item */}
       <DragOverlay>
         {activeId ? (
-          <ul className="list shadow-md">
-            <TabItem tab={tabs.find(t => t.id === activeId)!} isFiltered={false} />
-          </ul>
+          (() => {
+            const activeTab = tabs.find(t => t.id === activeId)!;
+            const activeIndex = tabs.findIndex(t => t.id === activeId);
+            return (
+              <ul className="list shadow-md">
+                <TabItem tab={activeTab} isFiltered={false} index={activeIndex} windowId={activeTab.windowId!} tabs={tabs} />
+              </ul>
+            );
+          })()
         ) : null}
       </DragOverlay>
     </DndContext>
