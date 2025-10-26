@@ -15,6 +15,7 @@ import { SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinat
 import TabItem from './TabItem';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
+import { useDragSelectionContext } from '../contexts/DragSelectionContext';
 
 interface TabListProps {
   tabs: chrome.tabs.Tab[];
@@ -24,6 +25,7 @@ interface TabListProps {
 const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
   const listRef = useRef<HTMLUListElement>(null);
   const { showToast } = useToast();
+  const { clearDragSelection, dragSelectedTabIds } = useDragSelectionContext();
 
   // Track active dragging item for DragOverlay
   const [activeId, setActiveId] = useState<number | null>(null);
@@ -84,6 +86,13 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
     try {
       // Move tab within same window (windowId omitted = current window)
       await chrome.tabs.move(active.id as number, { index: newIndex });
+
+      // Clear drag selection only if dragged tab was NOT selected
+      // (If selected tab was dragged, keep selection for consecutive moves)
+      const isDraggedTabSelected = dragSelectedTabIds.has(active.id as number);
+      if (!isDraggedTabSelected) {
+        clearDragSelection();
+      }
     } catch (error) {
       showToast(<Alert message="Failed to move tab" variant="error" />);
       console.error('Error moving tab:', error);
