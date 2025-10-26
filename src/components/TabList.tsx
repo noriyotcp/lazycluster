@@ -61,11 +61,14 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
     if (over) {
       setOverId(over.id as number);
 
-      // Determine drop position based on active and over indices
-      const activeIndex = tabs.findIndex(t => t.id === active.id);
-      const overIndex = tabs.findIndex(t => t.id === over.id);
+      // Use actual browser tab indices (not array positions) for consistent behavior
+      const activeTab = tabs.find(t => t.id === active.id);
+      const overTab = tabs.find(t => t.id === over.id);
 
-      setDropPosition(activeIndex > overIndex ? 'top' : 'bottom');
+      if (activeTab && overTab) {
+        const position = activeTab.index > overTab.index ? 'top' : 'bottom';
+        setDropPosition(position);
+      }
     }
   };
 
@@ -80,17 +83,73 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
     // Early return: no drop target or dropped on itself
     if (!over || active.id === over.id) return;
 
-    // Find target index in current window's tabs
-    const newIndex = tabs.findIndex(t => t.id === over.id);
+    // Find target tab and use its actual browser index (not array position)
+    const overTab = tabs.find(t => t.id === over.id)!;
+    const newIndex = overTab.index;
 
     try {
-      // Move tab within same window (windowId omitted = current window)
-      await chrome.tabs.move(active.id as number, { index: newIndex });
+      // Get drag selection data from useSortable
+      const selectedItems = active.data.current?.selectedItems as number[] | undefined;
+      const isSelected = active.data.current?.isSelected as boolean;
+
+      // Determine which tabs to move
+      let tabsToMove: number[];
+
+      if (isSelected && selectedItems) {
+        // Sort selected tab IDs by their current browser position to preserve original order
+        // Example: Cmd+click tabs 1,3,5 → always move as [1,3,5], not [5,1,3]
+        tabsToMove = selectedItems
+          .map(id => ({ id, index: tabs.find(t => t.id === id)!.index }))
+          .sort((a, b) => a.index - b.index)
+          .map(item => item.id);
+      } else {
+        tabsToMove = [active.id as number];
+      }
+
+      // Calculate minimum index of selected tabs for direction detection
+      const selectedIndices = tabsToMove.map(id => tabs.find(t => t.id === id)!.index);
+      const minSelectedIndex = Math.min(...selectedIndices);
+
+      // Calculate target index based on drop position
+      let targetIndex = newIndex;
+      if (dropPosition === 'bottom') {
+        targetIndex++;
+      }
+
+      // Determine direction BEFORE adjustment (use minimum selected index, not active tab)
+      const isMovingDown = minSelectedIndex < targetIndex;
+
+      // Adjust for downward movement: when moving tab(s) down, they're removed first,
+      // shifting all subsequent tabs' indices by the number of tabs being moved
+      if (isMovingDown) {
+        // Moving downward: subtract the number of tabs being moved
+        targetIndex -= tabsToMove.length;
+      }
+
+      // Move tab(s) within same window (windowId omitted = current window)
+      if (tabsToMove.length === 1) {
+        await chrome.tabs.move(tabsToMove[0], { index: targetIndex });
+      } else {
+        if (isMovingDown) {
+          // Downward: move in reverse order (last tab first)
+          for (let i = tabsToMove.length - 1; i >= 0; i--) {
+            const tabId = tabsToMove[i];
+            const finalIndex = targetIndex + i;
+            await chrome.tabs.move(tabId, { index: finalIndex });
+          }
+        } else {
+          // Upward: move in forward order (first tab first)
+          for (let i = 0; i < tabsToMove.length; i++) {
+            const tabId = tabsToMove[i];
+            const finalIndex = targetIndex + i;
+            await chrome.tabs.move(tabId, { index: finalIndex });
+          }
+        }
+      }
 
       // Clear drag selection only if dragged tab was NOT selected
       // (If selected tab was dragged, keep selection for consecutive moves)
-      const isDraggedTabSelected = dragSelectedTabIds.has(active.id as number);
-      if (!isDraggedTabSelected) {
+      if (!isSelected) {
         clearDragSelection();
       }
     } catch (error) {
