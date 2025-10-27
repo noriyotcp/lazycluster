@@ -84,7 +84,11 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
     if (!over || active.id === over.id) return;
 
     // Find target tab and use its actual browser index (not array position)
-    const overTab = tabs.find(t => t.id === over.id)!;
+    const overTab = tabs.find(t => t.id === over.id);
+    if (!overTab) {
+      console.error('Drop target tab not found:', over.id);
+      return;
+    }
     const newIndex = overTab.index;
 
     try {
@@ -99,7 +103,11 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
         // Sort selected tab IDs by their current browser position to preserve original order
         // Example: Cmd+click tabs 1,3,5 → always move as [1,3,5], not [5,1,3]
         tabsToMove = selectedItems
-          .map(id => ({ id, index: tabs.find(t => t.id === id)!.index }))
+          .map(id => {
+            const tab = tabs.find(t => t.id === id);
+            return tab ? { id, index: tab.index } : null;
+          })
+          .filter((item): item is { id: number; index: number } => item !== null)
           .sort((a, b) => a.index - b.index)
           .map(item => item.id);
       } else {
@@ -107,7 +115,9 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
       }
 
       // Calculate minimum index of selected tabs for direction detection
-      const selectedIndices = tabsToMove.map(id => tabs.find(t => t.id === id)!.index);
+      const selectedIndices = tabsToMove
+        .map(id => tabs.find(t => t.id === id)?.index)
+        .filter((index): index is number => index !== undefined);
       const minSelectedIndex = Math.min(...selectedIndices);
 
       // Calculate target index based on drop position
@@ -242,23 +252,32 @@ const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
 
       {/* DragOverlay shows clone of dragged item with optional selection badge */}
       <DragOverlay>
-        {activeId ? (
-          <div className="relative">
-            <ul className="list shadow-md">
-              <TabItem
-                tab={tabs.find(t => t.id === activeId)!}
-                isFiltered={false}
-                index={tabs.findIndex(t => t.id === activeId)}
-                windowId={tabs.find(t => t.id === activeId)!.windowId!}
-                tabs={tabs}
-              />
-            </ul>
-            {/* Show badge when dragging multiple selected tabs */}
-            {dragSelectedTabIds.has(activeId) && dragSelectedTabIds.size > 1 && (
-              <div className="absolute -top-2 -right-2 badge badge-sm badge-accent">{dragSelectedTabIds.size}</div>
-            )}
-          </div>
-        ) : null}
+        {activeId
+          ? (() => {
+              const activeTab = tabs.find(t => t.id === activeId);
+              if (!activeTab) return null;
+
+              return (
+                <div className="relative">
+                  <ul className="list shadow-md">
+                    <TabItem
+                      tab={activeTab}
+                      isFiltered={false}
+                      index={tabs.findIndex(t => t.id === activeId)}
+                      windowId={activeTab.windowId!}
+                      tabs={tabs}
+                    />
+                  </ul>
+                  {/* Show badge when dragging multiple selected tabs */}
+                  {dragSelectedTabIds.has(activeId) && dragSelectedTabIds.size > 1 && (
+                    <div className="absolute -top-2 -right-2 badge badge-sm badge-accent">
+                      {dragSelectedTabIds.size}
+                    </div>
+                  )}
+                </div>
+              );
+            })()
+          : null}
       </DragOverlay>
     </DndContext>
   );
