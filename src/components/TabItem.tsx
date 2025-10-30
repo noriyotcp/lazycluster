@@ -2,12 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
+import { useDragSelectionContext } from '../contexts/DragSelectionContext';
 import { useTabFocusContext } from '../../src/contexts/TabFocusContext';
 import { useDeletionState } from '../contexts/DeletionStateContext';
 import { useTabGroupColor } from '../contexts/TabGroupColorContext';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
 import { getTabGroupBorderColorClass } from '../utils/tabGroupColors';
+import { getTabIdsInRangeForWindow } from '../utils/dragSelection';
 
 const extractDomain = (url: string): string => {
   try {
@@ -20,6 +22,9 @@ const extractDomain = (url: string): string => {
 interface TabItemProps {
   tab: chrome.tabs.Tab;
   isFiltered?: boolean;
+  index: number;
+  windowId: number;
+  tabs: chrome.tabs.Tab[];
 }
 
 const globeIcon = () => {
@@ -34,8 +39,16 @@ const globeIcon = () => {
   );
 };
 
-const TabItem = ({ tab, isFiltered = false }: TabItemProps) => {
+const TabItem = ({ tab, isFiltered = false, index, windowId, tabs }: TabItemProps) => {
   const { selectedTabIds, addTabToSelection, removeTabFromSelection } = useTabSelectionContext();
+  const {
+    dragSelectedTabIds,
+    addTabToDragSelection,
+    removeTabFromDragSelection,
+    clearDragSelection,
+    addTabsToDragSelection,
+    lastDragSelectedIndex,
+  } = useDragSelectionContext();
   const [isChecked, setIsChecked] = useState(false);
   const { focusActiveTab } = useTabFocusContext();
   const checkboxRef = useRef<HTMLInputElement>(null);
@@ -52,6 +65,12 @@ const TabItem = ({ tab, isFiltered = false }: TabItemProps) => {
       disabled: isFiltered,
       // Disable layout animation during sorting to prevent items from moving immediately
       animateLayoutChanges: ({ isSorting }) => !isSorting,
+      // Pass drag selection data for multi-drag in handleDragEnd
+      data: {
+        selectedItems: Array.from(dragSelectedTabIds),
+        isSelected: dragSelectedTabIds.has(tab.id!),
+        index,
+      },
     });
 
   const style = {
@@ -104,15 +123,66 @@ const TabItem = ({ tab, isFiltered = false }: TabItemProps) => {
     }
   };
 
+  const handleDragHandleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Cmd/Ctrl+click: Toggle drag selection
+    if (e.metaKey || e.ctrlKey) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (dragSelectedTabIds.has(tab.id!)) {
+        removeTabFromDragSelection(tab.id!);
+      } else {
+        addTabToDragSelection(tab.id!, windowId, index);
+      }
+      return;
+    }
+
+    // Shift+click: Range drag selection
+    if (e.shiftKey) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // First Shift+click without prior selection: Select this tab only
+      if (lastDragSelectedIndex === null) {
+        addTabToDragSelection(tab.id!, windowId, index);
+        return;
+      }
+
+      // Subsequent Shift+click: Select range from last selected to current
+      const start = Math.min(lastDragSelectedIndex, index);
+      const end = Math.max(lastDragSelectedIndex, index);
+      const rangeTabIds = getTabIdsInRangeForWindow(tabs, start, end, windowId);
+      addTabsToDragSelection(rangeTabIds, windowId);
+      return;
+    }
+
+    // Normal click (no modifier keys): Clear all selections if this tab is selected
+    if (dragSelectedTabIds.has(tab.id!)) {
+      e.preventDefault();
+      e.stopPropagation();
+      clearDragSelection();
+      return;
+    }
+
+    // Unselected tab with normal click: Let dnd-kit handle it (drag)
+  };
+
   // Apply group color if tab belongs to a group, otherwise use transparent border
   const borderColorClass = groupColor ? getTabGroupBorderColorClass(groupColor) : 'border-l-transparent';
+
+  // Determine background color based on selection states
+  const getBgColor = () => {
+    const isDragSelected = dragSelectedTabIds.has(tab.id!);
+
+    if (isDragSelected) return 'bg-accent/10'; // Purple-ish for drag selection
+    return 'even:bg-base-200'; // Default zebra stripe
+  };
 
   return (
     <div inert={isDeletingTab || undefined} className="inert:opacity-50">
       <li
         ref={setNodeRef}
         style={style}
-        className={`list-row p-2 items-center rounded-none even:bg-base-200 focus:outline-1 focus:[outline-style:auto] group/tabitem border-l-[3px] ${borderColorClass}`}
+        className={`list-row p-2 items-center rounded-none ${getBgColor()} focus:outline-1 focus:[outline-style:auto] group/tabitem border-l-[3px] ${borderColorClass}`}
         onKeyDown={handleKeyDown}
         {...attributes}
         tabIndex={0}
@@ -154,6 +224,7 @@ const TabItem = ({ tab, isFiltered = false }: TabItemProps) => {
         <button
           ref={setActivatorNodeRef}
           {...listeners}
+          onClick={handleDragHandleClick}
           disabled={isFiltered}
           className={
             isFiltered
