@@ -121,17 +121,8 @@ export function useWindowGroupNavigation(
         return;
       }
 
-      // Handle sequence cancellation (ESC)
-      if (navKey.type === 'CANCEL' && sequenceActiveRef.current) {
-        event.preventDefault();
-        setSequenceActive(false);
-        setInputBuffer('');
-        if (sequenceTimeoutRef.current) {
-          clearTimeout(sequenceTimeoutRef.current);
-          sequenceTimeoutRef.current = null;
-        }
-        return;
-      }
+      // ESC during active sequence is handled by capture-phase listener (handleEscCapture)
+      // to prevent other handlers (e.g., TabItem focus restoration) from firing
 
       // Start sequence with 'w' key
       if (navKey.type === 'START_SEQUENCE' && !sequenceActiveRef.current) {
@@ -185,17 +176,36 @@ export function useWindowGroupNavigation(
     [handleWindowGroupFocus, resetSequenceTimeout, searchBarRef]
   );
 
-  // Setup keyboard event listener
+  // Capture-phase handler: intercept ESC during active sequence before any other handler
+  const handleEscCapture = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && sequenceActiveRef.current) {
+        event.preventDefault();
+        event.stopPropagation();
+        setSequenceActive(false);
+        setInputBuffer('');
+        if (sequenceTimeoutRef.current) {
+          clearTimeout(sequenceTimeoutRef.current);
+          sequenceTimeoutRef.current = null;
+        }
+      }
+    },
+    []
+  );
+
+  // Setup keyboard event listeners
   useEffect(() => {
+    document.addEventListener('keydown', handleEscCapture, true); // capture phase
     document.addEventListener('keydown', handleKeyDown);
 
     return () => {
+      document.removeEventListener('keydown', handleEscCapture, true);
       document.removeEventListener('keydown', handleKeyDown);
       if (sequenceTimeoutRef.current) {
         clearTimeout(sequenceTimeoutRef.current);
       }
     };
-  }, [handleKeyDown]);
+  }, [handleEscCapture, handleKeyDown]);
 
   return {
     sequenceActive,
