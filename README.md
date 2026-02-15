@@ -4,7 +4,7 @@ A Chrome extension for enhanced tab and window management, inspired by the origi
 
 ## Features
 
-- **Drag-and-Drop Tab Reordering:** Reorder tabs within the same window by dragging with mouse or keyboard for intuitive tab organization.
+- **Drag-and-Drop Tab Reordering:** Reorder tabs within the same window or move tabs between windows by dragging with mouse or keyboard for intuitive tab organization.
   - **Multi-Select**: Cmd/Ctrl+click to select multiple non-consecutive tabs, Shift+click for range selection
   - **Multi-Drag**: Drag any selected tab to move all selected tabs together while maintaining their order
   - **Visual Feedback**: Selected tabs highlighted, drag count badge displayed during multi-drag
