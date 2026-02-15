@@ -14,7 +14,10 @@ const KeyboardShortcutsModal = () => {
       { key: 'Shift + m', description: 'Jump to middle tab in window group' },
       { key: 'Shift + l', description: 'Jump to last tab in window group' },
     ],
-    'Tab Actions': [{ key: 'Space', description: 'Toggle tab selection' }],
+    'Tab Actions': [
+      { key: 'Space', description: 'Toggle tab selection' },
+      { key: 'ESC', description: 'Return focus to tab item (from inner elements)' },
+    ],
   };
 
   return (

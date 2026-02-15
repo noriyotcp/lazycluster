@@ -110,6 +110,15 @@ const TabItem = ({ tab, isFiltered = false, index, windowId, tabs }: TabItemProp
         checkboxRef.current.click();
       }
     }
+
+    // Esc: Return focus from inner elements (link, button, etc.) back to the <li>
+    if (e.key === 'Escape') {
+      const li = e.currentTarget;
+      if (e.target !== li) {
+        e.preventDefault();
+        li.focus();
+      }
+    }
   };
 
   const handleCloseButtonClick = async () => {
