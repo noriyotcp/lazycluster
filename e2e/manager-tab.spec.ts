@@ -674,6 +674,140 @@ test.describe('Manager Tab E2E Tests', () => {
     expect(focusedTagAfterEsc).toBe(focusedTagAfterFocus);
   });
 
+  test('should collapse all window groups when Alt+clicking a collapse header', async ({ page, extensionId }) => {
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+
+    // Create a second window to have multiple window groups
+    const newWindowId = await page.evaluate(() => {
+      return new Promise<number>(resolve => {
+        chrome.windows.create(
+          { url: 'https://example.com', type: 'normal' },
+          window => {
+            if (window && window.id) resolve(window.id);
+          }
+        );
+      });
+    });
+
+    try {
+      await page.waitForTimeout(2000);
+      await page.reload();
+
+      // Verify 2 window groups exist
+      await page.locator('[data-window-group-number]').nth(1).waitFor({ timeout: 5000 });
+      const windowGroupCount = await page.locator('[data-window-group-number]').count();
+      expect(windowGroupCount).toBe(2);
+
+      const checkboxes = page.locator('input[id^="window-group-collapse-"]');
+
+      // Verify both are expanded initially
+      for (let i = 0; i < windowGroupCount; i++) {
+        await expect(checkboxes.nth(i)).toBeChecked();
+      }
+
+      // Alt+click the first collapse checkbox to collapse all
+      // Note: dispatchEvent(click) on checkbox toggles checked in Chromium,
+      // so do NOT manually toggle el.checked (would cause double-toggle).
+      await checkboxes.first().evaluate((el: HTMLInputElement) => {
+        el.dispatchEvent(
+          new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            view: window,
+            altKey: true,
+          })
+        );
+      });
+      await page.waitForTimeout(100);
+
+      // Verify ALL window groups are collapsed
+      for (let i = 0; i < windowGroupCount; i++) {
+        await expect(checkboxes.nth(i)).not.toBeChecked();
+      }
+
+      // Alt+click again to expand all
+      await checkboxes.first().evaluate((el: HTMLInputElement) => {
+        el.dispatchEvent(
+          new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            view: window,
+            altKey: true,
+          })
+        );
+      });
+      await page.waitForTimeout(100);
+
+      // Verify ALL window groups are expanded
+      for (let i = 0; i < windowGroupCount; i++) {
+        await expect(checkboxes.nth(i)).toBeChecked();
+      }
+    } finally {
+      try {
+        await page.evaluate(
+          ({ windowId, cleanupDelay }: { windowId: number; cleanupDelay: number }) => {
+            return new Promise<void>(resolve => {
+              chrome.windows.remove(windowId, () => {
+                setTimeout(resolve, cleanupDelay);
+              });
+            });
+          },
+          { windowId: newWindowId, cleanupDelay: CHROME_CLEANUP_DELAY_MS }
+        );
+      } catch (_e) {
+        // (expected error, no action needed)
+      }
+    }
+  });
+
+  test('should not toggle other groups when clicking without Alt', async ({ page, extensionId }) => {
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+
+    // Create a second window
+    const newWindowId = await page.evaluate(() => {
+      return new Promise<number>(resolve => {
+        chrome.windows.create(
+          { url: 'https://example.com', type: 'normal' },
+          window => {
+            if (window && window.id) resolve(window.id);
+          }
+        );
+      });
+    });
+
+    try {
+      await page.waitForTimeout(2000);
+      await page.reload();
+
+      await page.locator('[data-window-group-number]').nth(1).waitFor({ timeout: 5000 });
+
+      const checkboxes = page.locator('input[id^="window-group-collapse-"]');
+
+      // Normal click (no Alt) on first checkbox
+      await checkboxes.first().click();
+      await page.waitForTimeout(100);
+
+      // First should be collapsed, second should still be expanded
+      await expect(checkboxes.first()).not.toBeChecked();
+      await expect(checkboxes.nth(1)).toBeChecked();
+    } finally {
+      try {
+        await page.evaluate(
+          ({ windowId, cleanupDelay }: { windowId: number; cleanupDelay: number }) => {
+            return new Promise<void>(resolve => {
+              chrome.windows.remove(windowId, () => {
+                setTimeout(resolve, cleanupDelay);
+              });
+            });
+          },
+          { windowId: newWindowId, cleanupDelay: CHROME_CLEANUP_DELAY_MS }
+        );
+      } catch (_e) {
+        // (expected error, no action needed)
+      }
+    }
+  });
+
   test('should not change focus when Escape pressed while li itself is focused', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/manager.html`);
 
