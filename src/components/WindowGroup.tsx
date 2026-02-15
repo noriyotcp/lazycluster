@@ -16,14 +16,15 @@ interface WindowGroupProps {
   isFiltered?: boolean;
   overId: number | null;
   dropPosition: 'top' | 'bottom';
+  overWindowId: number | null;
 }
-const WindowGroup = ({ tabGroup, activeWindowId, isFiltered = false, overId, dropPosition }: WindowGroupProps) => {
+const WindowGroup = ({ tabGroup, activeWindowId, isFiltered = false, overId, dropPosition, overWindowId }: WindowGroupProps) => {
   const { windowGroupNumber } = useWindowGroupContext();
   const { isDeleting } = useDeletionState();
   const isDeletingWindow = isDeleting({ type: 'window', id: tabGroup.windowId });
 
   // Register as a drop zone for cross-window drag-and-drop
-  const { isOver, setNodeRef } = useDroppable({
+  const { setNodeRef } = useDroppable({
     id: `window-${tabGroup.windowId}`,
     data: { windowId: tabGroup.windowId, type: 'window-group' },
   });
@@ -43,7 +44,7 @@ const WindowGroup = ({ tabGroup, activeWindowId, isFiltered = false, overId, dro
   return (
     <div ref={setNodeRef} inert={isDeletingWindow || undefined} className="inert:opacity-50">
       <div
-        className={`collapse collapse-arrow bg-base-100 border-base-300 border rounded-none mb-4 ${isOver ? 'ring-2 ring-accent' : ''}`}
+        className={`collapse collapse-arrow bg-base-100 border-base-300 border rounded-none mb-4 ${overWindowId === tabGroup.windowId ? 'ring-2 ring-accent' : ''}`}
         data-window-group-number={windowGroupNumber}
         data-window-id={tabGroup.windowId}
       >

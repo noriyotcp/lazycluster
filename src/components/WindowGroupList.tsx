@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   DndContext,
   DragEndEvent,
@@ -38,6 +38,9 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
   const [overId, setOverId] = useState<number | null>(null);
   const [dropPosition, setDropPosition] = useState<'top' | 'bottom'>('bottom');
 
+  // Track which window group is being dragged over (for cross-window ring highlight)
+  const [overWindowId, setOverWindowId] = useState<number | null>(null);
+
   // Configure sensors for drag-and-drop
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -63,9 +66,43 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
   // All tabs across all windows (for lookups)
   const allTabs = filteredTabGroups.flatMap(g => g.tabs);
 
+  // Store source window ID for pointer tracking (set in handleDragStart, read in useEffect)
+  const sourceWindowIdRef = useRef<number | null>(null);
+
+  // Track pointer position during drag for reliable ring highlight.
+  // Uses DOM elementsFromPoint() instead of dnd-kit collision detection to avoid
+  // flickering caused by rectIntersection fallback matching adjacent window groups.
+  useEffect(() => {
+    if (activeId === null) return;
+
+    const sourceWindowId = sourceWindowIdRef.current;
+
+    const handlePointerMove = (e: PointerEvent) => {
+      const elements = document.elementsFromPoint(e.clientX, e.clientY);
+      const windowGroupEl = elements.find(
+        (el): el is HTMLElement => el instanceof HTMLElement && 'windowId' in el.dataset
+      );
+      if (windowGroupEl) {
+        const targetWindowId = Number(windowGroupEl.dataset.windowId);
+        setOverWindowId(targetWindowId !== sourceWindowId ? targetWindowId : null);
+      } else {
+        setOverWindowId(null);
+      }
+    };
+
+    document.addEventListener('pointermove', handlePointerMove);
+    return () => {
+      document.removeEventListener('pointermove', handlePointerMove);
+      setOverWindowId(null);
+    };
+  }, [activeId]);
+
   // Handle drag start to track active item for DragOverlay
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as number);
+    const newActiveId = event.active.id as number;
+    const activeTab = allTabs.find(t => t.id === newActiveId);
+    sourceWindowIdRef.current = activeTab?.windowId ?? null;
+    setActiveId(newActiveId);
   };
 
   // Handle drag over event to show drop indicator
@@ -76,7 +113,7 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
       const activeTab = allTabs.find(t => t.id === active.id);
       const overTab = allTabs.find(t => t.id === over.id);
 
-      // Only show drop indicator for same-window targets (cross-window in later steps)
+      // Show drop indicator for same-window tab targets (cross-window in later steps)
       if (activeTab && overTab && activeTab.windowId === overTab.windowId) {
         setOverId(over.id as number);
 
@@ -223,6 +260,7 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
                   isFiltered={isFiltered}
                   overId={overId}
                   dropPosition={dropPosition}
+                  overWindowId={overWindowId}
                 />
               </WindowGroupContextProvider>
             </div>
