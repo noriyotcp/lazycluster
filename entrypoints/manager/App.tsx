@@ -33,7 +33,7 @@ const Manager = () => {
     (message: BackgroundMessage) => {
       devLog(`${new Date()} - Received message from background:`, message); // Log received messages
       if (message.type === 'UPDATE_TABS' && message.tabs) {
-        updateTabGroups(message.tabs); // Use the updated tabs
+        updateTabGroups(message.tabs, activeWindowId ?? undefined); // Use the updated tabs
 
         // Update group colors
         updateGroupColors(message.tabs);
@@ -52,7 +52,7 @@ const Manager = () => {
       }
       // No need to handle REQUEST_INITIAL_DATA here, it's sent from client
     },
-    [updateTabGroups, syncWithExistingTabs, cleanupNonExistentItems, updateGroupColors]
+    [updateTabGroups, syncWithExistingTabs, cleanupNonExistentItems, updateGroupColors, activeWindowId]
   );
 
   // Use the custom hook to manage the connection
@@ -77,15 +77,6 @@ const Manager = () => {
       }
     });
   }, []); // Run once on mount
-
-  // Effect to update activeWindowId when tabGroups changes (e.g., when tab is moved to another window)
-  useEffect(() => {
-    chrome.windows.getCurrent().then(window => {
-      if (window.id !== undefined) {
-        setActiveWindowId(window.id);
-      }
-    });
-  }, [tabGroups]); // Update whenever tabs change
 
   const handleSearchQueryChange = useCallback(
     (query: string) => {

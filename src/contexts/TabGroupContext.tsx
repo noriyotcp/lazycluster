@@ -7,7 +7,7 @@ interface TabGroup {
 
 interface TabGroupContextProps {
   tabGroups: TabGroup[];
-  updateTabGroups: (tabs: chrome.tabs.Tab[]) => void;
+  updateTabGroups: (tabs: chrome.tabs.Tab[], activeWindowId?: number) => void;
 }
 
 const TabGroupContext = createContext<TabGroupContextProps | undefined>(undefined);
@@ -15,32 +15,20 @@ const TabGroupContext = createContext<TabGroupContextProps | undefined>(undefine
 export const TabGroupProvider = ({ children }: { children: React.ReactNode }): React.ReactElement => {
   const [tabGroups, setTabGroups] = useState<TabGroup[]>([]);
 
-  const updateTabGroups = useCallback((updatedTabs: chrome.tabs.Tab[]) => {
+  const updateTabGroups = useCallback((updatedTabs: chrome.tabs.Tab[], activeWindowId?: number) => {
     const groupedTabs = groupTabsByWindow(updatedTabs);
-    // Get active window ID within the message handling
-    chrome.windows.getCurrent().then(window => {
-      if (window.id !== undefined) {
-        const sortedTabGroups = sortTabGroups(groupedTabs, window.id);
-        setTabGroups(sortedTabGroups);
-      } else {
-        setTabGroups(groupedTabs);
-      }
-    });
+    if (activeWindowId !== undefined) {
+      const sortedTabGroups = sortTabGroups(groupedTabs, activeWindowId);
+      setTabGroups(sortedTabGroups);
+    } else {
+      setTabGroups(groupedTabs);
+    }
   }, []);
 
-  const sortTabGroups = (tabGroups: TabGroup[], activeWindowId: number | null): TabGroup[] => {
-    if (activeWindowId === null) {
-      return tabGroups; // No sorting needed if active window ID is not available
-    }
-
-    const activeWindowGroupIndex = tabGroups.findIndex(group => group.windowId === activeWindowId);
-
-    if (activeWindowGroupIndex === -1) {
-      return tabGroups; // No sorting needed if the active window group is not found
-    }
-
-    const activeWindowGroup = tabGroups.splice(activeWindowGroupIndex, 1)[0]; // Extracts the active window's group
-    return [activeWindowGroup, ...tabGroups]; // Insert the active window group at the beginning
+  const sortTabGroups = (tabGroups: TabGroup[], activeWindowId: number): TabGroup[] => {
+    const activeGroup = tabGroups.find(group => group.windowId === activeWindowId);
+    if (!activeGroup) return tabGroups;
+    return [activeGroup, ...tabGroups.filter(group => group.windowId !== activeWindowId)];
   };
 
   const groupTabsByWindow = (tabs: chrome.tabs.Tab[]): TabGroup[] => {
