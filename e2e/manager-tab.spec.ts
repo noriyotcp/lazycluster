@@ -656,14 +656,14 @@ test.describe('Manager Tab E2E Tests', () => {
     await page.waitForTimeout(100);
 
     // Verify sequence is active (badge visible)
-    await expect(page.locator('.badge-primary')).toBeVisible();
+    await expect(page.locator('.badge-jump-to-window-group')).toBeVisible();
 
     // Press Escape to cancel the sequence
     await page.keyboard.press('Escape');
     await page.waitForTimeout(100);
 
     // Verify sequence is cancelled (badge gone)
-    await expect(page.locator('.badge-primary')).not.toBeVisible();
+    await expect(page.locator('.badge-jump-to-window-group')).not.toBeVisible();
 
     // Verify focus did NOT move to the <li> — it should stay on the inner element
     const focusedTagAfterEsc = await page.evaluate(() => document.activeElement?.tagName);
