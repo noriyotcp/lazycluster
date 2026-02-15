@@ -110,16 +110,26 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
     const { active, over } = event;
 
     if (over) {
+      // Window group droppable (collapsed group or empty area) — no tab-level indicator
+      if (over.data.current?.type === 'window-group') {
+        setOverId(null);
+        return;
+      }
+
       const activeTab = allTabs.find(t => t.id === active.id);
       const overTab = allTabs.find(t => t.id === over.id);
 
-      // Show drop indicator for same-window tab targets (cross-window in later steps)
-      if (activeTab && overTab && activeTab.windowId === overTab.windowId) {
+      if (activeTab && overTab) {
         setOverId(over.id as number);
 
-        // Use actual browser tab indices (not array positions) for consistent behavior
-        const position = activeTab.index > overTab.index ? 'top' : 'bottom';
-        setDropPosition(position);
+        if (activeTab.windowId === overTab.windowId) {
+          // Same window: direction based on index comparison
+          const position = activeTab.index > overTab.index ? 'top' : 'bottom';
+          setDropPosition(position);
+        } else {
+          // Cross-window: always insert after the over tab
+          setDropPosition('bottom');
+        }
       } else {
         setOverId(null);
       }
@@ -137,93 +147,136 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
     // Early return: no drop target or dropped on itself
     if (!over || active.id === over.id) return;
 
-    // Find tabs involved
     const activeTab = allTabs.find(t => t.id === active.id);
-    const overTab = allTabs.find(t => t.id === over.id);
+    if (!activeTab) return;
 
-    if (!activeTab || !overTab) {
-      console.error('Drop target tab not found:', over.id);
-      return;
+    // Determine target window ID based on drop target type
+    const isWindowGroupDrop = over.data.current?.type === 'window-group';
+    let targetWindowId: number;
+
+    if (isWindowGroupDrop) {
+      // Dropped on a window group container (e.g., collapsed group header)
+      targetWindowId = over.data.current!.windowId as number;
+    } else {
+      // Dropped on a specific tab
+      const overTab = allTabs.find(t => t.id === over.id);
+      if (!overTab) {
+        console.error('Drop target tab not found:', over.id);
+        return;
+      }
+      targetWindowId = overTab.windowId!;
     }
 
-    // Step 1: only handle same-window moves (cross-window in Step 4)
-    if (activeTab.windowId !== overTab.windowId) return;
+    const isCrossWindow = activeTab.windowId !== targetWindowId;
 
-    // Get the window's tabs for index calculations
-    const windowTabs = filteredTabGroups.find(g => g.windowId === activeTab.windowId)?.tabs ?? [];
-    const newIndex = overTab.index;
+    if (!isCrossWindow) {
+      // ---- Same-window move (existing logic) ----
+      const overTab = allTabs.find(t => t.id === over.id);
+      if (!overTab) return;
 
-    try {
-      // Get drag selection data from useSortable
-      const selectedItems = active.data.current?.selectedItems as number[] | undefined;
-      const isSelected = active.data.current?.isSelected as boolean;
+      const windowTabs = filteredTabGroups.find(g => g.windowId === activeTab.windowId)?.tabs ?? [];
+      const newIndex = overTab.index;
 
-      // Determine which tabs to move
-      let tabsToMove: number[];
+      try {
+        // Get drag selection data from useSortable
+        const selectedItems = active.data.current?.selectedItems as number[] | undefined;
+        const isSelected = active.data.current?.isSelected as boolean;
 
-      if (isSelected && selectedItems) {
-        // Sort selected tab IDs by their current browser position to preserve original order
-        tabsToMove = selectedItems
-          .map(id => {
-            const tab = windowTabs.find(t => t.id === id);
-            return tab ? { id, index: tab.index } : null;
-          })
-          .filter((item): item is { id: number; index: number } => item !== null)
-          .sort((a, b) => a.index - b.index)
-          .map(item => item.id);
-      } else {
-        tabsToMove = [active.id as number];
-      }
+        // Determine which tabs to move
+        let tabsToMove: number[];
 
-      // Calculate minimum index of selected tabs for direction detection
-      const selectedIndices = tabsToMove
-        .map(id => windowTabs.find(t => t.id === id)?.index)
-        .filter((index): index is number => index !== undefined);
-      const minSelectedIndex = Math.min(...selectedIndices);
-
-      // Calculate target index based on drop position
-      let targetIndex = newIndex;
-      if (dropPosition === 'bottom') {
-        targetIndex++;
-      }
-
-      // Determine direction BEFORE adjustment (use minimum selected index, not active tab)
-      const isMovingDown = minSelectedIndex < targetIndex;
-
-      // Adjust for downward movement: when moving tab(s) down, they're removed first,
-      // shifting all subsequent tabs' indices by the number of tabs being moved
-      if (isMovingDown) {
-        targetIndex -= tabsToMove.length;
-      }
-
-      // Move tab(s) within same window (windowId omitted = current window)
-      if (tabsToMove.length === 1) {
-        await chrome.tabs.move(tabsToMove[0], { index: targetIndex });
-      } else {
-        if (isMovingDown) {
-          // Downward: move in reverse order (last tab first)
-          for (let i = tabsToMove.length - 1; i >= 0; i--) {
-            const tabId = tabsToMove[i];
-            const finalIndex = targetIndex + i;
-            await chrome.tabs.move(tabId, { index: finalIndex });
-          }
+        if (isSelected && selectedItems) {
+          // Sort selected tab IDs by their current browser position to preserve original order
+          tabsToMove = selectedItems
+            .map(id => {
+              const tab = windowTabs.find(t => t.id === id);
+              return tab ? { id, index: tab.index } : null;
+            })
+            .filter((item): item is { id: number; index: number } => item !== null)
+            .sort((a, b) => a.index - b.index)
+            .map(item => item.id);
         } else {
-          // Upward: move in forward order (first tab first)
-          for (let i = 0; i < tabsToMove.length; i++) {
-            const tabId = tabsToMove[i];
-            const finalIndex = targetIndex + i;
-            await chrome.tabs.move(tabId, { index: finalIndex });
+          tabsToMove = [active.id as number];
+        }
+
+        // Calculate minimum index of selected tabs for direction detection
+        const selectedIndices = tabsToMove
+          .map(id => windowTabs.find(t => t.id === id)?.index)
+          .filter((index): index is number => index !== undefined);
+        const minSelectedIndex = Math.min(...selectedIndices);
+
+        // Calculate target index based on drop position
+        let targetIndex = newIndex;
+        if (dropPosition === 'bottom') {
+          targetIndex++;
+        }
+
+        // Determine direction BEFORE adjustment (use minimum selected index, not active tab)
+        const isMovingDown = minSelectedIndex < targetIndex;
+
+        // Adjust for downward movement: when moving tab(s) down, they're removed first,
+        // shifting all subsequent tabs' indices by the number of tabs being moved
+        if (isMovingDown) {
+          targetIndex -= tabsToMove.length;
+        }
+
+        // Move tab(s) within same window (windowId omitted = current window)
+        if (tabsToMove.length === 1) {
+          await chrome.tabs.move(tabsToMove[0], { index: targetIndex });
+        } else {
+          if (isMovingDown) {
+            // Downward: move in reverse order (last tab first)
+            for (let i = tabsToMove.length - 1; i >= 0; i--) {
+              const tabId = tabsToMove[i];
+              const finalIndex = targetIndex + i;
+              await chrome.tabs.move(tabId, { index: finalIndex });
+            }
+          } else {
+            // Upward: move in forward order (first tab first)
+            for (let i = 0; i < tabsToMove.length; i++) {
+              const tabId = tabsToMove[i];
+              const finalIndex = targetIndex + i;
+              await chrome.tabs.move(tabId, { index: finalIndex });
+            }
           }
         }
+
+        // Clear drag selection only if dragged tab was NOT selected
+        if (!isSelected) {
+          clearDragSelection();
+        }
+      } catch (error) {
+        showToast(<Alert message="Failed to move tab" variant="error" />);
+        console.error('Error moving tab:', error);
+      }
+    } else {
+      // ---- Cross-window move ----
+
+      // Phase 1: block multi-drag cross-window (will be supported in Phase 2)
+      const selectedItems = active.data.current?.selectedItems as number[] | undefined;
+      const isSelected = active.data.current?.isSelected as boolean;
+      if (isSelected && selectedItems && selectedItems.length > 1) {
+        return;
       }
 
-      // Clear drag selection only if dragged tab was NOT selected
-      if (!isSelected) {
-        clearDragSelection();
+      // Calculate target index
+      let targetIndex: number;
+      if (isWindowGroupDrop) {
+        // Dropped on window group container (collapsed group) — append to end
+        targetIndex = -1;
+      } else {
+        // Dropped on a specific tab in the target window
+        const overTab = allTabs.find(t => t.id === over.id)!;
+        targetIndex = dropPosition === 'top' ? overTab.index : overTab.index + 1;
       }
-    } catch (error) {
-      showToast(<Alert message="Failed to move tab" variant="error" />);
-      console.error('Error moving tab:', error);
+
+      try {
+        await chrome.tabs.move(active.id as number, { windowId: targetWindowId, index: targetIndex });
+        clearDragSelection();
+      } catch (error) {
+        showToast(<Alert message="Failed to move tab to another window" variant="error" />);
+        console.error('Error moving tab to another window:', error);
+      }
     }
   };
 
