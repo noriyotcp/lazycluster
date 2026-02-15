@@ -13,8 +13,10 @@ interface WindowGroupProps {
   };
   activeWindowId: number | null;
   isFiltered?: boolean;
+  overId: number | null;
+  dropPosition: 'top' | 'bottom';
 }
-const WindowGroup = ({ tabGroup, activeWindowId, isFiltered = false }: WindowGroupProps) => {
+const WindowGroup = ({ tabGroup, activeWindowId, isFiltered = false, overId, dropPosition }: WindowGroupProps) => {
   const { windowGroupNumber } = useWindowGroupContext();
   const { isDeleting } = useDeletionState();
   const isDeletingWindow = isDeleting({ type: 'window', id: tabGroup.windowId });
@@ -49,7 +51,7 @@ const WindowGroup = ({ tabGroup, activeWindowId, isFiltered = false }: WindowGro
         </div>
         <div className="collapse-content">
           <WindowActions windowId={tabGroup.windowId} visibleTabs={tabGroup.tabs} />
-          <TabList tabs={tabGroup.tabs} isFiltered={isFiltered} />
+          <TabList tabs={tabGroup.tabs} isFiltered={isFiltered} overId={overId} dropPosition={dropPosition} />
         </div>
       </div>
     </div>
