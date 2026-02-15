@@ -121,7 +121,7 @@ const Manager = () => {
         />
       </div>
       {sequenceActive && (
-        <div className="fixed bottom-4 right-4 badge badge-soft badge-primary badge-jump-to-window-group">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 badge badge-soft badge-primary badge-jump-to-window-group">
           {inputBuffer.length === 0 ? (
             'Type window group number'
           ) : (
