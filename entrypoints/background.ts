@@ -5,6 +5,20 @@ export default defineBackground(() => {
 
   let port: chrome.runtime.Port | null = null;
 
+  // Debounce timer for coalescing rapid tab events into a single update
+  let updateTimer: ReturnType<typeof setTimeout> | null = null;
+  const DEBOUNCE_MS = 50;
+
+  const debouncedUpdateTabs = () => {
+    if (updateTimer) clearTimeout(updateTimer);
+    updateTimer = setTimeout(() => {
+      updateTimer = null;
+      if (port) {
+        updateTabs(port);
+      }
+    }, DEBOUNCE_MS);
+  };
+
   // Function to get tabs with windowId
   const getTabs = async (): Promise<chrome.tabs.Tab[]> => {
     const windows = await chrome.windows.getAll({ populate: true });
@@ -23,80 +37,62 @@ export default defineBackground(() => {
   };
 
   // Listen for tab creation
-  chrome.tabs.onCreated.addListener(async () => {
+  chrome.tabs.onCreated.addListener(() => {
     devLog(`${new Date()} - onCreated:`, port);
-    if (port) {
-      updateTabs(port);
-    }
+    debouncedUpdateTabs();
   });
 
   // Listen for tab updates
   chrome.tabs.onUpdated.addListener(
-    async (tabId: number, changeInfo: { status?: string; groupId?: number }, _tab: chrome.tabs.Tab) => {
+    (tabId: number, changeInfo: { status?: string; groupId?: number }, _tab: chrome.tabs.Tab) => {
       // Process when the tab status is 'complete' or groupId changes
       if (changeInfo.status === 'complete' || changeInfo.groupId !== undefined) {
         devLog(`${new Date()} - onUpdated for tab ${tabId}`, changeInfo);
-        if (port) {
-          updateTabs(port);
-        }
+        debouncedUpdateTabs();
       }
     },
   );
 
   // Listen for tab removal
-  chrome.tabs.onRemoved.addListener(async () => {
+  chrome.tabs.onRemoved.addListener(() => {
     devLog(`${new Date()} - onRemoved:`, port);
-    if (port) {
-      updateTabs(port);
-    }
+    debouncedUpdateTabs();
   });
 
   // Listen for tab movement within a window
-  chrome.tabs.onMoved.addListener(async () => {
+  chrome.tabs.onMoved.addListener(() => {
     devLog(`${new Date()} - onMoved:`, port);
-    if (port) {
-      updateTabs(port);
-    }
+    debouncedUpdateTabs();
   });
 
   // Listen for tab attachment (moved into a window)
-  chrome.tabs.onAttached.addListener(async () => {
+  chrome.tabs.onAttached.addListener(() => {
     devLog(`${new Date()} - onAttached:`, port);
-    if (port) {
-      updateTabs(port);
-    }
+    debouncedUpdateTabs();
   });
 
   // Listen for tab detachment (moved out of a window)
-  chrome.tabs.onDetached.addListener(async () => {
+  chrome.tabs.onDetached.addListener(() => {
     devLog(`${new Date()} - onDetached:`, port);
-    if (port) {
-      updateTabs(port);
-    }
+    debouncedUpdateTabs();
   });
 
   // Listen for tab group creation
-  chrome.tabGroups.onCreated.addListener(async () => {
+  chrome.tabGroups.onCreated.addListener(() => {
     devLog(`${new Date()} - tabGroups.onCreated:`, port);
-    if (port) {
-      updateTabs(port);
-    }
+    debouncedUpdateTabs();
   });
 
   // Listen for tab group updates (color change, title change, etc.)
-  chrome.tabGroups.onUpdated.addListener(async () => {
+  chrome.tabGroups.onUpdated.addListener(() => {
     devLog(`${new Date()} - tabGroups.onUpdated:`, port);
-    if (port) {
-      updateTabs(port);
-    }
+    debouncedUpdateTabs();
   });
 
   // Listen for tab group removal
-  chrome.tabGroups.onRemoved.addListener(async () => {
+  chrome.tabGroups.onRemoved.addListener(() => {
     devLog(`${new Date()} - tabGroups.onRemoved:`, port);
-    if (port) {
-      updateTabs(port);
-    }
+    debouncedUpdateTabs();
   });
 
   const connect = (p: chrome.runtime.Port) => {
