@@ -292,6 +292,12 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
     ? filteredTabGroups.find(g => g.windowId === activeTab.windowId)?.tabs ?? []
     : [];
 
+  // Detect multi-drag over a different window (blocked in Phase 1)
+  const isMultiDragCrossWindow = overWindowId !== null
+    && activeId !== null
+    && dragSelectedTabIds.has(activeId)
+    && dragSelectedTabIds.size > 1;
+
   return (
     <DndContext
       sensors={sensors}
@@ -313,7 +319,7 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
                   isFiltered={isFiltered}
                   overId={overId}
                   dropPosition={dropPosition}
-                  overWindowId={overWindowId}
+                  overWindowId={isMultiDragCrossWindow ? null : overWindowId}
                 />
               </WindowGroupContextProvider>
             </div>
@@ -335,10 +341,10 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
                       tabs={activeTabWindowTabs}
                     />
                   </ul>
-                  {/* Show badge when dragging multiple selected tabs */}
+                  {/* Show badge: prohibition icon for blocked multi-drag cross-window, otherwise selection count */}
                   {dragSelectedTabIds.has(activeId!) && dragSelectedTabIds.size > 1 && (
-                    <div className="absolute -top-2 -right-2 badge badge-sm badge-accent">
-                      {dragSelectedTabIds.size}
+                    <div className={`absolute -top-2 -right-2 badge badge-sm ${isMultiDragCrossWindow ? 'badge-ghost opacity-80' : 'badge-accent'}`}>
+                      {isMultiDragCrossWindow ? '\u{1F6AB}' : dragSelectedTabIds.size}
                     </div>
                   )}
                 </div>
