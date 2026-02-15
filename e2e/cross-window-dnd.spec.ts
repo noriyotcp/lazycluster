@@ -44,6 +44,141 @@ async function startDragAndHold(
   // Mouse is still held down — caller should release with page.mouse.up()
 }
 
+// Perform a full drag-and-drop from source to target position
+async function performDragAndDrop(
+  page: Page,
+  source: Locator,
+  targetX: number,
+  targetY: number
+): Promise<void> {
+  await startDragAndHold(page, source, targetX, targetY);
+  await page.mouse.up();
+  await page.waitForTimeout(1000); // Wait for Chrome API + background script UI update
+}
+
+// Create an extra tab in a specific window
+async function createTabInWindow(page: Page, windowId?: number): Promise<void> {
+  await page.evaluate((wId) => {
+    return new Promise<void>(resolve => {
+      const opts: chrome.tabs.CreateProperties = { url: 'https://example.com', active: false };
+      if (wId) opts.windowId = wId;
+      chrome.tabs.create(opts, () => resolve());
+    });
+  }, windowId ?? null);
+  await page.waitForTimeout(500);
+}
+
+test.describe('Cross-Window DnD Tab Movement', () => {
+  test('should move a tab to another window on cross-window drop', async ({
+    page,
+    extensionId,
+  }) => {
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+
+    // Create extra tabs so the source window has enough to drag
+    await createTabInWindow(page);
+    await createTabInWindow(page);
+
+    const newWindowId = await createWindow(page);
+
+    try {
+      const windowGroups = page.locator('[data-window-id]');
+      await expect(windowGroups).toHaveCount(2);
+
+      const allGroups = await windowGroups.all();
+      const sourceGroup = allGroups[0];
+      const targetGroup = allGroups[1];
+
+      // Remember window IDs for stable post-drop queries
+      const sourceWinId = await sourceGroup.getAttribute('data-window-id');
+      const targetWinId = await targetGroup.getAttribute('data-window-id');
+
+      // Count initial tabs dynamically (don't hardcode — initial tab count varies by environment)
+      const sourceHandles = sourceGroup.locator('button[aria-label="Drag to reorder"]');
+      const targetHandles = targetGroup.locator('button[aria-label="Drag to reorder"]');
+      const sourceCountBefore = await sourceHandles.count();
+      const targetCountBefore = await targetHandles.count();
+
+      // Drag the last tab from source to the target window's tab
+      const lastSourceHandle = sourceHandles.last();
+      const targetHandle = targetHandles.first();
+      const targetBox = await targetHandle.boundingBox();
+      if (!targetBox) throw new Error('Could not get target handle bounding box');
+
+      await performDragAndDrop(
+        page,
+        lastSourceHandle,
+        targetBox.x + targetBox.width / 2,
+        targetBox.y + targetBox.height / 2
+      );
+
+      // Verify: source lost one tab, target gained one tab
+      const srcGroup = page.locator(`[data-window-id="${sourceWinId}"]`);
+      const tgtGroup = page.locator(`[data-window-id="${targetWinId}"]`);
+      await expect(srcGroup.locator('button[aria-label="Drag to reorder"]')).toHaveCount(sourceCountBefore - 1);
+      await expect(tgtGroup.locator('button[aria-label="Drag to reorder"]')).toHaveCount(targetCountBefore + 1);
+    } finally {
+      await removeWindow(page, newWindowId);
+    }
+  });
+
+  test('should move a tab to a collapsed window group', async ({ page, extensionId }) => {
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+
+    // Create extra tabs so the source window has enough to drag
+    await createTabInWindow(page);
+    await createTabInWindow(page);
+
+    const newWindowId = await createWindow(page);
+
+    try {
+      const windowGroups = page.locator('[data-window-id]');
+      await expect(windowGroups).toHaveCount(2);
+
+      const allGroups = await windowGroups.all();
+      const sourceGroup = allGroups[0];
+      const targetGroup = allGroups[1];
+
+      const sourceWinId = await sourceGroup.getAttribute('data-window-id');
+      const targetWinId = await targetGroup.getAttribute('data-window-id');
+
+      // Collapse the target window group
+      const collapseCheckbox = targetGroup.locator(`#window-group-collapse-${targetWinId}`);
+      await collapseCheckbox.click();
+      await page.waitForTimeout(100);
+      await expect(collapseCheckbox).not.toBeChecked();
+
+      // Count initial tabs dynamically
+      const sourceCountBefore = await sourceGroup.locator('button[aria-label="Drag to reorder"]').count();
+
+      // Drag the last tab from source to the collapsed target group header
+      const lastSourceHandle = sourceGroup.locator('button[aria-label="Drag to reorder"]').last();
+      const targetBox = await targetGroup.boundingBox();
+      if (!targetBox) throw new Error('Could not get target group bounding box');
+
+      await performDragAndDrop(
+        page,
+        lastSourceHandle,
+        targetBox.x + targetBox.width / 2,
+        targetBox.y + targetBox.height / 2
+      );
+
+      // Verify source lost a tab
+      const srcGroup = page.locator(`[data-window-id="${sourceWinId}"]`);
+      await expect(srcGroup.locator('button[aria-label="Drag to reorder"]')).toHaveCount(sourceCountBefore - 1);
+
+      // Expand target to verify it gained the tab
+      const tgtGroup = page.locator(`[data-window-id="${targetWinId}"]`);
+      const tgtCheckbox = tgtGroup.locator(`#window-group-collapse-${targetWinId}`);
+      await tgtCheckbox.click();
+      await page.waitForTimeout(100);
+      await expect(tgtGroup.locator('button[aria-label="Drag to reorder"]')).toHaveCount(2);
+    } finally {
+      await removeWindow(page, newWindowId);
+    }
+  });
+});
+
 test.describe('Cross-Window DnD Ring Highlight', () => {
   test('should show ring highlight when dragging over a different window group', async ({
     page,
