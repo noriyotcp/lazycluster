@@ -271,7 +271,12 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
       }
 
       try {
-        await chrome.tabs.move(active.id as number, { windowId: targetWindowId, index: targetIndex });
+        // Two-step move: first move to target window (append), then reposition within window.
+        // This lets Chrome's same-window logic handle tab group insertion automatically.
+        await chrome.tabs.move(active.id as number, { windowId: targetWindowId, index: -1 });
+        if (targetIndex !== -1) {
+          await chrome.tabs.move(active.id as number, { index: targetIndex });
+        }
         clearDragSelection();
       } catch (error) {
         showToast(<Alert message="Failed to move tab to another window" variant="error" />);
