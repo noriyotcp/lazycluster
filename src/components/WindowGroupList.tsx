@@ -9,7 +9,9 @@ import {
   KeyboardSensor,
   useSensor,
   useSensors,
-  closestCenter,
+  pointerWithin,
+  rectIntersection,
+  CollisionDetection,
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import WindowGroup from './WindowGroup';
@@ -50,6 +52,13 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
       },
     })
   );
+
+  // Pointer-first collision detection for multi-container DnD
+  const collisionDetection: CollisionDetection = (args) => {
+    const pointerCollisions = pointerWithin(args);
+    if (pointerCollisions.length > 0) return pointerCollisions;
+    return rectIntersection(args);
+  };
 
   // All tabs across all windows (for lookups)
   const allTabs = filteredTabGroups.flatMap(g => g.tabs);
@@ -196,7 +205,7 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={collisionDetection}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
