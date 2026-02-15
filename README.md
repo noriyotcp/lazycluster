@@ -31,6 +31,7 @@ A Chrome extension for enhanced tab and window management, inspired by the origi
     - `ESC`: Cancel the sequence
     - Sequence times out after 3 seconds of inactivity (timer resets with each keystroke)
   - `/`: Focus search bar
+  - `Option/Alt + Click` on window group header: Toggle all window groups open/closed at once
 - **Quick Domain Access:** Easily see and access a tab's domain by hovering, even when the title is long, providing quick context and navigation.
 - **Streamlined Selection:** Simple checkboxes allow for easy individual or window-wide tab selection for bulk actions.
 
