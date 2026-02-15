@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useDroppable } from '@dnd-kit/core';
 import WindowHeader from './WindowHeader';
 import TabList from './TabList';
 import WindowActions from './WindowActions';
@@ -21,6 +22,12 @@ const WindowGroup = ({ tabGroup, activeWindowId, isFiltered = false, overId, dro
   const { isDeleting } = useDeletionState();
   const isDeletingWindow = isDeleting({ type: 'window', id: tabGroup.windowId });
 
+  // Register as a drop zone for cross-window drag-and-drop
+  const { isOver, setNodeRef } = useDroppable({
+    id: `window-${tabGroup.windowId}`,
+    data: { windowId: tabGroup.windowId, type: 'window-group' },
+  });
+
   const handleCollapseClick = useCallback(
     (event: React.MouseEvent<HTMLInputElement>) => {
       if (event.altKey) {
@@ -34,9 +41,9 @@ const WindowGroup = ({ tabGroup, activeWindowId, isFiltered = false, overId, dro
   );
 
   return (
-    <div inert={isDeletingWindow || undefined} className="inert:opacity-50">
+    <div ref={setNodeRef} inert={isDeletingWindow || undefined} className="inert:opacity-50">
       <div
-        className="collapse collapse-arrow bg-base-100 border-base-300 border rounded-none mb-4"
+        className={`collapse collapse-arrow bg-base-100 border-base-300 border rounded-none mb-4 ${isOver ? 'ring-2 ring-accent' : ''}`}
         data-window-group-number={windowGroupNumber}
         data-window-id={tabGroup.windowId}
       >
