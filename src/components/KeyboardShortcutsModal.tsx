@@ -6,6 +6,10 @@ const KeyboardShortcutsModal = () => {
       { key: 'w + <number> + Enter', description: 'Jump to Window Group by number' },
       { key: 'w + 0 + Enter', description: 'Jump to current window' },
       { key: 'ESC', description: 'Cancel window jump sequence' },
+      {
+        key: 'Option/Alt + Click header',
+        description: 'Toggle all window groups open/closed',
+      },
     ],
     'Tab Navigation': [
       { key: 'j', description: 'Move to next tab (down)' },
