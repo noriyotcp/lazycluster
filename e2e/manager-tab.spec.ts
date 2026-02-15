@@ -631,6 +631,46 @@ test.describe('Manager Tab E2E Tests', () => {
     await expect(secondTabItem).toBeFocused();
   });
 
+  test('should not move focus when Escape cancels w+number sequence from inner element', async ({ page, extensionId }) => {
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+
+    // Wait for tab items to load
+    await page.locator('.collapse-content li[tabindex="0"]').first().waitFor();
+
+    // Focus the first tab item <li>
+    const firstTabItem = page.locator('.collapse-content li[tabindex="0"]').first();
+    await firstTabItem.focus();
+    await expect(firstTabItem).toBeFocused();
+
+    // Press Tab to move focus into an inner element (e.g., the link)
+    await page.keyboard.press('Tab');
+
+    // Verify focus moved to an inner element
+    const focusedTagAfterTab = await page.evaluate(() => document.activeElement?.tagName);
+    expect(focusedTagAfterTab).not.toBe('LI');
+
+    // Start w+number sequence
+    await page.keyboard.press('w');
+    await page.waitForTimeout(100);
+    await page.keyboard.press('1');
+    await page.waitForTimeout(100);
+
+    // Verify sequence is active (badge visible)
+    await expect(page.locator('.badge-primary')).toBeVisible();
+
+    // Press Escape to cancel the sequence
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(100);
+
+    // Verify sequence is cancelled (badge gone)
+    await expect(page.locator('.badge-primary')).not.toBeVisible();
+
+    // Verify focus did NOT move to the <li> — it should stay on the inner element
+    const focusedTagAfterEsc = await page.evaluate(() => document.activeElement?.tagName);
+    expect(focusedTagAfterEsc).not.toBe('LI');
+    expect(focusedTagAfterEsc).toBe(focusedTagAfterTab);
+  });
+
   test('should not change focus when Escape pressed while li itself is focused', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/manager.html`);
 
