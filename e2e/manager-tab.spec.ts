@@ -612,15 +612,17 @@ test.describe('Manager Tab E2E Tests', () => {
     await firstTabItem.focus();
     await expect(firstTabItem).toBeFocused();
 
-    // Press Tab to move focus into an inner element (e.g., the link)
-    await page.keyboard.press('Tab');
+    // Directly focus an inner element (avoid Tab key — unreliable with role="button" from dnd-kit)
+    const innerLink = firstTabItem.locator('a').first();
+    await innerLink.focus();
 
     // Verify focus moved to an inner element (not the <li> anymore)
-    const focusedTagAfterTab = await page.evaluate(() => document.activeElement?.tagName);
-    expect(focusedTagAfterTab).not.toBe('LI');
+    const focusedTagAfterFocus = await page.evaluate(() => document.activeElement?.tagName);
+    expect(focusedTagAfterFocus).toBe('A');
 
     // Press Escape to return focus to the <li>
     await page.keyboard.press('Escape');
+    await page.waitForTimeout(100);
 
     // Verify focus returned to the <li> tab item
     await expect(firstTabItem).toBeFocused();
@@ -642,12 +644,13 @@ test.describe('Manager Tab E2E Tests', () => {
     await firstTabItem.focus();
     await expect(firstTabItem).toBeFocused();
 
-    // Press Tab to move focus into an inner element (e.g., the link)
-    await page.keyboard.press('Tab');
+    // Directly focus an inner element (avoid Tab key — unreliable with role="button" from dnd-kit)
+    const innerLink = firstTabItem.locator('a').first();
+    await innerLink.focus();
 
     // Verify focus moved to an inner element
-    const focusedTagAfterTab = await page.evaluate(() => document.activeElement?.tagName);
-    expect(focusedTagAfterTab).not.toBe('LI');
+    const focusedTagAfterFocus = await page.evaluate(() => document.activeElement?.tagName);
+    expect(focusedTagAfterFocus).toBe('A');
 
     // Start w+number sequence
     await page.keyboard.press('w');
@@ -668,7 +671,7 @@ test.describe('Manager Tab E2E Tests', () => {
     // Verify focus did NOT move to the <li> — it should stay on the inner element
     const focusedTagAfterEsc = await page.evaluate(() => document.activeElement?.tagName);
     expect(focusedTagAfterEsc).not.toBe('LI');
-    expect(focusedTagAfterEsc).toBe(focusedTagAfterTab);
+    expect(focusedTagAfterEsc).toBe(focusedTagAfterFocus);
   });
 
   test('should not change focus when Escape pressed while li itself is focused', async ({ page, extensionId }) => {
