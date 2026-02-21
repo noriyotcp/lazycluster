@@ -6,6 +6,7 @@ import { DragSelectionContextProvider } from '../../src/contexts/DragSelectionCo
 import { TabGroupProvider } from '@/src/contexts/TabGroupContext';
 import { TabGroupColorProvider } from '../../src/contexts/TabGroupColorContext';
 import { DeletionStateProvider } from '../../src/contexts/DeletionStateContext';
+import { ActiveWindowIdProvider } from '../../src/contexts/ActiveWindowIdContext';
 import { ToastProvider } from '../../src/components/ToastProvider';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -16,7 +17,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <TabSelectionContextProvider>
             <DragSelectionContextProvider>
               <DeletionStateProvider>
-                <App />
+                <ActiveWindowIdProvider>
+                  <App />
+                </ActiveWindowIdProvider>
               </DeletionStateProvider>
             </DragSelectionContextProvider>
           </TabSelectionContextProvider>

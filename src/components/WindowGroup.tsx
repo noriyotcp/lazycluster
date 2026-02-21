@@ -12,13 +12,12 @@ interface WindowGroupProps {
     windowId: number;
     tabs: chrome.tabs.Tab[];
   };
-  activeWindowId: number | null;
   isFiltered?: boolean;
   overId: number | null;
   dropPosition: 'top' | 'bottom';
   overWindowId: number | null;
 }
-const WindowGroup = ({ tabGroup, activeWindowId, isFiltered = false, overId, dropPosition, overWindowId }: WindowGroupProps) => {
+const WindowGroup = ({ tabGroup, isFiltered = false, overId, dropPosition, overWindowId }: WindowGroupProps) => {
   const { windowGroupNumber } = useWindowGroupContext();
   const { isDeleting } = useDeletionState();
   const isDeletingWindow = isDeleting({ type: 'window', id: tabGroup.windowId });
@@ -55,7 +54,7 @@ const WindowGroup = ({ tabGroup, activeWindowId, isFiltered = false, overId, dro
           onClick={handleCollapseClick}
         />
         <div className="collapse-title font-semibold">
-          <WindowHeader windowId={tabGroup.windowId} activeWindowId={activeWindowId} />
+          <WindowHeader windowId={tabGroup.windowId} />
         </div>
         <div className="collapse-content">
           <WindowActions windowId={tabGroup.windowId} visibleTabs={tabGroup.tabs} />

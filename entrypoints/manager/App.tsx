@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react'; // Add useCallback
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { devLog } from '../../src/utils/devLog';
 import Header from '../../src/components/Header';
 import WindowGroupList from '../../src/components/WindowGroupList';
@@ -9,6 +9,7 @@ import { useDeletionState } from '../../src/contexts/DeletionStateContext'; // I
 import { useTabGroupColor } from '../../src/contexts/TabGroupColorContext'; // Import TabGroupColorContext
 import { useBackgroundConnection } from '../../src/hooks/useBackgroundConnection'; // Import the hook
 import { useWindowGroupNavigation } from '../../src/hooks/useWindowGroupNavigation'; // Import window navigation hook
+import { useActiveWindowId } from '../../src/contexts/ActiveWindowIdContext';
 import KeyboardShortcutsModal from '../../src/components/KeyboardShortcutsModal';
 import './style.css';
 
@@ -24,7 +25,7 @@ const Manager = () => {
   const { clearSelection, syncWithExistingTabs } = useTabSelectionContext();
   const { cleanupNonExistentItems } = useDeletionState();
   const { updateGroupColors } = useTabGroupColor();
-  const [activeWindowId, setActiveWindowId] = useState<number | null>(null);
+  const { activeWindowId } = useActiveWindowId();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const searchBarRef = useRef<HTMLInputElement>(null);
 
@@ -69,15 +70,6 @@ const Manager = () => {
   // Window Group Navigation
   const { sequenceActive, inputBuffer } = useWindowGroupNavigation(activeWindowId, { searchBarRef });
 
-  // Effect for initial activeWindowId setup on mount
-  useEffect(() => {
-    chrome.windows.getCurrent().then(window => {
-      if (window.id !== undefined) {
-        setActiveWindowId(window.id);
-      }
-    });
-  }, []); // Run once on mount
-
   const handleSearchQueryChange = useCallback(
     (query: string) => {
       setSearchQuery(query);
@@ -107,7 +99,6 @@ const Manager = () => {
       <div className="p-5 pt-0">
         <WindowGroupList
           filteredTabGroups={filteredTabGroups}
-          activeWindowId={activeWindowId}
           isFiltered={searchQuery !== ''}
         />
       </div>
