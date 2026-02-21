@@ -23,11 +23,10 @@ import { useDragSelectionContext } from '../contexts/DragSelectionContext';
 
 interface WindowGroupListProps {
   filteredTabGroups: { windowId: number; tabs: chrome.tabs.Tab[]; windowGroupNumber: number }[];
-  activeWindowId: number | null;
   isFiltered?: boolean;
 }
 
-const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false }: WindowGroupListProps) => {
+const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupListProps) => {
   const { showToast } = useToast();
   const { clearDragSelection, dragSelectedTabIds } = useDragSelectionContext();
 
@@ -334,7 +333,6 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
               <WindowGroupContextProvider key={tabGroup.windowId} value={{ windowGroupNumber: tabGroup.windowGroupNumber }}>
                 <WindowGroup
                   tabGroup={tabGroup}
-                  activeWindowId={activeWindowId}
                   isFiltered={isFiltered}
                   overId={overId}
                   dropPosition={dropPosition}
