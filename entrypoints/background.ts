@@ -21,19 +21,27 @@ export default defineBackground(() => {
 
   // Function to get tabs with windowId
   const getTabs = async (): Promise<chrome.tabs.Tab[]> => {
-    const windows = await chrome.windows.getAll({ populate: true });
-    const tabs: chrome.tabs.Tab[] = windows.reduce<chrome.tabs.Tab[]>((acc, win) => {
-      if (win.tabs) {
-        acc.push(...(win.tabs as chrome.tabs.Tab[]));
-      }
-      return acc;
-    }, []);
-    return tabs;
+    try {
+      const windows = await chrome.windows.getAll({ populate: true });
+      return windows.reduce<chrome.tabs.Tab[]>((acc, win) => {
+        if (win.tabs) {
+          acc.push(...(win.tabs as chrome.tabs.Tab[]));
+        }
+        return acc;
+      }, []);
+    } catch (error) {
+      console.error('Failed to get tabs:', error);
+      return [];
+    }
   };
 
   const updateTabs = async (port: chrome.runtime.Port) => {
-    const tabs = await getTabs();
-    port.postMessage({ type: 'UPDATE_TABS', tabs });
+    try {
+      const tabs = await getTabs();
+      port.postMessage({ type: 'UPDATE_TABS', tabs });
+    } catch (error) {
+      console.error('Failed to update tabs:', error);
+    }
   };
 
   // Listen for tab creation
@@ -112,11 +120,14 @@ export default defineBackground(() => {
 
       port.onMessage.addListener(async message => {
         if (message.type === 'REQUEST_INITIAL_DATA') {
-          const tabs = await getTabs();
-          if (port) {
-            // Add this check
-            port.postMessage({ type: 'UPDATE_TABS', tabs });
-            port.postMessage({ type: 'BACKGROUND_INITIALIZED' });
+          try {
+            const tabs = await getTabs();
+            if (port) {
+              port.postMessage({ type: 'UPDATE_TABS', tabs });
+              port.postMessage({ type: 'BACKGROUND_INITIALIZED' });
+            }
+          } catch (error) {
+            console.error('Failed to send initial data:', error);
           }
         }
       });
@@ -127,7 +138,9 @@ export default defineBackground(() => {
 
   chrome.runtime.onMessage.addListener((request: { action?: string; tabId?: number }) => {
     if (request.action === 'closeTab' && request.tabId) {
-      chrome.tabs.remove(request.tabId);
+      chrome.tabs.remove(request.tabId).catch(error => {
+        console.error(`Failed to close tab ${request.tabId}:`, error);
+      });
     }
   });
 });
