@@ -288,16 +288,13 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
 
       try {
         // Two-step move: first append all tabs to target window, then reposition.
-        // Step 1: Append each tab to target window (preserves relative order)
-        for (const tabId of tabsToMove) {
-          await chrome.tabs.move(tabId, { windowId: targetWindowId, index: -1 });
-        }
+        // Batch API calls (chrome.tabs.move accepts an array) to minimize events and debounce delay.
+        // Step 1: Append all tabs to target window (preserves relative order)
+        await chrome.tabs.move(tabsToMove, { windowId: targetWindowId, index: -1 });
 
         // Step 2: Reposition within target window if dropped on a specific tab
         if (targetIndex !== -1) {
-          for (let i = 0; i < tabsToMove.length; i++) {
-            await chrome.tabs.move(tabsToMove[i], { index: targetIndex + i });
-          }
+          await chrome.tabs.move(tabsToMove, { index: targetIndex });
         }
 
         clearDragSelection();
