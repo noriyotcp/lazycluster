@@ -1,7 +1,8 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 
 interface ActiveWindowIdContextProps {
   activeWindowId: number | null;
+  refreshActiveWindowId: () => Promise<number | null>;
 }
 
 const ActiveWindowIdContext = createContext<ActiveWindowIdContextProps | undefined>(undefined);
@@ -9,15 +10,22 @@ const ActiveWindowIdContext = createContext<ActiveWindowIdContextProps | undefin
 export const ActiveWindowIdProvider = ({ children }: { children: React.ReactNode }): React.ReactElement => {
   const [activeWindowId, setActiveWindowId] = useState<number | null>(null);
 
-  useEffect(() => {
-    chrome.windows.getCurrent().then(window => {
-      if (window.id !== undefined) {
-        setActiveWindowId(window.id);
-      }
-    });
+  const refreshActiveWindowId = useCallback(async (): Promise<number | null> => {
+    const window = await chrome.windows.getCurrent();
+    const newId = window.id ?? null;
+    setActiveWindowId(newId);
+    return newId;
   }, []);
 
-  return <ActiveWindowIdContext.Provider value={{ activeWindowId }}>{children}</ActiveWindowIdContext.Provider>;
+  useEffect(() => {
+    refreshActiveWindowId();
+  }, [refreshActiveWindowId]);
+
+  return (
+    <ActiveWindowIdContext.Provider value={{ activeWindowId, refreshActiveWindowId }}>
+      {children}
+    </ActiveWindowIdContext.Provider>
+  );
 };
 
 export const useActiveWindowId = () => {

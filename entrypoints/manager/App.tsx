@@ -25,16 +25,17 @@ const Manager = () => {
   const { clearSelection, syncWithExistingTabs } = useTabSelectionContext();
   const { cleanupNonExistentItems } = useDeletionState();
   const { updateGroupColors } = useTabGroupColor();
-  const { activeWindowId } = useActiveWindowId();
+  const { activeWindowId, refreshActiveWindowId } = useActiveWindowId();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const searchBarRef = useRef<HTMLInputElement>(null);
 
   // Define the message handler using useCallback to maintain reference stability
   const handleBackgroundMessage = useCallback(
-    (message: BackgroundMessage) => {
+    async (message: BackgroundMessage) => {
       devLog(`${new Date()} - Received message from background:`, message); // Log received messages
       if (message.type === 'UPDATE_TABS' && message.tabs) {
-        updateTabGroups(message.tabs, activeWindowId ?? undefined); // Use the updated tabs
+        const currentWindowId = await refreshActiveWindowId();
+        updateTabGroups(message.tabs, currentWindowId ?? undefined); // Use the updated tabs
 
         // Update group colors
         updateGroupColors(message.tabs);
@@ -53,7 +54,7 @@ const Manager = () => {
       }
       // No need to handle REQUEST_INITIAL_DATA here, it's sent from client
     },
-    [updateTabGroups, syncWithExistingTabs, cleanupNonExistentItems, updateGroupColors, activeWindowId]
+    [updateTabGroups, syncWithExistingTabs, cleanupNonExistentItems, updateGroupColors, refreshActiveWindowId]
   );
 
   // Use the custom hook to manage the connection

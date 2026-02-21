@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { ActiveWindowIdProvider, useActiveWindowId } from './ActiveWindowIdContext';
 
 describe('ActiveWindowIdContext', () => {
@@ -68,6 +68,80 @@ describe('ActiveWindowIdContext', () => {
         expect(chrome.windows.getCurrent).toHaveBeenCalled();
       });
 
+      expect(result.current.activeWindowId).toBeNull();
+    });
+
+    it('updates activeWindowId when refreshActiveWindowId is called', async () => {
+      // Initial window ID
+      chrome.windows.getCurrent = vi.fn(() =>
+        Promise.resolve({
+          id: 42,
+          focused: true,
+          incognito: false,
+          alwaysOnTop: false,
+        } as chrome.windows.Window)
+      );
+
+      const { result } = renderHook(() => useActiveWindowId(), {
+        wrapper: ActiveWindowIdProvider,
+      });
+
+      await waitFor(() => {
+        expect(result.current.activeWindowId).toBe(42);
+      });
+
+      // Simulate manager tab moved to a different window
+      chrome.windows.getCurrent = vi.fn(() =>
+        Promise.resolve({
+          id: 99,
+          focused: true,
+          incognito: false,
+          alwaysOnTop: false,
+        } as chrome.windows.Window)
+      );
+
+      let returnedId: number | null = null;
+      await act(async () => {
+        returnedId = await result.current.refreshActiveWindowId();
+      });
+
+      expect(returnedId).toBe(99);
+      expect(result.current.activeWindowId).toBe(99);
+    });
+
+    it('refreshActiveWindowId returns null when window.id is undefined', async () => {
+      chrome.windows.getCurrent = vi.fn(() =>
+        Promise.resolve({
+          id: 42,
+          focused: true,
+          incognito: false,
+          alwaysOnTop: false,
+        } as chrome.windows.Window)
+      );
+
+      const { result } = renderHook(() => useActiveWindowId(), {
+        wrapper: ActiveWindowIdProvider,
+      });
+
+      await waitFor(() => {
+        expect(result.current.activeWindowId).toBe(42);
+      });
+
+      // Simulate window with undefined id
+      chrome.windows.getCurrent = vi.fn(() =>
+        Promise.resolve({
+          focused: true,
+          incognito: false,
+          alwaysOnTop: false,
+        } as chrome.windows.Window)
+      );
+
+      let returnedId: number | null = 42; // Initialize to non-null to verify it changes
+      await act(async () => {
+        returnedId = await result.current.refreshActiveWindowId();
+      });
+
+      expect(returnedId).toBeNull();
       expect(result.current.activeWindowId).toBeNull();
     });
   });
