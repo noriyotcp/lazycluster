@@ -252,12 +252,9 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
     } else {
       // ---- Cross-window move ----
 
-      // Phase 1: block multi-drag cross-window (will be supported in Phase 2)
+      // Get drag selection data from useSortable
       const selectedItems = active.data.current?.selectedItems as number[] | undefined;
       const isSelected = active.data.current?.isSelected as boolean;
-      if (isSelected && selectedItems && selectedItems.length > 1) {
-        return;
-      }
 
       // Calculate target index
       let targetIndex: number;
@@ -270,17 +267,40 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
         targetIndex = dropPosition === 'top' ? overTab.index : overTab.index + 1;
       }
 
+      // Determine which tabs to move (sorted by index for relative order)
+      let tabsToMove: number[];
+
+      if (isSelected && selectedItems && selectedItems.length > 1) {
+        // Multi-tab cross-window move
+        const sourceWindowTabs = filteredTabGroups.find(g => g.windowId === activeTab.windowId)?.tabs ?? [];
+        tabsToMove = selectedItems
+          .map(id => {
+            const tab = sourceWindowTabs.find(t => t.id === id);
+            return tab ? { id, index: tab.index } : null;
+          })
+          .filter((item): item is { id: number; index: number } => item !== null)
+          .sort((a, b) => a.index - b.index)
+          .map(item => item.id);
+      } else {
+        // Single-tab cross-window move
+        tabsToMove = [active.id as number];
+      }
+
       try {
-        // Two-step move: first move to target window (append), then reposition within window.
-        // This lets Chrome's same-window logic handle tab group insertion automatically.
-        await chrome.tabs.move(active.id as number, { windowId: targetWindowId, index: -1 });
+        // Two-step move: first append all tabs to target window, then reposition.
+        // Batch API calls (chrome.tabs.move accepts an array) to minimize events and debounce delay.
+        // Step 1: Append all tabs to target window (preserves relative order)
+        await chrome.tabs.move(tabsToMove, { windowId: targetWindowId, index: -1 });
+
+        // Step 2: Reposition within target window if dropped on a specific tab
         if (targetIndex !== -1) {
-          await chrome.tabs.move(active.id as number, { index: targetIndex });
+          await chrome.tabs.move(tabsToMove, { index: targetIndex });
         }
+
         clearDragSelection();
       } catch (error) {
         showToast(<Alert message="Failed to move tab to another window" variant="error" />);
-        console.error('Error moving tab to another window:', error);
+        console.error('Error moving tab(s) to another window:', error);
       }
     }
   };
@@ -296,12 +316,6 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
   const activeTabWindowTabs = activeTab
     ? filteredTabGroups.find(g => g.windowId === activeTab.windowId)?.tabs ?? []
     : [];
-
-  // Detect multi-drag over a different window (blocked in Phase 1)
-  const isMultiDragCrossWindow = overWindowId !== null
-    && activeId !== null
-    && dragSelectedTabIds.has(activeId)
-    && dragSelectedTabIds.size > 1;
 
   return (
     <DndContext
@@ -324,7 +338,7 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
                   isFiltered={isFiltered}
                   overId={overId}
                   dropPosition={dropPosition}
-                  overWindowId={isMultiDragCrossWindow ? null : overWindowId}
+                  overWindowId={overWindowId}
                 />
               </WindowGroupContextProvider>
             </div>
@@ -346,10 +360,10 @@ const WindowGroupList = ({ filteredTabGroups, activeWindowId, isFiltered = false
                       tabs={activeTabWindowTabs}
                     />
                   </ul>
-                  {/* Show badge: prohibition icon for blocked multi-drag cross-window, otherwise selection count */}
+                  {/* Show badge with selection count during multi-drag */}
                   {dragSelectedTabIds.has(activeId!) && dragSelectedTabIds.size > 1 && (
-                    <div className={`absolute -top-2 -right-2 badge badge-sm ${isMultiDragCrossWindow ? 'badge-ghost opacity-80' : 'badge-accent'}`}>
-                      {isMultiDragCrossWindow ? '\u{1F6AB}' : dragSelectedTabIds.size}
+                    <div className="absolute -top-2 -right-2 badge badge-sm badge-accent">
+                      {dragSelectedTabIds.size}
                     </div>
                   )}
                 </div>
