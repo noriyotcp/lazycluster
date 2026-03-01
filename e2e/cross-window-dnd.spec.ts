@@ -557,3 +557,173 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
     }
   });
 });
+
+// Helper to create a tab group with specified tabs in a window
+async function createTabGroup(
+  page: Page,
+  windowId: number,
+  title: string,
+  color: string,
+  tabCount: number
+): Promise<{ groupId: number; tabIds: number[] }> {
+  return page.evaluate(
+    async ({ windowId, title, color, tabCount }) => {
+      // Create tabs in the target window
+      const tabIds: number[] = [];
+      for (let i = 0; i < tabCount; i++) {
+        const tab = await chrome.tabs.create({
+          url: 'https://example.com',
+          windowId,
+          active: false,
+        });
+        if (tab.id) tabIds.push(tab.id);
+      }
+      // Group and configure
+      const groupId = await chrome.tabs.group({ tabIds: tabIds as [number, ...number[]] });
+      await chrome.tabGroups.update(groupId, { title, color: color as chrome.tabGroups.Color });
+      return { groupId, tabIds };
+    },
+    { windowId, title, color, tabCount }
+  );
+}
+
+test.describe('Cross-Window DnD Tab Group Preservation', () => {
+  test('should preserve tab group when all group tabs are moved to another window', async ({
+    page,
+    extensionId,
+  }) => {
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+
+    // Create extra ungrouped tabs so the source window survives after moving grouped tabs
+    await createTabInWindow(page);
+    await createTabInWindow(page);
+
+    const newWindowId = await createWindow(page);
+
+    try {
+      // Get source window ID
+      const windowGroups = page.locator('[data-window-id]');
+      await expect(windowGroups).toHaveCount(2);
+      const allGroups = await windowGroups.all();
+      const sourceWinId = Number(await allGroups[0].getAttribute('data-window-id'));
+      const targetWinId = Number(await allGroups[1].getAttribute('data-window-id'));
+
+      // Create a 2-tab group in the source window
+      const { tabIds: groupTabIds } = await createTabGroup(
+        page, sourceWinId, 'TestGroup', 'blue', 2
+      );
+      await page.waitForTimeout(500);
+
+      // Re-query groups after tab creation (UI has updated)
+      const srcGroup = page.locator(`[data-window-id="${sourceWinId}"]`);
+      const tgtGroup = page.locator(`[data-window-id="${targetWinId}"]`);
+
+      const sourceHandles = srcGroup.locator('button[aria-label="Drag to reorder"]');
+      const targetHandles = tgtGroup.locator('button[aria-label="Drag to reorder"]');
+      const sourceCountBefore = await sourceHandles.count();
+      const targetCountBefore = await targetHandles.count();
+
+      // Cmd+click the drag handles for both grouped tabs (at the end of the list)
+      await cmdClick(page, sourceHandles.nth(sourceCountBefore - 2));
+      await cmdClick(page, sourceHandles.nth(sourceCountBefore - 1));
+
+      // Drag to target window
+      const targetHandle = targetHandles.first();
+      const targetBox = await targetHandle.boundingBox();
+      if (!targetBox) throw new Error('Could not get target handle bounding box');
+
+      await performDragAndDrop(
+        page,
+        sourceHandles.nth(sourceCountBefore - 1),
+        targetBox.x + targetBox.width / 2,
+        targetBox.y + targetBox.height / 2
+      );
+
+      // Wait for Chrome API to process group recreation
+      await page.waitForTimeout(500);
+
+      // Verify tabs moved
+      await expect(srcGroup.locator('button[aria-label="Drag to reorder"]')).toHaveCount(sourceCountBefore - 2);
+      await expect(tgtGroup.locator('button[aria-label="Drag to reorder"]')).toHaveCount(targetCountBefore + 2);
+
+      // Verify tab group was preserved in target window
+      const targetGroupInfo = await page.evaluate(async (tabIds: number[]) => {
+        const tab = await chrome.tabs.get(tabIds[0]);
+        if (tab.groupId === -1) return null;
+        const group = await chrome.tabGroups.get(tab.groupId);
+        return { title: group.title, color: group.color };
+      }, groupTabIds);
+
+      expect(targetGroupInfo).not.toBeNull();
+      expect(targetGroupInfo!.title).toBe('TestGroup');
+      expect(targetGroupInfo!.color).toBe('blue');
+    } finally {
+      await removeWindow(page, newWindowId);
+    }
+  });
+
+  test('should NOT preserve tab group when only some group tabs are moved', async ({
+    page,
+    extensionId,
+  }) => {
+    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+
+    // Create extra ungrouped tabs
+    await createTabInWindow(page);
+
+    const newWindowId = await createWindow(page);
+
+    try {
+      const windowGroups = page.locator('[data-window-id]');
+      await expect(windowGroups).toHaveCount(2);
+      const allGroups = await windowGroups.all();
+      const sourceWinId = Number(await allGroups[0].getAttribute('data-window-id'));
+      const targetWinId = Number(await allGroups[1].getAttribute('data-window-id'));
+
+      // Create a 3-tab group in the source window
+      const { tabIds: groupTabIds } = await createTabGroup(
+        page, sourceWinId, 'PartialGroup', 'red', 3
+      );
+      await page.waitForTimeout(500);
+
+      const srcGroup = page.locator(`[data-window-id="${sourceWinId}"]`);
+      const tgtGroup = page.locator(`[data-window-id="${targetWinId}"]`);
+
+      const sourceHandles = srcGroup.locator('button[aria-label="Drag to reorder"]');
+      const targetHandles = tgtGroup.locator('button[aria-label="Drag to reorder"]');
+
+      // Drag only the last grouped tab (1 of 3) to target window
+      const lastHandle = sourceHandles.last();
+      const targetHandle = targetHandles.first();
+      const targetBox = await targetHandle.boundingBox();
+      if (!targetBox) throw new Error('Could not get target handle bounding box');
+
+      await performDragAndDrop(
+        page,
+        lastHandle,
+        targetBox.x + targetBox.width / 2,
+        targetBox.y + targetBox.height / 2
+      );
+
+      await page.waitForTimeout(500);
+
+      // Verify the moved tab is ungrouped (groupId === -1)
+      const movedTabGroupId = await page.evaluate(async (tabId: number) => {
+        const tab = await chrome.tabs.get(tabId);
+        return tab.groupId;
+      }, groupTabIds[2]); // Last tab was moved
+
+      expect(movedTabGroupId).toBe(-1);
+
+      // Verify remaining tabs still have their group in source window
+      const remainingGroupId = await page.evaluate(async (tabId: number) => {
+        const tab = await chrome.tabs.get(tabId);
+        return tab.groupId;
+      }, groupTabIds[0]);
+
+      expect(remainingGroupId).not.toBe(-1);
+    } finally {
+      await removeWindow(page, newWindowId);
+    }
+  });
+});
