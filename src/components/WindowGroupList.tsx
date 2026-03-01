@@ -20,6 +20,7 @@ import { WindowGroupContextProvider } from '../contexts/WindowGroupContext';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
 import { useDragSelectionContext } from '../contexts/DragSelectionContext';
+import { identifyGroupsToPreserve } from '../utils/tabGroupPreservation';
 
 interface WindowGroupListProps {
   filteredTabGroups: { windowId: number; tabs: chrome.tabs.Tab[]; windowGroupNumber: number }[];
@@ -174,7 +175,6 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
       if (!overTab) return;
 
       const windowTabs = filteredTabGroups.find(g => g.windowId === activeTab.windowId)?.tabs ?? [];
-      const newIndex = overTab.index;
 
       try {
         // Get drag selection data from useSortable
@@ -198,44 +198,95 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
           tabsToMove = [active.id as number];
         }
 
-        // Calculate minimum index of selected tabs for direction detection
-        const selectedIndices = tabsToMove
-          .map(id => windowTabs.find(t => t.id === id)?.index)
-          .filter((index): index is number => index !== undefined);
-        const minSelectedIndex = Math.min(...selectedIndices);
+        // Identify tab groups to preserve (all members of a group are being moved)
+        const groupsToPreserve = identifyGroupsToPreserve(tabsToMove, windowTabs);
 
-        // Calculate target index based on drop position
-        let targetIndex = newIndex;
-        if (dropPosition === 'bottom') {
-          targetIndex++;
-        }
+        if (groupsToPreserve.length > 0) {
+          // Segment-based move: use chrome.tabGroups.move() for groups to avoid
+          // chrome.tabs.move() breaking group membership.
+          const preservedGroupIds = new Set(groupsToPreserve.map(g => g.groupId));
+          const tabMap = new Map(windowTabs.map(t => [t.id!, t]));
 
-        // Determine direction BEFORE adjustment (use minimum selected index, not active tab)
-        const isMovingDown = minSelectedIndex < targetIndex;
+          // Build segments: consecutive groups and ungrouped runs
+          type MoveSegment = { type: 'group'; groupId: number; tabIds: number[] }
+            | { type: 'ungrouped'; tabIds: number[] };
+          const segments: MoveSegment[] = [];
+          let currentSeg: MoveSegment | null = null;
 
-        // Adjust for downward movement: when moving tab(s) down, they're removed first,
-        // shifting all subsequent tabs' indices by the number of tabs being moved
-        if (isMovingDown) {
-          targetIndex -= tabsToMove.length;
-        }
+          for (const tabId of tabsToMove) {
+            const tab = tabMap.get(tabId);
+            if (!tab) continue;
+            const gid = tab.groupId;
+            const isPreserved = gid !== -1 && gid !== undefined && preservedGroupIds.has(gid);
 
-        // Move tab(s) within same window (windowId omitted = current window)
-        if (tabsToMove.length === 1) {
-          await chrome.tabs.move(tabsToMove[0], { index: targetIndex });
-        } else {
-          if (isMovingDown) {
-            // Downward: move in reverse order (last tab first)
-            for (let i = tabsToMove.length - 1; i >= 0; i--) {
-              const tabId = tabsToMove[i];
-              const finalIndex = targetIndex + i;
-              await chrome.tabs.move(tabId, { index: finalIndex });
+            if (isPreserved) {
+              if (currentSeg?.type === 'group' && currentSeg.groupId === gid) {
+                currentSeg.tabIds.push(tabId);
+              } else {
+                if (currentSeg) segments.push(currentSeg);
+                currentSeg = { type: 'group', groupId: gid, tabIds: [tabId] };
+              }
+            } else {
+              if (currentSeg?.type === 'ungrouped') {
+                currentSeg.tabIds.push(tabId);
+              } else {
+                if (currentSeg) segments.push(currentSeg);
+                currentSeg = { type: 'ungrouped', tabIds: [tabId] };
+              }
             }
+          }
+          if (currentSeg) segments.push(currentSeg);
+
+          // Step 1: Collect all segments at end of window (preserves relative order)
+          for (const seg of segments) {
+            if (seg.type === 'group') {
+              await chrome.tabGroups.move(seg.groupId, { index: -1 });
+            } else {
+              await chrome.tabs.move(seg.tabIds, { index: -1 });
+            }
+          }
+
+          // Step 2: Get drop target's current index (shifted after collection)
+          const overTabNow = await chrome.tabs.get(overTab.id!);
+          let insertAt = overTabNow.index;
+          if (dropPosition === 'bottom') insertAt++;
+
+          // Step 3: Move segments from end to target position in order
+          let offset = 0;
+          for (const seg of segments) {
+            if (seg.type === 'group') {
+              await chrome.tabGroups.move(seg.groupId, { index: insertAt + offset });
+            } else {
+              await chrome.tabs.move(seg.tabIds, { index: insertAt + offset });
+            }
+            offset += seg.tabIds.length;
+          }
+        } else {
+          // No groups to preserve — sequential move with direction-aware index
+          const selectedIndices = tabsToMove
+            .map(id => windowTabs.find(t => t.id === id)?.index)
+            .filter((index): index is number => index !== undefined);
+          const minSelectedIndex = Math.min(...selectedIndices);
+
+          let targetIndex = overTab.index;
+          if (dropPosition === 'bottom') targetIndex++;
+
+          const isMovingDown = minSelectedIndex < targetIndex;
+          if (isMovingDown) targetIndex -= tabsToMove.length;
+
+          if (tabsToMove.length === 1) {
+            await chrome.tabs.move(tabsToMove[0], { index: targetIndex });
           } else {
-            // Upward: move in forward order (first tab first)
-            for (let i = 0; i < tabsToMove.length; i++) {
-              const tabId = tabsToMove[i];
-              const finalIndex = targetIndex + i;
-              await chrome.tabs.move(tabId, { index: finalIndex });
+            if (isMovingDown) {
+              // Downward: move in reverse order (last tab first)
+              for (let i = tabsToMove.length - 1; i >= 0; i--) {
+                await chrome.tabs.move(tabsToMove[i], { index: targetIndex + i });
+              }
+            } else {
+              // Upward: move in forward order (first tab first)
+              for (let i = 0; i < tabsToMove.length; i++) {
+                await chrome.tabs.move(tabsToMove[i], { index: targetIndex + i });
+              }
             }
           }
         }
@@ -266,12 +317,14 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
         targetIndex = dropPosition === 'top' ? overTab.index : overTab.index + 1;
       }
 
+      // Hoisted: needed for both single-tab and multi-tab group preservation check
+      const sourceWindowTabs = filteredTabGroups.find(g => g.windowId === activeTab.windowId)?.tabs ?? [];
+
       // Determine which tabs to move (sorted by index for relative order)
       let tabsToMove: number[];
 
       if (isSelected && selectedItems && selectedItems.length > 1) {
         // Multi-tab cross-window move
-        const sourceWindowTabs = filteredTabGroups.find(g => g.windowId === activeTab.windowId)?.tabs ?? [];
         tabsToMove = selectedItems
           .map(id => {
             const tab = sourceWindowTabs.find(t => t.id === id);
@@ -286,14 +339,76 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
       }
 
       try {
-        // Two-step move: first append all tabs to target window, then reposition.
-        // Batch API calls (chrome.tabs.move accepts an array) to minimize events and debounce delay.
-        // Step 1: Append all tabs to target window (preserves relative order)
-        await chrome.tabs.move(tabsToMove, { windowId: targetWindowId, index: -1 });
+        // Identify tab groups to preserve BEFORE moving
+        const groupsToPreserve = identifyGroupsToPreserve(tabsToMove, sourceWindowTabs);
 
-        // Step 2: Reposition within target window if dropped on a specific tab
-        if (targetIndex !== -1) {
-          await chrome.tabs.move(tabsToMove, { index: targetIndex });
+        if (groupsToPreserve.length > 0) {
+          // Segment-based cross-window move: use chrome.tabGroups.move() for groups
+          const preservedGroupIds = new Set(groupsToPreserve.map(g => g.groupId));
+          const tabMap = new Map(sourceWindowTabs.map(t => [t.id!, t]));
+
+          // Build segments: consecutive groups and ungrouped runs
+          type MoveSegment = { type: 'group'; groupId: number; tabIds: number[] }
+            | { type: 'ungrouped'; tabIds: number[] };
+          const segments: MoveSegment[] = [];
+          let currentSeg: MoveSegment | null = null;
+
+          for (const tabId of tabsToMove) {
+            const tab = tabMap.get(tabId);
+            if (!tab) continue;
+            const gid = tab.groupId;
+            const isPreserved = gid !== -1 && gid !== undefined && preservedGroupIds.has(gid);
+
+            if (isPreserved) {
+              if (currentSeg?.type === 'group' && currentSeg.groupId === gid) {
+                currentSeg.tabIds.push(tabId);
+              } else {
+                if (currentSeg) segments.push(currentSeg);
+                currentSeg = { type: 'group', groupId: gid, tabIds: [tabId] };
+              }
+            } else {
+              if (currentSeg?.type === 'ungrouped') {
+                currentSeg.tabIds.push(tabId);
+              } else {
+                if (currentSeg) segments.push(currentSeg);
+                currentSeg = { type: 'ungrouped', tabIds: [tabId] };
+              }
+            }
+          }
+          if (currentSeg) segments.push(currentSeg);
+
+          // Step 1: Move all segments to target window (append to end, preserves relative order)
+          for (const seg of segments) {
+            if (seg.type === 'group') {
+              await chrome.tabGroups.move(seg.groupId, { windowId: targetWindowId, index: -1 });
+            } else {
+              await chrome.tabs.move(seg.tabIds, { windowId: targetWindowId, index: -1 });
+            }
+          }
+
+          // Step 2: Reposition within target window if dropped on a specific tab
+          if (targetIndex !== -1) {
+            const overTab = allTabs.find(t => t.id === over.id)!;
+            const overTabNow = await chrome.tabs.get(overTab.id!);
+            let insertAt = overTabNow.index;
+            if (dropPosition === 'bottom') insertAt++;
+
+            let offset = 0;
+            for (const seg of segments) {
+              if (seg.type === 'group') {
+                await chrome.tabGroups.move(seg.groupId, { index: insertAt + offset });
+              } else {
+                await chrome.tabs.move(seg.tabIds, { index: insertAt + offset });
+              }
+              offset += seg.tabIds.length;
+            }
+          }
+        } else {
+          // No groups to preserve — existing two-step move
+          await chrome.tabs.move(tabsToMove, { windowId: targetWindowId, index: -1 });
+          if (targetIndex !== -1) {
+            await chrome.tabs.move(tabsToMove, { index: targetIndex });
+          }
         }
 
         clearDragSelection();
