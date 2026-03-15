@@ -72,15 +72,25 @@ const DuplicatesView = ({ allTabs, onBack }: DuplicatesViewProps) => {
           <h2 className="text-lg font-bold">Duplicate Tabs</h2>
         </div>
         <div className="flex items-center gap-3">
-          <label className="label cursor-pointer gap-2 text-sm">
-            <span className="text-base-content/60">{matchMode === 'exact' ? 'Exact match' : 'Normalized'}</span>
-            <input
-              type="checkbox"
-              className="toggle toggle-sm"
-              checked={matchMode === 'normalized'}
-              onChange={e => setMatchMode(e.target.checked ? 'normalized' : 'exact')}
-            />
-          </label>
+          <div className="flex items-center gap-2">
+            <div className="tooltip tooltip-left" data-tip="Smart: ignores #fragments, trailing slashes, and tracking params (utm_*)">
+              <span className="text-base-content/40 cursor-help text-sm">?</span>
+            </div>
+            <div className="join">
+              <button
+                className={`btn btn-xs join-item ${matchMode === 'exact' ? 'btn-active' : ''}`}
+                onClick={() => setMatchMode('exact')}
+              >
+                Exact URL
+              </button>
+              <button
+                className={`btn btn-xs join-item ${matchMode === 'normalized' ? 'btn-active' : ''}`}
+                onClick={() => setMatchMode('normalized')}
+              >
+                Smart
+              </button>
+            </div>
+          </div>
           {duplicateCount > 0 && (
             <button className="btn btn-sm btn-error" onClick={handleCloseAllDuplicates}>
               Close all duplicates ({duplicateCount})
