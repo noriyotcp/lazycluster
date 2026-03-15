@@ -19,10 +19,11 @@ const extractDomain = (url: string): string => {
 
 interface DuplicatesViewProps {
   allTabs: chrome.tabs.Tab[];
+  windowLabels: Map<number, string>;
   onBack: () => void;
 }
 
-const DuplicatesView = ({ allTabs, onBack }: DuplicatesViewProps) => {
+const DuplicatesView = ({ allTabs, windowLabels, onBack }: DuplicatesViewProps) => {
   const [matchMode, setMatchMode] = useState<DuplicateMatchMode>('normalized');
   const { setDeletingState } = useDeletionState();
   const { showToast } = useToast();
@@ -130,7 +131,7 @@ const DuplicatesView = ({ allTabs, onBack }: DuplicatesViewProps) => {
                         <th className="w-8" />
                         <th>Title</th>
                         <th className="w-48">Domain</th>
-                        <th className="w-20">Window</th>
+                        <th className="w-36">Window</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -145,7 +146,7 @@ const DuplicatesView = ({ allTabs, onBack }: DuplicatesViewProps) => {
                           </td>
                           <td className="max-w-md truncate" title={tab.title}>{tab.title}</td>
                           <td className="text-base-content/60 truncate">{extractDomain(tab.url || '')}</td>
-                          <td className="text-base-content/60">W{tab.windowId}</td>
+                          <td className="text-base-content/60">{windowLabels.get(tab.windowId) ?? `W${tab.windowId}`}</td>
                         </tr>
                       ))}
                     </tbody>

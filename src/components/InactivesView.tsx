@@ -20,10 +20,11 @@ const extractDomain = (url: string): string => {
 
 interface InactivesViewProps {
   allTabs: chrome.tabs.Tab[];
+  windowLabels: Map<number, string>;
   onBack: () => void;
 }
 
-const InactivesView = ({ allTabs, onBack }: InactivesViewProps) => {
+const InactivesView = ({ allTabs, windowLabels, onBack }: InactivesViewProps) => {
   const [thresholdMs, setThresholdMs] = useState(DEFAULT_INACTIVE_THRESHOLD_MS);
   const { setDeletingState } = useDeletionState();
   const { showToast } = useToast();
@@ -111,7 +112,7 @@ const InactivesView = ({ allTabs, onBack }: InactivesViewProps) => {
                   <th className="w-8" />
                   <th>Title</th>
                   <th className="w-48">Domain</th>
-                  <th className="w-20">Window</th>
+                  <th className="w-36">Window</th>
                   <th className="w-24">Inactive</th>
                   <th className="w-20" />
                 </tr>
@@ -130,7 +131,7 @@ const InactivesView = ({ allTabs, onBack }: InactivesViewProps) => {
                       {tab.title || extractDomain(tab.url || '')}
                     </td>
                     <td className="text-base-content/60 truncate">{extractDomain(tab.url || '')}</td>
-                    <td className="text-base-content/60">W{tab.windowId}</td>
+                    <td className="text-base-content/60">{windowLabels.get(tab.windowId) ?? `W${tab.windowId}`}</td>
                     <td className="text-base-content/60">
                       {tab.lastAccessed ? formatInactiveDuration(tab.lastAccessed) : ''}
                     </td>

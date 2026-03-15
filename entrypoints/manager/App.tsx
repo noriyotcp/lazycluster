@@ -109,6 +109,12 @@ const Manager = () => {
     [clearSelection]
   );
 
+  // Map windowId to display label (Current Window / Window 1, 2, ...)
+  const windowLabels = new Map<number, string>();
+  tabGroups.forEach((group, index) => {
+    windowLabels.set(group.windowId, index === 0 ? 'Current Window' : `Window ${index}`);
+  });
+
   const filteredTabGroups = tabGroups
     .map((group, index) => ({ ...group, windowGroupNumber: index }))
     .map(group => ({
@@ -139,10 +145,10 @@ const Manager = () => {
           />
         )}
         {viewMode === 'duplicates' && (
-          <DuplicatesView allTabs={allTabs} onBack={() => changeView('tabs')} />
+          <DuplicatesView allTabs={allTabs} windowLabels={windowLabels} onBack={() => changeView('tabs')} />
         )}
         {viewMode === 'inactives' && (
-          <InactivesView allTabs={allTabs} onBack={() => changeView('tabs')} />
+          <InactivesView allTabs={allTabs} windowLabels={windowLabels} onBack={() => changeView('tabs')} />
         )}
       </div>
       {sequenceActive && (
