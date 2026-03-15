@@ -47,8 +47,13 @@ export const findDuplicateTabs = (
   for (const tab of tabs) {
     if (!tab.url) continue;
 
-    // Skip special browser URLs
-    if (tab.url.startsWith('chrome://') || tab.url.startsWith('edge://') || tab.url.startsWith('about:')) {
+    // Skip special browser and extension URLs
+    if (
+      tab.url.startsWith('chrome://') ||
+      tab.url.startsWith('chrome-extension://') ||
+      tab.url.startsWith('edge://') ||
+      tab.url.startsWith('about:')
+    ) {
       continue;
     }
 

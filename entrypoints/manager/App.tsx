@@ -1,14 +1,17 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { devLog } from '../../src/utils/devLog';
 import Header from '../../src/components/Header';
+import type { ViewMode } from '../../src/components/Header';
 import WindowGroupList from '../../src/components/WindowGroupList';
+import DuplicatesView from '../../src/components/DuplicatesView';
+import InactivesView from '../../src/components/InactivesView';
 import { TabFocusProvider } from '../../src/contexts/TabFocusContext';
 import { useTabGroupContext } from '../../src/contexts/TabGroupContext';
-import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext'; // Import TabSelectionContext
-import { useDeletionState } from '../../src/contexts/DeletionStateContext'; // Import DeletionStateContext
-import { useTabGroupColor } from '../../src/contexts/TabGroupColorContext'; // Import TabGroupColorContext
-import { useBackgroundConnection } from '../../src/hooks/useBackgroundConnection'; // Import the hook
-import { useWindowGroupNavigation } from '../../src/hooks/useWindowGroupNavigation'; // Import window navigation hook
+import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
+import { useDeletionState } from '../../src/contexts/DeletionStateContext';
+import { useTabGroupColor } from '../../src/contexts/TabGroupColorContext';
+import { useBackgroundConnection } from '../../src/hooks/useBackgroundConnection';
+import { useWindowGroupNavigation } from '../../src/hooks/useWindowGroupNavigation';
 import { useActiveWindowId } from '../../src/contexts/ActiveWindowIdContext';
 import KeyboardShortcutsModal from '../../src/components/KeyboardShortcutsModal';
 import './style.css';
@@ -20,6 +23,12 @@ interface BackgroundMessage {
   payload?: unknown; // Keep payload flexible if needed
 }
 
+const getViewFromHash = (): ViewMode => {
+  const hash = window.location.hash.slice(1);
+  if (hash === 'duplicates' || hash === 'inactives') return hash;
+  return 'tabs';
+};
+
 const Manager = () => {
   const { tabGroups, updateTabGroups } = useTabGroupContext();
   const { clearSelection, syncWithExistingTabs } = useTabSelectionContext();
@@ -28,7 +37,23 @@ const Manager = () => {
   const { activeWindowId, refreshActiveWindowId } = useActiveWindowId();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [allTabs, setAllTabs] = useState<chrome.tabs.Tab[]>([]);
+  const [viewMode, setViewMode] = useState<ViewMode>(getViewFromHash);
   const searchBarRef = useRef<HTMLInputElement>(null);
+
+  // Sync viewMode with URL hash
+  const changeView = useCallback((view: ViewMode) => {
+    setViewMode(view);
+    window.location.hash = view === 'tabs' ? '' : view;
+  }, []);
+
+  // Listen for browser back/forward navigation
+  useEffect(() => {
+    const handleHashChange = () => {
+      setViewMode(getViewFromHash());
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // Define the message handler using useCallback to maintain reference stability
   const handleBackgroundMessage = useCallback(
@@ -98,12 +123,27 @@ const Manager = () => {
 
   return (
     <TabFocusProvider>
-      <Header searchQuery={searchQuery} onSearchQueryChange={handleSearchQueryChange} searchBarRef={searchBarRef} allTabs={allTabs} />
+      <Header
+        searchQuery={searchQuery}
+        onSearchQueryChange={handleSearchQueryChange}
+        searchBarRef={searchBarRef}
+        allTabs={allTabs}
+        viewMode={viewMode}
+        onViewChange={changeView}
+      />
       <div className="p-5 pt-0">
-        <WindowGroupList
-          filteredTabGroups={filteredTabGroups}
-          isFiltered={searchQuery !== ''}
-        />
+        {viewMode === 'tabs' && (
+          <WindowGroupList
+            filteredTabGroups={filteredTabGroups}
+            isFiltered={searchQuery !== ''}
+          />
+        )}
+        {viewMode === 'duplicates' && (
+          <DuplicatesView allTabs={allTabs} onBack={() => changeView('tabs')} />
+        )}
+        {viewMode === 'inactives' && (
+          <InactivesView allTabs={allTabs} onBack={() => changeView('tabs')} />
+        )}
       </div>
       {sequenceActive && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 badge badge-soft badge-primary badge-jump-to-window-group">

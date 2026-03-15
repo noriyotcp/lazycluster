@@ -2,26 +2,33 @@ import React from 'react';
 import SearchBar from './SearchBar';
 import ThemeSwitcher from './ThemeSwitcher';
 import TabCountBadge from './TabCountBadge';
-import DuplicateTabsPanel from './DuplicateTabsPanel';
-import InactiveTabsPanel from './InactiveTabsPanel';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useDeletionState } from '../contexts/DeletionStateContext';
 import { useToast } from '../../src/components/ToastProvider';
 import Alert from '../../src/components/Alert';
 import { useTotalTabCount } from '../hooks/useTotalTabCount';
+import { findDuplicateTabs, countDuplicateTabs } from '../utils/duplicateDetection';
+import { findInactiveTabs, DEFAULT_INACTIVE_THRESHOLD_MS } from '../utils/inactiveDetection';
+
+export type ViewMode = 'tabs' | 'duplicates' | 'inactives';
 
 interface HeaderProps {
   searchQuery: string;
   onSearchQueryChange: (query: string) => void;
   searchBarRef: React.RefObject<HTMLInputElement | null>;
   allTabs: chrome.tabs.Tab[];
+  viewMode: ViewMode;
+  onViewChange: (view: ViewMode) => void;
 }
 
-const Header = ({ searchQuery, onSearchQueryChange, searchBarRef, allTabs }: HeaderProps) => {
+const Header = ({ searchQuery, onSearchQueryChange, searchBarRef, allTabs, viewMode, onViewChange }: HeaderProps) => {
   const { selectedTabIds, removeTabsFromSelection } = useTabSelectionContext();
   const { setDeletingState } = useDeletionState();
   const { showToast } = useToast();
   const totalTabCount = useTotalTabCount();
+
+  const duplicateCount = countDuplicateTabs(findDuplicateTabs(allTabs, 'normalized'));
+  const inactiveCount = findInactiveTabs(allTabs, DEFAULT_INACTIVE_THRESHOLD_MS).length;
 
   const handleCloseSelectedTabs = async () => {
     const tabsToClose = Array.from(selectedTabIds); // Convert Set to array
@@ -42,14 +49,38 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef, allTabs }: Hea
     }
   };
 
+  const toggleView = (view: 'duplicates' | 'inactives') => {
+    onViewChange(viewMode === view ? 'tabs' : view);
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-(--color-base-100) shadow-md p-5 pt-2.5 pb-2.5">
       <span className="flex justify-between items-center gap-x-4">
         <SearchBar searchQuery={searchQuery} onSearchQueryChange={onSearchQueryChange} ref={searchBarRef} />
         <div className="flex items-center gap-x-4">
           <TabCountBadge count={totalTabCount} />
-          <DuplicateTabsPanel allTabs={allTabs} />
-          <InactiveTabsPanel allTabs={allTabs} />
+          <button
+            className={`btn btn-ghost relative ${viewMode === 'duplicates' ? 'btn-active' : ''}`}
+            onClick={() => toggleView('duplicates')}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
+              <path d="M2 3.5A1.5 1.5 0 0 1 3.5 2h2A1.5 1.5 0 0 1 7 3.5v2A1.5 1.5 0 0 1 5.5 7h-2A1.5 1.5 0 0 1 2 5.5v-2ZM2 10.5A1.5 1.5 0 0 1 3.5 9h2A1.5 1.5 0 0 1 7 10.5v2A1.5 1.5 0 0 1 5.5 14h-2A1.5 1.5 0 0 1 2 12.5v-2ZM9 3.5A1.5 1.5 0 0 1 10.5 2h2A1.5 1.5 0 0 1 14 3.5v2A1.5 1.5 0 0 1 12.5 7h-2A1.5 1.5 0 0 1 9 5.5v-2ZM9 10.5A1.5 1.5 0 0 1 10.5 9h2a1.5 1.5 0 0 1 1.5 1.5v2a1.5 1.5 0 0 1-1.5 1.5h-2A1.5 1.5 0 0 1 9 12.5v-2Z" />
+            </svg>
+            {duplicateCount > 0 && (
+              <div className="badge badge-sm badge-warning absolute -top-1 -right-1">{duplicateCount}</div>
+            )}
+          </button>
+          <button
+            className={`btn btn-ghost relative ${viewMode === 'inactives' ? 'btn-active' : ''}`}
+            onClick={() => toggleView('inactives')}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
+              <path fillRule="evenodd" d="M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Zm7.75-4.25a.75.75 0 0 0-1.5 0V8c0 .414.336.75.75.75h3.25a.75.75 0 0 0 0-1.5h-2.5v-3.5Z" clipRule="evenodd" />
+            </svg>
+            {inactiveCount > 0 && (
+              <div className="badge badge-sm badge-info absolute -top-1 -right-1">{inactiveCount}</div>
+            )}
+          </button>
           <button className="btn btn-ghost" onClick={handleCloseSelectedTabs} disabled={selectedTabIds.size === 0}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
               <path
