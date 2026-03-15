@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useDeletionState } from '../contexts/DeletionStateContext';
+import { useTabFocusContext } from '../contexts/TabFocusContext';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
 import {
@@ -26,6 +27,7 @@ interface DuplicatesViewProps {
 const DuplicatesView = ({ allTabs, windowLabels, onBack }: DuplicatesViewProps) => {
   const [matchMode, setMatchMode] = useState<DuplicateMatchMode>('normalized');
   const { setDeletingState } = useDeletionState();
+  const { focusActiveTab } = useTabFocusContext();
   const { showToast } = useToast();
 
   const duplicates = findDuplicateTabs(allTabs, matchMode);
@@ -144,9 +146,27 @@ const DuplicatesView = ({ allTabs, windowLabels, onBack }: DuplicatesViewProps) 
                               <span className="size-4 inline-block" />
                             )}
                           </td>
-                          <td className="max-w-md truncate" title={tab.title}>{tab.title}</td>
+                          <td className="max-w-md truncate" title={tab.title}>
+                            <a
+                              className="cursor-pointer hover:underline"
+                              href={tab.url}
+                              onClick={e => {
+                                e.preventDefault();
+                                if (tab.id && tab.windowId) focusActiveTab(tab.id, tab.windowId);
+                              }}
+                            >
+                              {tab.title}
+                            </a>
+                          </td>
                           <td className="text-base-content/60 truncate">{extractDomain(tab.url || '')}</td>
-                          <td className="text-base-content/60">{windowLabels.get(tab.windowId) ?? `W${tab.windowId}`}</td>
+                          <td className="text-base-content/60">
+                            <a
+                              className="cursor-pointer hover:underline"
+                              onClick={() => chrome.windows.update(tab.windowId, { focused: true })}
+                            >
+                              {windowLabels.get(tab.windowId) ?? `W${tab.windowId}`}
+                            </a>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
