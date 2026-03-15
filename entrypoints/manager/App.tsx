@@ -27,6 +27,7 @@ const Manager = () => {
   const { updateGroupColors } = useTabGroupColor();
   const { activeWindowId, refreshActiveWindowId } = useActiveWindowId();
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [allTabs, setAllTabs] = useState<chrome.tabs.Tab[]>([]);
   const searchBarRef = useRef<HTMLInputElement>(null);
 
   // Define the message handler using useCallback to maintain reference stability
@@ -34,6 +35,7 @@ const Manager = () => {
     async (message: BackgroundMessage) => {
       devLog(`${new Date()} - Received message from background:`, message); // Log received messages
       if (message.type === 'UPDATE_TABS' && message.tabs) {
+        setAllTabs(message.tabs);
         const currentWindowId = await refreshActiveWindowId();
         updateTabGroups(message.tabs, currentWindowId ?? undefined); // Use the updated tabs
 
@@ -96,7 +98,7 @@ const Manager = () => {
 
   return (
     <TabFocusProvider>
-      <Header searchQuery={searchQuery} onSearchQueryChange={handleSearchQueryChange} searchBarRef={searchBarRef} />
+      <Header searchQuery={searchQuery} onSearchQueryChange={handleSearchQueryChange} searchBarRef={searchBarRef} allTabs={allTabs} />
       <div className="p-5 pt-0">
         <WindowGroupList
           filteredTabGroups={filteredTabGroups}

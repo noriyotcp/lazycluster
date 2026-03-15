@@ -2,6 +2,8 @@ import React from 'react';
 import SearchBar from './SearchBar';
 import ThemeSwitcher from './ThemeSwitcher';
 import TabCountBadge from './TabCountBadge';
+import DuplicateTabsPanel from './DuplicateTabsPanel';
+import InactiveTabsPanel from './InactiveTabsPanel';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useDeletionState } from '../contexts/DeletionStateContext';
 import { useToast } from '../../src/components/ToastProvider';
@@ -12,9 +14,10 @@ interface HeaderProps {
   searchQuery: string;
   onSearchQueryChange: (query: string) => void;
   searchBarRef: React.RefObject<HTMLInputElement | null>;
+  allTabs: chrome.tabs.Tab[];
 }
 
-const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps) => {
+const Header = ({ searchQuery, onSearchQueryChange, searchBarRef, allTabs }: HeaderProps) => {
   const { selectedTabIds, removeTabsFromSelection } = useTabSelectionContext();
   const { setDeletingState } = useDeletionState();
   const { showToast } = useToast();
@@ -45,6 +48,8 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef }: HeaderProps)
         <SearchBar searchQuery={searchQuery} onSearchQueryChange={onSearchQueryChange} ref={searchBarRef} />
         <div className="flex items-center gap-x-4">
           <TabCountBadge count={totalTabCount} />
+          <DuplicateTabsPanel allTabs={allTabs} />
+          <InactiveTabsPanel allTabs={allTabs} />
           <button className="btn btn-ghost" onClick={handleCloseSelectedTabs} disabled={selectedTabIds.size === 0}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
               <path
