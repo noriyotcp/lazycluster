@@ -105,46 +105,30 @@ const InactivesView = ({ allTabs, windowLabels, onBack }: InactivesViewProps) =>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="table table-zebra w-full">
-              <thead>
-                <tr>
-                  <th className="w-8" />
-                  <th>Title</th>
-                  <th className="w-48">Domain</th>
-                  <th className="w-36">Window</th>
-                  <th className="w-24">Inactive</th>
-                  <th className="w-20" />
-                </tr>
-              </thead>
-              <tbody>
-                {inactiveTabs.map(tab => (
-                  <tr key={tab.id}>
-                    <td>
-                      {tab.favIconUrl ? (
-                        <img className="size-4" src={tab.favIconUrl} alt="" onError={e => ((e.target as HTMLImageElement).src = '')} />
-                      ) : (
-                        <span className="size-4 inline-block" />
-                      )}
-                    </td>
-                    <td className="max-w-md truncate" title={tab.title}>
-                      {tab.title || extractDomain(tab.url || '')}
-                    </td>
-                    <td className="text-base-content/60 truncate">{extractDomain(tab.url || '')}</td>
-                    <td className="text-base-content/60">{windowLabels.get(tab.windowId) ?? `W${tab.windowId}`}</td>
-                    <td className="text-base-content/60">
-                      {tab.lastAccessed ? formatInactiveDuration(tab.lastAccessed) : ''}
-                    </td>
-                    <td>
-                      <button className="btn btn-xs btn-outline btn-error" onClick={() => handleCloseTab(tab.id!)}>
-                        Close
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ul className="list">
+            {inactiveTabs.map(tab => (
+              <li key={tab.id} className="list-row items-center p-2 even:bg-base-200">
+                <div>
+                  {tab.favIconUrl ? (
+                    <img className="size-4" src={tab.favIconUrl} alt="" onError={e => ((e.target as HTMLImageElement).src = '')} />
+                  ) : (
+                    <span className="size-4 inline-block" />
+                  )}
+                </div>
+                <div className="list-col-grow min-w-0">
+                  <div className="truncate" title={tab.title}>
+                    {tab.title || extractDomain(tab.url || '')}
+                  </div>
+                  <div className="text-xs text-base-content/50">
+                    {extractDomain(tab.url || '')} · {windowLabels.get(tab.windowId) ?? `W${tab.windowId}`} · {tab.lastAccessed ? formatInactiveDuration(tab.lastAccessed) : ''}
+                  </div>
+                </div>
+                <button className="btn btn-xs btn-outline btn-error shrink-0" onClick={() => handleCloseTab(tab.id!)}>
+                  Close
+                </button>
+              </li>
+            ))}
+          </ul>
         </>
       )}
     </div>
