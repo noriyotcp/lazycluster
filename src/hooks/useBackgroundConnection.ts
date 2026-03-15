@@ -141,8 +141,25 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
   useEffect(() => {
     connect(); // Initial connection attempt
 
+    // Reconnect when page becomes visible again (e.g., returning from another tab)
+    // This handles the case where Service Worker has terminated and retry limit was reached
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && portRef.current === null) {
+        devLog(`${new Date()} - Page became visible with no active connection. Reconnecting...`);
+        // Cancel any pending backoff timer to prevent race condition
+        if (reconnectTimerRef.current) {
+          clearTimeout(reconnectTimerRef.current);
+          reconnectTimerRef.current = null;
+        }
+        attemptRef.current = 0;
+        connect();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
       // Cleanup on unmount
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       if (stableConnectionTimerRef.current) {
         clearTimeout(stableConnectionTimerRef.current);
       }
