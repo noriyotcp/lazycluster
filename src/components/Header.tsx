@@ -8,7 +8,7 @@ import { useToast } from '../../src/components/ToastProvider';
 import Alert from '../../src/components/Alert';
 import { useTotalTabCount } from '../hooks/useTotalTabCount';
 import { findDuplicateTabs, countDuplicateTabs } from '../utils/duplicateDetection';
-import { findInactiveTabs, DEFAULT_INACTIVE_THRESHOLD_MS } from '../utils/inactiveDetection';
+import { findInactiveTabs } from '../utils/inactiveDetection';
 
 export type ViewMode = 'tabs' | 'duplicates' | 'inactives';
 
@@ -19,16 +19,17 @@ interface HeaderProps {
   allTabs: chrome.tabs.Tab[];
   viewMode: ViewMode;
   onViewChange: (view: ViewMode) => void;
+  inactiveThresholdMs: number;
 }
 
-const Header = ({ searchQuery, onSearchQueryChange, searchBarRef, allTabs, viewMode, onViewChange }: HeaderProps) => {
+const Header = ({ searchQuery, onSearchQueryChange, searchBarRef, allTabs, viewMode, onViewChange, inactiveThresholdMs }: HeaderProps) => {
   const { selectedTabIds, removeTabsFromSelection } = useTabSelectionContext();
   const { setDeletingState } = useDeletionState();
   const { showToast } = useToast();
   const totalTabCount = useTotalTabCount();
 
   const duplicateCount = countDuplicateTabs(findDuplicateTabs(allTabs, 'normalized'));
-  const inactiveCount = findInactiveTabs(allTabs, DEFAULT_INACTIVE_THRESHOLD_MS).length;
+  const inactiveCount = findInactiveTabs(allTabs, inactiveThresholdMs).length;
 
   const handleCloseSelectedTabs = async () => {
     const tabsToClose = Array.from(selectedTabIds); // Convert Set to array

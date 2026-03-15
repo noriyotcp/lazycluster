@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useDeletionState } from '../contexts/DeletionStateContext';
 import { useTabFocusContext } from '../contexts/TabFocusContext';
 import { useToast } from './ToastProvider';
@@ -7,7 +6,6 @@ import {
   findInactiveTabs,
   sortByInactivity,
   formatInactiveDuration,
-  DEFAULT_INACTIVE_THRESHOLD_MS,
   INACTIVE_THRESHOLD_PRESETS,
 } from '../utils/inactiveDetection';
 
@@ -23,10 +21,11 @@ interface InactivesViewProps {
   allTabs: chrome.tabs.Tab[];
   windowLabels: Map<number, string>;
   onBack: () => void;
+  thresholdMs: number;
+  onThresholdChange: (thresholdMs: number) => void;
 }
 
-const InactivesView = ({ allTabs, windowLabels, onBack }: InactivesViewProps) => {
-  const [thresholdMs, setThresholdMs] = useState(DEFAULT_INACTIVE_THRESHOLD_MS);
+const InactivesView = ({ allTabs, windowLabels, onBack, thresholdMs, onThresholdChange }: InactivesViewProps) => {
   const { setDeletingState } = useDeletionState();
   const { focusActiveTab } = useTabFocusContext();
   const { showToast } = useToast();
@@ -72,7 +71,7 @@ const InactivesView = ({ allTabs, windowLabels, onBack }: InactivesViewProps) =>
           <select
             className="select select-sm"
             value={thresholdMs}
-            onChange={e => setThresholdMs(Number(e.target.value))}
+            onChange={e => onThresholdChange(Number(e.target.value))}
           >
             {INACTIVE_THRESHOLD_PRESETS.map(preset => (
               <option key={preset.value} value={preset.value}>

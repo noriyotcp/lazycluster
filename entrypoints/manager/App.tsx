@@ -14,6 +14,7 @@ import { useBackgroundConnection } from '../../src/hooks/useBackgroundConnection
 import { useWindowGroupNavigation } from '../../src/hooks/useWindowGroupNavigation';
 import { useActiveWindowId } from '../../src/contexts/ActiveWindowIdContext';
 import KeyboardShortcutsModal from '../../src/components/KeyboardShortcutsModal';
+import { DEFAULT_INACTIVE_THRESHOLD_MS } from '../../src/utils/inactiveDetection';
 import './style.css';
 
 // Define a more specific message type based on BaseMessage from the hook
@@ -38,6 +39,7 @@ const Manager = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [allTabs, setAllTabs] = useState<chrome.tabs.Tab[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>(getViewFromHash);
+  const [inactiveThresholdMs, setInactiveThresholdMs] = useState(DEFAULT_INACTIVE_THRESHOLD_MS);
   const searchBarRef = useRef<HTMLInputElement>(null);
 
   // Sync viewMode with URL hash
@@ -136,6 +138,7 @@ const Manager = () => {
         allTabs={allTabs}
         viewMode={viewMode}
         onViewChange={changeView}
+        inactiveThresholdMs={inactiveThresholdMs}
       />
       <div className="p-5 pt-0">
         {viewMode === 'tabs' && (
@@ -148,7 +151,7 @@ const Manager = () => {
           <DuplicatesView allTabs={allTabs} windowLabels={windowLabels} onBack={() => changeView('tabs')} />
         )}
         {viewMode === 'inactives' && (
-          <InactivesView allTabs={allTabs} windowLabels={windowLabels} onBack={() => changeView('tabs')} />
+          <InactivesView allTabs={allTabs} windowLabels={windowLabels} onBack={() => changeView('tabs')} thresholdMs={inactiveThresholdMs} onThresholdChange={setInactiveThresholdMs} />
         )}
       </div>
       {sequenceActive && (
