@@ -51,7 +51,12 @@ async function shiftClick(page: Page, locator: Locator): Promise<void> {
 
 // Helper function to perform drag-and-drop using pointer events
 // Note: Keyboard drag doesn't support multi-item selection in dnd-kit
-async function performDrag(page: Page, source: Locator, target: Locator): Promise<void> {
+async function performDrag(
+  page: Page,
+  source: Locator,
+  target: Locator,
+  targetYRatio = 0.5,
+): Promise<void> {
   const sourceBox = await source.boundingBox();
   const targetBox = await target.boundingBox();
 
@@ -59,11 +64,11 @@ async function performDrag(page: Page, source: Locator, target: Locator): Promis
     throw new Error('Could not get bounding boxes for drag operation');
   }
 
-  // Calculate centers
+  // Calculate positions (targetYRatio: 0.5 = center, 0.8 = bottom)
   const sourceX = sourceBox.x + sourceBox.width / 2;
   const sourceY = sourceBox.y + sourceBox.height / 2;
   const targetX = targetBox.x + targetBox.width / 2;
-  const targetY = targetBox.y + targetBox.height / 2;
+  const targetY = targetBox.y + targetBox.height * targetYRatio;
 
   // Perform drag: mouse down, move, mouse up
   await page.mouse.move(sourceX, sourceY);
@@ -366,7 +371,8 @@ test.describe('Multi-Drag E2E Tests', () => {
     const lastIndex = tabTitles.length - 1;
     const lastTabItem = page.locator('.group\\/tabitem').nth(lastIndex);
 
-    await performDrag(page, secondDragHandle, lastTabItem);
+    // Drop at bottom of last tab to ensure "insert after" placement
+    await performDrag(page, secondDragHandle, lastTabItem, 0.8);
 
     // Wait for Chrome API to update
     await page.waitForTimeout(500);
@@ -375,7 +381,7 @@ test.describe('Multi-Drag E2E Tests', () => {
     const newTabTitles = await page.locator('.group\\/tabitem a.list-col-grow').allTextContents();
 
     // Verify the range moved together and preserved order
-    // Original tabs at index 1,2,3 should now be near the end
+    // Original tabs at index 1,2,3 should now be at the end
     const newIndex = newTabTitles.indexOf(tabTitles[1]);
     expect(newIndex).toBeGreaterThan(1); // Should have moved down
 
