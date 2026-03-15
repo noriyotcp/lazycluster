@@ -54,7 +54,7 @@ const InactivesView = ({ allTabs, onBack }: InactivesViewProps) => {
   };
 
   return (
-    <div>
+    <div className="mt-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <button className="btn btn-ghost btn-sm" onClick={onBack}>
