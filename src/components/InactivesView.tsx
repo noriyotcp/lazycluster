@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useDeletionState } from '../contexts/DeletionStateContext';
+import { useTabFocusContext } from '../contexts/TabFocusContext';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
 import {
@@ -27,6 +28,7 @@ interface InactivesViewProps {
 const InactivesView = ({ allTabs, windowLabels, onBack }: InactivesViewProps) => {
   const [thresholdMs, setThresholdMs] = useState(DEFAULT_INACTIVE_THRESHOLD_MS);
   const { setDeletingState } = useDeletionState();
+  const { focusActiveTab } = useTabFocusContext();
   const { showToast } = useToast();
 
   const inactiveTabs = sortByInactivity(findInactiveTabs(allTabs, thresholdMs));
@@ -116,11 +118,22 @@ const InactivesView = ({ allTabs, windowLabels, onBack }: InactivesViewProps) =>
                   )}
                 </div>
                 <div className="list-col-grow min-w-0">
-                  <div className="truncate" title={tab.title}>
+                  <a
+                    className="truncate block cursor-pointer hover:underline"
+                    title={tab.title}
+                    href={tab.url}
+                    onClick={e => {
+                      e.preventDefault();
+                      if (tab.id && tab.windowId) focusActiveTab(tab.id, tab.windowId);
+                    }}
+                  >
                     {tab.title || extractDomain(tab.url || '')}
-                  </div>
+                  </a>
                   <div className="text-xs text-base-content/50">
-                    {extractDomain(tab.url || '')} · {windowLabels.get(tab.windowId) ?? `W${tab.windowId}`} · {tab.lastAccessed ? formatInactiveDuration(tab.lastAccessed) : ''}
+                    {extractDomain(tab.url || '')} · <a
+                      className="cursor-pointer hover:underline"
+                      onClick={() => chrome.windows.update(tab.windowId, { focused: true })}
+                    >{windowLabels.get(tab.windowId) ?? `W${tab.windowId}`}</a> · {tab.lastAccessed ? formatInactiveDuration(tab.lastAccessed) : ''}
                   </div>
                 </div>
                 <button className="btn btn-xs btn-outline btn-error shrink-0" onClick={() => handleCloseTab(tab.id!)}>
