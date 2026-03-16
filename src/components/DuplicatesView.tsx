@@ -81,13 +81,13 @@ const DuplicatesView = ({ allTabs, windowLabels, onBack }: DuplicatesViewProps) 
             </div>
             <div className="join">
               <button
-                className={`btn btn-xs join-item ${matchMode === 'exact' ? 'btn-active' : ''}`}
+                className={`btn btn-xs join-item ${matchMode === 'exact' ? 'btn-warning' : ''}`}
                 onClick={() => setMatchMode('exact')}
               >
                 Exact URL
               </button>
               <button
-                className={`btn btn-xs join-item ${matchMode === 'normalized' ? 'btn-active' : ''}`}
+                className={`btn btn-xs join-item ${matchMode === 'normalized' ? 'btn-warning' : ''}`}
                 onClick={() => setMatchMode('normalized')}
               >
                 Smart
