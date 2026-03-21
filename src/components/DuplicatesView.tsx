@@ -81,12 +81,6 @@ const DuplicatesView = ({ allTabs, windowLabels, onBack }: DuplicatesViewProps) 
             </div>
             <div className="join">
               <button
-                className={`btn btn-xs join-item ${matchMode === 'exact' ? 'btn-warning' : ''}`}
-                onClick={() => setMatchMode('exact')}
-              >
-                Exact URL
-              </button>
-              <button
                 className={`btn btn-xs join-item ${matchMode === 'normalized' ? 'btn-warning' : ''}`}
                 onClick={() => setMatchMode('normalized')}
               >
@@ -112,7 +106,7 @@ const DuplicatesView = ({ allTabs, windowLabels, onBack }: DuplicatesViewProps) 
         <div className="text-center py-16 text-base-content/60">
           <p className="text-lg">No duplicate tabs found.</p>
           <p className="text-sm mt-2">
-            {matchMode === 'exact' ? 'Try switching to Normalized mode to catch more duplicates.' : 'All your tabs have unique URLs.'}
+            {matchMode === 'normalized' ? 'Try switching to Title mode to catch more duplicates.' : 'All your tabs have unique titles per domain.'}
           </p>
         </div>
       ) : (

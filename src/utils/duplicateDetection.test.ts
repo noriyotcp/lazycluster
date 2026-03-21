@@ -67,7 +67,7 @@ describe('findDuplicateTabs', () => {
       makeTab({ id: 3, url: 'https://other.com' }),
     ];
 
-    const result = findDuplicateTabs(tabs, 'exact');
+    const result = findDuplicateTabs(tabs, 'normalized');
 
     expect(result.size).toBe(1);
     const group = result.get('https://example.com/page')!;
@@ -81,7 +81,7 @@ describe('findDuplicateTabs', () => {
       makeTab({ id: 2, url: 'https://b.com' }),
     ];
 
-    const result = findDuplicateTabs(tabs, 'exact');
+    const result = findDuplicateTabs(tabs, 'normalized');
     expect(result.size).toBe(0);
   });
 
@@ -93,16 +93,6 @@ describe('findDuplicateTabs', () => {
 
     const result = findDuplicateTabs(tabs, 'normalized');
     expect(result.size).toBe(1);
-  });
-
-  it('does not detect normalized duplicates in exact mode', () => {
-    const tabs = [
-      makeTab({ id: 1, url: 'https://example.com/path/' }),
-      makeTab({ id: 2, url: 'https://example.com/path' }),
-    ];
-
-    const result = findDuplicateTabs(tabs, 'exact');
-    expect(result.size).toBe(0);
   });
 
   it('detects normalized duplicates (fragment difference)', () => {
@@ -131,14 +121,14 @@ describe('findDuplicateTabs', () => {
       makeTab({ id: 2, url: 'chrome://extensions' }),
     ];
 
-    const result = findDuplicateTabs(tabs, 'exact');
+    const result = findDuplicateTabs(tabs, 'normalized');
     expect(result.size).toBe(0);
   });
 
   it('skips tabs without URL', () => {
     const tabs = [makeTab({ id: 1, url: undefined }), makeTab({ id: 2, url: undefined })];
 
-    const result = findDuplicateTabs(tabs, 'exact');
+    const result = findDuplicateTabs(tabs, 'normalized');
     expect(result.size).toBe(0);
   });
 
@@ -151,7 +141,7 @@ describe('findDuplicateTabs', () => {
       makeTab({ id: 5, url: 'https://c.com' }),
     ];
 
-    const result = findDuplicateTabs(tabs, 'exact');
+    const result = findDuplicateTabs(tabs, 'normalized');
     expect(result.size).toBe(2);
   });
 
@@ -161,7 +151,7 @@ describe('findDuplicateTabs', () => {
       makeTab({ id: 2, windowId: 2, url: 'https://example.com' }),
     ];
 
-    const result = findDuplicateTabs(tabs, 'exact');
+    const result = findDuplicateTabs(tabs, 'normalized');
     expect(result.size).toBe(1);
   });
 });
@@ -269,7 +259,7 @@ describe('findDuplicateTabs with title-domain mode', () => {
       makeTab({ id: 1, url: 'https://github.com/user/repo/pull/197', title: 'PR #197' }),
       makeTab({ id: 2, url: 'https://github.com/user/repo/pull/197/commits', title: 'PR #197' }),
     ];
-    expect(findDuplicateTabs(tabs, 'exact').size).toBe(0);
+    expect(findDuplicateTabs(tabs, 'normalized').size).toBe(0);
     expect(findDuplicateTabs(tabs, 'normalized').size).toBe(0);
     expect(findDuplicateTabs(tabs, 'title-domain').size).toBe(1);
   });

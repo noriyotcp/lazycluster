@@ -1,4 +1,4 @@
-export type DuplicateMatchMode = 'exact' | 'normalized' | 'title-domain';
+export type DuplicateMatchMode = 'normalized' | 'title-domain';
 
 const TRACKING_PARAMS = new Set([
   'utm_source',
@@ -43,7 +43,7 @@ const getMatchKey = (tab: chrome.tabs.Tab, mode: DuplicateMatchMode): string => 
       return tab.title ?? '';
     }
   }
-  return mode === 'normalized' ? normalizeUrl(tab.url!) : tab.url!;
+  return normalizeUrl(tab.url!);
 };
 
 export const findDuplicateTabs = (
