@@ -111,7 +111,7 @@ const InactivesView = ({ allTabs, windowLabels, onBack, thresholdMs, onThreshold
               <li key={tab.id} className="list-row rounded-none items-center p-2 even:bg-base-200">
                 <div>
                   {tab.favIconUrl ? (
-                    <img className="size-4" src={tab.favIconUrl} alt="" onError={e => ((e.target as HTMLImageElement).src = '')} />
+                    <img className="size-4 object-contain" src={tab.favIconUrl} alt="" onError={e => ((e.target as HTMLImageElement).src = '')} />
                   ) : (
                     <span className="size-4 inline-block" />
                   )}

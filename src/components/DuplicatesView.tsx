@@ -147,7 +147,7 @@ const DuplicatesView = ({ allTabs, windowLabels, onBack }: DuplicatesViewProps) 
                         <tr key={tab.id}>
                           <td>
                             {tab.favIconUrl ? (
-                              <img className="size-4" src={tab.favIconUrl} alt="" onError={e => ((e.target as HTMLImageElement).src = '')} />
+                              <img className="size-4 min-w-4 min-h-4 object-contain" src={tab.favIconUrl} alt="" onError={e => ((e.target as HTMLImageElement).src = '')} />
                             ) : (
                               <span className="size-4 inline-block" />
                             )}
