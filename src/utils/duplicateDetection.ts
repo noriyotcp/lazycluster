@@ -1,4 +1,4 @@
-export type DuplicateMatchMode = 'exact' | 'normalized';
+export type DuplicateMatchMode = 'exact' | 'normalized' | 'title-domain';
 
 const TRACKING_PARAMS = new Set([
   'utm_source',
@@ -34,8 +34,16 @@ export const normalizeUrl = (url: string): string => {
   }
 };
 
-const getMatchKey = (url: string, mode: DuplicateMatchMode): string => {
-  return mode === 'normalized' ? normalizeUrl(url) : url;
+const getMatchKey = (tab: chrome.tabs.Tab, mode: DuplicateMatchMode): string => {
+  if (mode === 'title-domain') {
+    try {
+      const domain = new URL(tab.url!).hostname;
+      return `${domain}::${tab.title ?? ''}`;
+    } catch {
+      return tab.title ?? '';
+    }
+  }
+  return mode === 'normalized' ? normalizeUrl(tab.url!) : tab.url!;
 };
 
 export const findDuplicateTabs = (
@@ -57,7 +65,7 @@ export const findDuplicateTabs = (
       continue;
     }
 
-    const key = getMatchKey(tab.url, mode);
+    const key = getMatchKey(tab, mode);
     const existing = groups.get(key);
     if (existing) {
       existing.push(tab);

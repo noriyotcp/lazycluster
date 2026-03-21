@@ -215,3 +215,62 @@ describe('getTabsToClose', () => {
     expect(result[0].id).toBe(1); // undefined lastAccessed treated as 0, so closed
   });
 });
+
+describe('findDuplicateTabs with title-domain mode', () => {
+  it('groups tabs with same title and domain', () => {
+    const tabs = [
+      makeTab({ id: 1, url: 'https://example.com/page1', title: 'My Page' }),
+      makeTab({ id: 2, url: 'https://example.com/page2?q=foo', title: 'My Page' }),
+    ];
+    const result = findDuplicateTabs(tabs, 'title-domain');
+    expect(result.size).toBe(1);
+    const group = Array.from(result.values())[0];
+    expect(group).toHaveLength(2);
+  });
+
+  it('does not group tabs with same domain but different titles', () => {
+    const tabs = [
+      makeTab({ id: 1, url: 'https://example.com/page1', title: 'Page One' }),
+      makeTab({ id: 2, url: 'https://example.com/page2', title: 'Page Two' }),
+    ];
+    const result = findDuplicateTabs(tabs, 'title-domain');
+    expect(result.size).toBe(0);
+  });
+
+  it('does not group tabs with same title but different domains', () => {
+    const tabs = [
+      makeTab({ id: 1, url: 'https://example.com/page', title: 'Dashboard' }),
+      makeTab({ id: 2, url: 'https://other.com/page', title: 'Dashboard' }),
+    ];
+    const result = findDuplicateTabs(tabs, 'title-domain');
+    expect(result.size).toBe(0);
+  });
+
+  it('handles tabs with empty titles', () => {
+    const tabs = [
+      makeTab({ id: 1, url: 'https://example.com/a', title: '' }),
+      makeTab({ id: 2, url: 'https://example.com/b', title: '' }),
+    ];
+    const result = findDuplicateTabs(tabs, 'title-domain');
+    expect(result.size).toBe(1);
+  });
+
+  it('handles tabs with undefined titles', () => {
+    const tabs = [
+      makeTab({ id: 1, url: 'https://example.com/a', title: undefined }),
+      makeTab({ id: 2, url: 'https://example.com/b', title: undefined }),
+    ];
+    const result = findDuplicateTabs(tabs, 'title-domain');
+    expect(result.size).toBe(1);
+  });
+
+  it('detects duplicates that exact and normalized modes miss', () => {
+    const tabs = [
+      makeTab({ id: 1, url: 'https://github.com/user/repo/pull/197', title: 'PR #197' }),
+      makeTab({ id: 2, url: 'https://github.com/user/repo/pull/197/commits', title: 'PR #197' }),
+    ];
+    expect(findDuplicateTabs(tabs, 'exact').size).toBe(0);
+    expect(findDuplicateTabs(tabs, 'normalized').size).toBe(0);
+    expect(findDuplicateTabs(tabs, 'title-domain').size).toBe(1);
+  });
+});

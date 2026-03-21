@@ -76,7 +76,7 @@ const DuplicatesView = ({ allTabs, windowLabels, onBack }: DuplicatesViewProps) 
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <div className="tooltip tooltip-left" data-tip="Smart: ignores #fragments, trailing slashes, and tracking params (utm_*)">
+            <div className="tooltip tooltip-left" data-tip="Smart: ignores #fragments, trailing slashes, and tracking params. Title: matches same page title on same domain.">
               <span className="text-base-content/40 cursor-help text-sm">?</span>
             </div>
             <div className="join">
@@ -91,6 +91,12 @@ const DuplicatesView = ({ allTabs, windowLabels, onBack }: DuplicatesViewProps) 
                 onClick={() => setMatchMode('normalized')}
               >
                 Smart
+              </button>
+              <button
+                className={`btn btn-xs join-item ${matchMode === 'title-domain' ? 'btn-warning' : ''}`}
+                onClick={() => setMatchMode('title-domain')}
+              >
+                Title
               </button>
             </div>
           </div>
