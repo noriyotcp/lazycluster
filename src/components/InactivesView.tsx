@@ -69,7 +69,7 @@ const InactivesView = ({ allTabs, windowLabels, onBack, thresholdMs, onThreshold
         </div>
         <div className="flex items-center gap-3">
           <select
-            className="select select-sm"
+            className="select select-sm [&>option]:[padding-inline:0]"
             value={thresholdMs}
             onChange={e => onThresholdChange(Number(e.target.value))}
           >
