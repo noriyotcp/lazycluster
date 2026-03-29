@@ -32,6 +32,14 @@ A Chrome extension for enhanced tab and window management, inspired by the origi
     - Sequence times out after 3 seconds of inactivity (timer resets with each keystroke)
   - `/`: Focus search bar
   - `Option/Alt + Click` on window group header: Toggle all window groups open/closed at once
+- **Duplicate Tab Detection:** Find and manage duplicate tabs across all windows with the Duplicates view:
+  - **Smart Matching**: Detects duplicates by normalized URL (ignores trailing slashes, fragments)
+  - **Title Matching**: Detects duplicates by tab title for cases where URLs differ but content is the same
+  - Direct tab and window focus links for quick navigation to any duplicate
+- **Inactive Tab Management:** Identify and clean up tabs you haven't visited recently with the Inactives view:
+  - Configurable threshold: 1 day, 3 days, or 7 days
+  - Sorted by most inactive first, with human-readable time labels (e.g. `3d ago`)
+  - Bulk close inactive tabs to reclaim memory
 - **Quick Domain Access:** Easily see and access a tab's domain by hovering, even when the title is long, providing quick context and navigation.
 - **Streamlined Selection:** Simple checkboxes allow for easy individual or window-wide tab selection for bulk actions.
 
