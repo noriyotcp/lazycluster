@@ -76,29 +76,34 @@ const SavedTabsView = ({ savedTabGroups, onBack, onRestoreGroup, onDeleteGroup, 
           <p className="text-sm mt-2">Use "Save all" in Inactive Tabs to save tabs here.</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div>
           {savedTabGroups.map(group => (
-            <div key={group.id} className="card bg-base-200 shadow-sm">
-              <div className="card-body p-4">
-                <div className="flex items-center justify-between gap-3 mb-2">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-bold">{formatGroupName(group.savedAt)}</h3>
-                    <span className="badge badge-sm badge-neutral">{group.tabs.length} tabs</span>
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                    <button
-                      className="btn btn-sm btn-success"
-                      onClick={() => handleRestoreGroup(group.id)}
-                    >
-                      Restore all
-                    </button>
-                    <button
-                      className="btn btn-sm btn-ghost btn-error"
-                      onClick={() => handleDeleteGroup(group.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
+            <div key={group.id} className="collapse collapse-arrow bg-base-200 border-base-300 border rounded-lg mb-4">
+              <input
+                id={`saved-group-collapse-${group.id}`}
+                type="checkbox"
+                defaultChecked={true}
+              />
+              <div className="collapse-title">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">{formatGroupName(group.savedAt)}</span>
+                  <span className="badge badge-sm badge-neutral">{group.tabs.length} tabs</span>
+                </div>
+              </div>
+              <div className="collapse-content">
+                <div className="flex gap-2 justify-end mb-3">
+                  <button
+                    className="btn btn-sm btn-success"
+                    onClick={() => handleRestoreGroup(group.id)}
+                  >
+                    Restore all
+                  </button>
+                  <button
+                    className="btn btn-sm btn-ghost btn-error"
+                    onClick={() => handleDeleteGroup(group.id)}
+                  >
+                    Delete
+                  </button>
                 </div>
                 <ul className="list">
                   {group.tabs.map((tab, i) => (
