@@ -10,7 +10,7 @@ import { useTotalTabCount } from '../hooks/useTotalTabCount';
 import { findDuplicateTabs, countDuplicateTabs } from '../utils/duplicateDetection';
 import { findInactiveTabs } from '../utils/inactiveDetection';
 
-export type ViewMode = 'tabs' | 'duplicates' | 'inactives';
+export type ViewMode = 'tabs' | 'duplicates' | 'inactives' | 'saved';
 
 interface HeaderProps {
   searchQuery: string;
@@ -20,9 +20,10 @@ interface HeaderProps {
   viewMode: ViewMode;
   onViewChange: (view: ViewMode) => void;
   inactiveThresholdMs: number;
+  savedTabGroupCount: number;
 }
 
-const Header = ({ searchQuery, onSearchQueryChange, searchBarRef, allTabs, viewMode, onViewChange, inactiveThresholdMs }: HeaderProps) => {
+const Header = ({ searchQuery, onSearchQueryChange, searchBarRef, allTabs, viewMode, onViewChange, inactiveThresholdMs, savedTabGroupCount }: HeaderProps) => {
   const { selectedTabIds, removeTabsFromSelection } = useTabSelectionContext();
   const { setDeletingState } = useDeletionState();
   const { showToast } = useToast();
@@ -50,7 +51,7 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef, allTabs, viewM
     }
   };
 
-  const toggleView = (view: 'duplicates' | 'inactives') => {
+  const toggleView = (view: 'duplicates' | 'inactives' | 'saved') => {
     onViewChange(viewMode === view ? 'tabs' : view);
   };
 
@@ -80,6 +81,17 @@ const Header = ({ searchQuery, onSearchQueryChange, searchBarRef, allTabs, viewM
             </svg>
             {inactiveCount > 0 && (
               <div className="badge badge-sm badge-info absolute -top-1 -right-1">{inactiveCount}</div>
+            )}
+          </button>
+          <button
+            className={`btn btn-ghost relative ${viewMode === 'saved' ? 'btn-active' : ''}`}
+            onClick={() => toggleView('saved')}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
+              <path d="M2 3.5A1.5 1.5 0 0 1 3.5 2h9A1.5 1.5 0 0 1 14 3.5v11.25c0 .138-.111.25-.25.25h-.5a.25.25 0 0 1-.177-.073L8 9.81l-5.073 5.116A.25.25 0 0 1 2.75 15h-.5a.25.25 0 0 1-.25-.25V3.5Z" />
+            </svg>
+            {savedTabGroupCount > 0 && (
+              <div className="badge badge-sm badge-accent absolute -top-1 -right-1">{savedTabGroupCount}</div>
             )}
           </button>
           <button className="btn btn-ghost" onClick={handleCloseSelectedTabs} disabled={selectedTabIds.size === 0}>

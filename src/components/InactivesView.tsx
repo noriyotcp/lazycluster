@@ -8,6 +8,7 @@ import {
   formatInactiveDuration,
   INACTIVE_THRESHOLD_PRESETS,
 } from '../utils/inactiveDetection';
+import type { SavedTabGroup } from '../types/savedTabs';
 
 const extractDomain = (url: string): string => {
   try {
@@ -23,9 +24,10 @@ interface InactivesViewProps {
   onBack: () => void;
   thresholdMs: number;
   onThresholdChange: (thresholdMs: number) => void;
+  onSaveAll: (tabs: chrome.tabs.Tab[]) => Promise<SavedTabGroup>;
 }
 
-const InactivesView = ({ allTabs, windowLabels, onBack, thresholdMs, onThresholdChange }: InactivesViewProps) => {
+const InactivesView = ({ allTabs, windowLabels, onBack, thresholdMs, onThresholdChange, onSaveAll }: InactivesViewProps) => {
   const { setDeletingState } = useDeletionState();
   const { focusActiveTab } = useTabFocusContext();
   const { showToast } = useToast();
@@ -55,6 +57,19 @@ const InactivesView = ({ allTabs, windowLabels, onBack, thresholdMs, onThreshold
     }
   };
 
+  const handleSaveAll = async () => {
+    const ids = inactiveTabs.map(t => t.id!);
+    ids.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: true }));
+    try {
+      const group = await onSaveAll(inactiveTabs);
+      await chrome.tabs.remove(ids);
+      showToast(<Alert message={`Saved ${group.tabs.length} tab(s) and closed.`} variant="success" />);
+    } catch (error) {
+      ids.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: false }));
+      showToast(<Alert message={`Failed to save tabs: ${error instanceof Error ? error.message : String(error)}`} />);
+    }
+  };
+
   return (
     <div className="mt-4">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -80,9 +95,14 @@ const InactivesView = ({ allTabs, windowLabels, onBack, thresholdMs, onThreshold
             ))}
           </select>
           {inactiveTabs.length > 0 && (
-            <button className="btn btn-sm btn-error" onClick={handleCloseAll}>
-              Close all ({inactiveTabs.length})
-            </button>
+            <>
+              <button className="btn btn-sm btn-warning" onClick={handleSaveAll}>
+                Save all ({inactiveTabs.length})
+              </button>
+              <button className="btn btn-sm btn-error" onClick={handleCloseAll}>
+                Close all ({inactiveTabs.length})
+              </button>
+            </>
           )}
         </div>
       </div>
