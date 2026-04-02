@@ -60,13 +60,20 @@ const InactivesView = ({ allTabs, windowLabels, onBack, thresholdMs, onThreshold
   const handleSaveAll = async () => {
     const ids = inactiveTabs.map(t => t.id!);
     ids.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: true }));
+    let group;
     try {
-      const group = await onSaveAll(inactiveTabs);
+      group = await onSaveAll(inactiveTabs);
+    } catch (error) {
+      ids.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: false }));
+      showToast(<Alert message={`Failed to save tabs: ${error instanceof Error ? error.message : String(error)}`} />);
+      return;
+    }
+    try {
       await chrome.tabs.remove(ids);
       showToast(<Alert message={`Saved ${group.tabs.length} tab(s) and closed.`} variant="success" />);
     } catch (error) {
       ids.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: false }));
-      showToast(<Alert message={`Failed to save tabs: ${error instanceof Error ? error.message : String(error)}`} />);
+      showToast(<Alert message={`Tabs saved but could not close them: ${error instanceof Error ? error.message : String(error)}`} />);
     }
   };
 
