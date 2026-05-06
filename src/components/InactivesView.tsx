@@ -2,6 +2,7 @@ import { useDeletionState } from '../contexts/DeletionStateContext';
 import { useTabFocusContext } from '../contexts/TabFocusContext';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
+import FaviconImage from './FaviconImage';
 import {
   findInactiveTabs,
   sortByInactivity,
@@ -137,11 +138,7 @@ const InactivesView = ({ allTabs, windowLabels, onBack, thresholdMs, onThreshold
             {inactiveTabs.map(tab => (
               <li key={tab.id} className="list-row rounded-none items-center p-2 even:bg-base-200">
                 <div>
-                  {tab.favIconUrl ? (
-                    <img className="size-4 object-contain" src={tab.favIconUrl} alt="" onError={e => ((e.target as HTMLImageElement).src = '')} />
-                  ) : (
-                    <span className="size-4 inline-block" />
-                  )}
+                  <FaviconImage src={tab.favIconUrl} />
                 </div>
                 <div className="list-col-grow min-w-0">
                   <a
