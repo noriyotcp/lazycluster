@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import type { SavedTabGroup } from '../types/savedTabs';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
@@ -21,6 +22,9 @@ interface SavedTabsViewProps {
 
 const SavedTabsView = ({ savedTabGroups, onBack, onRestoreGroup, onDeleteGroup, onClearAll }: SavedTabsViewProps) => {
   const { showToast } = useToast();
+  const deleteDialogRef = useRef<HTMLDialogElement>(null);
+  const clearAllDialogRef = useRef<HTMLDialogElement>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const handleRestoreGroup = async (id: string) => {
     const group = savedTabGroups.find(g => g.id === id);
@@ -64,7 +68,7 @@ const SavedTabsView = ({ savedTabGroups, onBack, onRestoreGroup, onDeleteGroup, 
           <h2 className="text-lg font-bold whitespace-nowrap">Saved Tabs</h2>
         </div>
         {savedTabGroups.length > 0 && (
-          <button className="btn btn-sm btn-error btn-outline" onClick={handleClearAll}>
+          <button className="btn btn-sm btn-error btn-outline" onClick={() => clearAllDialogRef.current?.showModal()}>
             Clear all
           </button>
         )}
@@ -100,7 +104,10 @@ const SavedTabsView = ({ savedTabGroups, onBack, onRestoreGroup, onDeleteGroup, 
                   </button>
                   <button
                     className="btn btn-sm btn-ghost btn-error"
-                    onClick={() => handleDeleteGroup(group.id)}
+                    onClick={() => {
+                      setPendingDeleteId(group.id);
+                      deleteDialogRef.current?.showModal();
+                    }}
                   >
                     Delete
                   </button>
@@ -135,6 +142,46 @@ const SavedTabsView = ({ savedTabGroups, onBack, onRestoreGroup, onDeleteGroup, 
           ))}
         </div>
       )}
+      <dialog ref={deleteDialogRef} className="modal">
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">Delete saved group?</h3>
+          <p className="py-4 text-base-content/70">This cannot be undone.</p>
+          <div className="modal-action">
+            <form method="dialog" className="flex gap-2">
+              <button className="btn btn-sm">Cancel</button>
+              <button
+                className="btn btn-sm btn-error"
+                onClick={() => {
+                  if (pendingDeleteId) handleDeleteGroup(pendingDeleteId);
+                }}
+              >
+                Delete
+              </button>
+            </form>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+
+      <dialog ref={clearAllDialogRef} className="modal">
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">Clear all saved groups?</h3>
+          <p className="py-4 text-base-content/70">This cannot be undone.</p>
+          <div className="modal-action">
+            <form method="dialog" className="flex gap-2">
+              <button className="btn btn-sm">Cancel</button>
+              <button className="btn btn-sm btn-error" onClick={handleClearAll}>
+                Clear all
+              </button>
+            </form>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
     </div>
   );
 };
