@@ -5,6 +5,8 @@ import type { ViewMode } from '../../src/components/Header';
 import WindowGroupList from '../../src/components/WindowGroupList';
 import DuplicatesView from '../../src/components/DuplicatesView';
 import InactivesView from '../../src/components/InactivesView';
+import SavedTabsView from '../../src/components/SavedTabsView';
+import { useSavedTabs } from '../../src/hooks/useSavedTabs';
 import { TabFocusProvider } from '../../src/contexts/TabFocusContext';
 import { useTabGroupContext } from '../../src/contexts/TabGroupContext';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
@@ -26,7 +28,7 @@ interface BackgroundMessage {
 
 const getViewFromHash = (): ViewMode => {
   const hash = window.location.hash.slice(1);
-  if (hash === 'duplicates' || hash === 'inactives') return hash;
+  if (hash === 'duplicates' || hash === 'inactives' || hash === 'saved') return hash;
   return 'tabs';
 };
 
@@ -40,6 +42,7 @@ const Manager = () => {
   const [allTabs, setAllTabs] = useState<chrome.tabs.Tab[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>(getViewFromHash);
   const [inactiveThresholdMs, setInactiveThresholdMs] = useState(DEFAULT_INACTIVE_THRESHOLD_MS);
+  const { savedTabGroups, saveInactiveTabs, restoreGroup, deleteGroup, clearAll } = useSavedTabs();
   const searchBarRef = useRef<HTMLInputElement>(null);
 
   // Sync viewMode with URL hash
@@ -139,6 +142,7 @@ const Manager = () => {
         viewMode={viewMode}
         onViewChange={changeView}
         inactiveThresholdMs={inactiveThresholdMs}
+        savedTabGroupCount={savedTabGroups.length}
       />
       <div className="p-5 pt-0">
         {viewMode === 'tabs' && (
@@ -151,7 +155,16 @@ const Manager = () => {
           <DuplicatesView allTabs={allTabs} windowLabels={windowLabels} onBack={() => changeView('tabs')} />
         )}
         {viewMode === 'inactives' && (
-          <InactivesView allTabs={allTabs} windowLabels={windowLabels} onBack={() => changeView('tabs')} thresholdMs={inactiveThresholdMs} onThresholdChange={setInactiveThresholdMs} />
+          <InactivesView allTabs={allTabs} windowLabels={windowLabels} onBack={() => changeView('tabs')} thresholdMs={inactiveThresholdMs} onThresholdChange={setInactiveThresholdMs} onSaveAll={saveInactiveTabs} />
+        )}
+        {viewMode === 'saved' && (
+          <SavedTabsView
+            savedTabGroups={savedTabGroups}
+            onBack={() => changeView('tabs')}
+            onRestoreGroup={restoreGroup}
+            onDeleteGroup={deleteGroup}
+            onClearAll={clearAll}
+          />
         )}
       </div>
       {sequenceActive && (
