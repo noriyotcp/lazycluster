@@ -1,5 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { formatGroupName, loadSavedTabGroups, addSavedTabGroup, deleteSavedTabGroup, clearAllSavedTabGroups } from './savedTabs';
+import {
+  formatGroupName,
+  loadSavedTabGroups,
+  saveSavedTabGroups,
+  addSavedTabGroup,
+  deleteSavedTabGroup,
+  clearAllSavedTabGroups,
+} from './savedTabs';
+import type { SavedTabGroup } from '../types/savedTabs';
 
 // --- formatGroupName (pure function) ---
 
@@ -45,8 +53,6 @@ vi.stubGlobal('chrome', {
 
 vi.stubGlobal('crypto', { randomUUID: () => 'test-uuid' });
 
-const STORAGE_KEY = 'lazycluster.savedTabGroups';
-
 beforeEach(() => {
   Object.keys(mockStorage).forEach(k => delete mockStorage[k]);
   vi.clearAllMocks();
@@ -59,8 +65,8 @@ describe('loadSavedTabGroups', () => {
   });
 
   it('returns stored groups', async () => {
-    const groups = [{ id: '1', savedAt: 1000, tabs: [] }];
-    mockStorage[STORAGE_KEY] = groups;
+    const groups: SavedTabGroup[] = [{ id: '1', savedAt: 1000, tabs: [] }];
+    await saveSavedTabGroups(groups);
     const result = await loadSavedTabGroups();
     expect(result).toEqual(groups);
   });
@@ -68,8 +74,8 @@ describe('loadSavedTabGroups', () => {
 
 describe('addSavedTabGroup', () => {
   it('prepends new group to existing groups', async () => {
-    const existing = [{ id: 'old', savedAt: 1000, tabs: [] }];
-    mockStorage[STORAGE_KEY] = existing;
+    const existing: SavedTabGroup[] = [{ id: 'old', savedAt: 1000, tabs: [] }];
+    await saveSavedTabGroups(existing);
 
     const tabs = [
       { url: 'https://example.com', title: 'Example', favIconUrl: undefined } as chrome.tabs.Tab,
@@ -79,7 +85,7 @@ describe('addSavedTabGroup', () => {
     expect(group.tabs).toHaveLength(1);
     expect(group.tabs[0].url).toBe('https://example.com');
 
-    const stored = mockStorage[STORAGE_KEY] as typeof existing;
+    const stored = await loadSavedTabGroups();
     expect(stored[0].id).toBe('test-uuid');
     expect(stored[1].id).toBe('old');
   });
@@ -96,21 +102,21 @@ describe('addSavedTabGroup', () => {
 
 describe('deleteSavedTabGroup', () => {
   it('removes group with matching id', async () => {
-    mockStorage[STORAGE_KEY] = [
+    await saveSavedTabGroups([
       { id: 'a', savedAt: 1000, tabs: [] },
       { id: 'b', savedAt: 2000, tabs: [] },
-    ];
+    ]);
     await deleteSavedTabGroup('a');
-    const stored = mockStorage[STORAGE_KEY] as Array<{ id: string }>;
+    const stored = await loadSavedTabGroups();
     expect(stored).toHaveLength(1);
     expect(stored[0].id).toBe('b');
   });
 });
 
 describe('clearAllSavedTabGroups', () => {
-  it('removes the storage key', async () => {
-    mockStorage[STORAGE_KEY] = [{ id: 'a', savedAt: 1000, tabs: [] }];
+  it('removes all stored groups', async () => {
+    await saveSavedTabGroups([{ id: 'a', savedAt: 1000, tabs: [] }]);
     await clearAllSavedTabGroups();
-    expect(mockStorage[STORAGE_KEY]).toBeUndefined();
+    expect(await loadSavedTabGroups()).toEqual([]);
   });
 });
