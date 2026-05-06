@@ -41,7 +41,6 @@ vi.stubGlobal('chrome', {
       }),
     },
   },
-  randomUUID: vi.fn(() => 'test-uuid'),
 });
 
 vi.stubGlobal('crypto', { randomUUID: () => 'test-uuid' });
