@@ -8,6 +8,7 @@ import { useDeletionState } from '../contexts/DeletionStateContext';
 import { useTabGroupColor } from '../contexts/TabGroupColorContext';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
+import FaviconImage from './FaviconImage';
 import { getTabGroupBorderColorClass } from '../utils/tabGroupColors';
 import { getTabIdsInRangeForWindow } from '../utils/dragSelection';
 
@@ -205,16 +206,12 @@ const TabItem = ({ tab, isFiltered = false, index, windowId, tabs }: TabItemProp
           ref={checkboxRef}
         />
         <div>
-          {tab.favIconUrl ? (
-            <img
-              className="size-4"
-              src={tab.favIconUrl ?? ''}
-              alt={tab.title ?? ''}
-              onError={e => ((e.target as HTMLImageElement).src = '')}
-            />
-          ) : (
-            globeIcon()
-          )}
+          <FaviconImage
+            src={tab.favIconUrl}
+            alt={tab.title ?? ''}
+            className="size-4"
+            fallback={globeIcon()}
+          />
         </div>
         <a
           className="list-col-grow cursor-pointer focus:outline-1 truncate hover:underline"

@@ -3,6 +3,7 @@ import { useDeletionState } from '../contexts/DeletionStateContext';
 import { useTabFocusContext } from '../contexts/TabFocusContext';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
+import FaviconImage from './FaviconImage';
 import {
   findDuplicateTabs,
   countDuplicateTabs,
@@ -140,11 +141,7 @@ const DuplicatesView = ({ allTabs, windowLabels, onBack }: DuplicatesViewProps) 
                       {groupTabs.map(tab => (
                         <tr key={tab.id}>
                           <td>
-                            {tab.favIconUrl ? (
-                              <img className="size-4 min-w-4 min-h-4 object-contain" src={tab.favIconUrl} alt="" onError={e => ((e.target as HTMLImageElement).src = '')} />
-                            ) : (
-                              <span className="size-4 inline-block" />
-                            )}
+                            <FaviconImage src={tab.favIconUrl} className="size-4 min-w-4 min-h-4 object-contain" />
                           </td>
                           <td className="max-w-md truncate" title={tab.title}>
                             <a

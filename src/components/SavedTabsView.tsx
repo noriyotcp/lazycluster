@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import type { SavedTabGroup } from '../types/savedTabs';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
+import FaviconImage from './FaviconImage';
 import { formatGroupName } from '../utils/savedTabs';
 
 const extractDomain = (url: string): string => {
@@ -116,11 +117,7 @@ const SavedTabsView = ({ savedTabGroups, onBack, onRestoreGroup, onDeleteGroup, 
                   {group.tabs.map((tab, i) => (
                     <li key={i} className="list-row rounded-none items-center p-2 even:bg-base-300">
                       <div>
-                        {tab.favIconUrl ? (
-                          <img className="size-4 object-contain" src={tab.favIconUrl} alt="" onError={e => ((e.target as HTMLImageElement).src = '')} />
-                        ) : (
-                          <span className="size-4 inline-block" />
-                        )}
+                        <FaviconImage src={tab.favIconUrl} />
                       </div>
                       <div className="list-col-grow min-w-0">
                         <a
