@@ -77,7 +77,7 @@ const SavedTabsView = ({ savedTabGroups, onBack, onRestoreGroup, onDeleteGroup, 
       {savedTabGroups.length === 0 ? (
         <div className="text-center py-16 text-base-content/60">
           <p className="text-lg">No saved tabs.</p>
-          <p className="text-sm mt-2">Use "Save all" in Inactive Tabs to save tabs here.</p>
+          <p className="text-sm mt-2">Use &quot;Save all&quot; in Inactive Tabs to save tabs here.</p>
         </div>
       ) : (
         <div>
