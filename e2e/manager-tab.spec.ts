@@ -12,8 +12,7 @@ test.describe('Manager Tab E2E Tests', () => {
     const windowGroupList = page.locator('.p-5.pt-0');
     await windowGroupList.waitFor({ state: 'visible', timeout: 10000 });
 
-    // TODO: Add checks for the displayed window group and tabs
-    expect(windowGroupList.locator('.collapse').first()).toBeVisible();
+    await expect(windowGroupList.locator('.collapse').first()).toBeVisible({ timeout: 10000 });
 
     // Verify that at least one window group is displayed
     const windowGroups = await windowGroupList.locator('.collapse').count();
