@@ -3,9 +3,7 @@ import SearchBar from './SearchBar';
 import ThemeSwitcher from './ThemeSwitcher';
 import TabCountBadge from './TabCountBadge';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
-import { useDeletionState } from '../contexts/DeletionStateContext';
-import { useToast } from '../../src/components/ToastProvider';
-import Alert from '../../src/components/Alert';
+import { useCloseTabs } from '../hooks/useCloseTabs';
 import { useTotalTabCount } from '../hooks/useTotalTabCount';
 import { findDuplicateTabs, countDuplicateTabs } from '../utils/duplicateDetection';
 import { findInactiveTabs } from '../utils/inactiveDetection';
@@ -34,8 +32,7 @@ const Header = ({
   savedTabGroupCount,
 }: HeaderProps) => {
   const { selectedTabIds, removeTabsFromSelection } = useTabSelectionContext();
-  const { setDeletingState } = useDeletionState();
-  const { showToast } = useToast();
+  const { closeTabs } = useCloseTabs();
   const totalTabCount = useTotalTabCount();
 
   const duplicateCount = countDuplicateTabs(findDuplicateTabs(allTabs, 'normalized'));
@@ -43,20 +40,14 @@ const Header = ({
 
   const handleCloseSelectedTabs = async () => {
     const tabsToClose = Array.from(selectedTabIds); // Convert Set to array
-    // Mark all tabs as deleting
-    tabsToClose.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: true }));
-    try {
-      await chrome.tabs.remove(tabsToClose);
-      // Success: remove all from selection
+    const closed = await closeTabs(tabsToClose, {
+      successMessage: `Selected ${tabsToClose.length} tabs closed successfully.`,
+      errorMessage: 'Error closing tabs',
+    });
+    // On error, don't update selection - let syncWithExistingTabs handle cleanup.
+    // This prevents state inconsistency when tab removal fails.
+    if (closed) {
       removeTabsFromSelection(tabsToClose);
-      showToast(<Alert message={`Selected ${tabsToClose.length} tabs closed successfully.`} variant="success" />);
-    } catch (error) {
-      // Reset deleting state for all tabs that failed to close
-      tabsToClose.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: false }));
-      // On error, don't update selection - let syncWithExistingTabs handle cleanup
-      // This prevents state inconsistency when tab removal fails
-      showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
-      console.error('Error closing tabs:', error);
     }
   };
 

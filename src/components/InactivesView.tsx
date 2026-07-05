@@ -1,7 +1,10 @@
 import { useDeletionState } from '../contexts/DeletionStateContext';
 import { useTabFocusContext } from '../contexts/TabFocusContext';
 import { useToast } from './ToastProvider';
+import { useCloseTabs } from '../hooks/useCloseTabs';
 import Alert from './Alert';
+import ViewHeader from './ViewHeader';
+import EmptyState from './EmptyState';
 import FaviconImage from './FaviconImage';
 import {
   findInactiveTabs,
@@ -11,6 +14,7 @@ import {
 } from '../utils/inactiveDetection';
 import type { SavedTabGroup } from '../types/savedTabs';
 import { extractDomain } from '../utils/url';
+import { focusWindow } from '../utils/windowActions';
 
 interface InactivesViewProps {
   allTabs: chrome.tabs.Tab[];
@@ -32,34 +36,28 @@ const InactivesView = ({
   const { setDeletingState } = useDeletionState();
   const { focusActiveTab } = useTabFocusContext();
   const { showToast } = useToast();
+  const { closeTabs } = useCloseTabs();
 
   const inactiveTabs = sortByInactivity(findInactiveTabs(allTabs, thresholdMs));
 
   const handleCloseTab = async (tabId: number) => {
-    setDeletingState({ type: 'tab', id: tabId, isDeleting: true });
-    try {
-      await chrome.tabs.remove(tabId);
-      showToast(<Alert message="Closed inactive tab." variant="success" />);
-    } catch (error) {
-      setDeletingState({ type: 'tab', id: tabId, isDeleting: false });
-      showToast(<Alert message={`Failed to close tab: ${error instanceof Error ? error.message : String(error)}`} />);
-    }
+    await closeTabs([tabId], {
+      successMessage: 'Closed inactive tab.',
+      errorMessage: 'Failed to close tab',
+    });
   };
 
   const handleCloseAll = async () => {
     const ids = inactiveTabs.map(t => t.id!);
-    ids.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: true }));
-    try {
-      await chrome.tabs.remove(ids);
-      showToast(<Alert message={`Closed ${ids.length} inactive tab(s).`} variant="success" />);
-    } catch (error) {
-      ids.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: false }));
-      showToast(<Alert message={`Failed to close tabs: ${error instanceof Error ? error.message : String(error)}`} />);
-    }
+    await closeTabs(ids, {
+      successMessage: `Closed ${ids.length} inactive tab(s).`,
+      errorMessage: 'Failed to close tabs',
+    });
   };
 
   const handleSaveAll = async () => {
     const ids = inactiveTabs.map(t => t.id!);
+    // Mark as deleting before the save so the tabs appear inert while it runs.
     ids.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: true }));
     let group;
     try {
@@ -69,35 +67,15 @@ const InactivesView = ({
       showToast(<Alert message={`Failed to save tabs: ${error instanceof Error ? error.message : String(error)}`} />);
       return;
     }
-    try {
-      await chrome.tabs.remove(ids);
-      showToast(<Alert message={`Saved ${group.tabs.length} tab(s) and closed.`} variant="success" />);
-    } catch (error) {
-      ids.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: false }));
-      showToast(
-        <Alert
-          message={`Tabs saved but could not close them: ${error instanceof Error ? error.message : String(error)}`}
-        />
-      );
-    }
+    await closeTabs(ids, {
+      successMessage: `Saved ${group.tabs.length} tab(s) and closed.`,
+      errorMessage: 'Tabs saved but could not close them',
+    });
   };
 
   return (
     <div className="mt-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3 shrink-0">
-          <button className="btn btn-ghost btn-sm" onClick={onBack}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
-              <path
-                fillRule="evenodd"
-                d="M14 8a.75.75 0 0 1-.75.75H4.56l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 1.06L4.56 7.25h8.69A.75.75 0 0 1 14 8Z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Back
-          </button>
-          <h2 className="text-lg font-bold whitespace-nowrap">Inactive Tabs</h2>
-        </div>
+      <ViewHeader title="Inactive Tabs" onBack={onBack}>
         <div className="flex items-center gap-3">
           <select
             className="select select-sm [&>option]:[padding-inline:0]"
@@ -121,16 +99,18 @@ const InactivesView = ({
             </>
           )}
         </div>
-      </div>
+      </ViewHeader>
 
       {inactiveTabs.length === 0 ? (
-        <div className="text-center py-16 text-base-content/60">
-          <p className="text-lg">No inactive tabs found.</p>
-          <p className="text-sm mt-2">
-            All your tabs have been accessed within the last{' '}
-            {INACTIVE_THRESHOLD_PRESETS.find(p => p.value === thresholdMs)?.label ?? 'selected period'}.
-          </p>
-        </div>
+        <EmptyState
+          title="No inactive tabs found."
+          hint={
+            <>
+              All your tabs have been accessed within the last{' '}
+              {INACTIVE_THRESHOLD_PRESETS.find(p => p.value === thresholdMs)?.label ?? 'selected period'}.
+            </>
+          }
+        />
       ) : (
         <>
           <div className="stats shadow mb-4">
@@ -166,7 +146,7 @@ const InactivesView = ({
                     <button
                       type="button"
                       className="link link-hover cursor-pointer"
-                      onClick={() => chrome.windows.update(tab.windowId, { focused: true })}
+                      onClick={() => focusWindow(tab.windowId)}
                     >
                       {windowLabels.get(tab.windowId) ?? `W${tab.windowId}`}
                     </button>{' '}

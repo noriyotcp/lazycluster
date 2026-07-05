@@ -1,8 +1,14 @@
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
 import { useDeletionState } from '../contexts/DeletionStateContext';
 import { useToast } from '../../src/components/ToastProvider';
+import { useCloseTabs } from '../hooks/useCloseTabs';
 import Alert from '../../src/components/Alert';
-import { countSelectedIds, shouldBulkSelectBeChecked, shouldCloseTabsBeDisabled } from '../utils/windowActions';
+import {
+  countSelectedIds,
+  focusWindow,
+  shouldBulkSelectBeChecked,
+  shouldCloseTabsBeDisabled,
+} from '../utils/windowActions';
 
 interface WindowActionsProps {
   windowId: number;
@@ -17,9 +23,10 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
   const { selectedTabIds, addTabsToSelection, removeTabsFromSelection } = useTabSelectionContext();
   const { setDeletingState } = useDeletionState();
   const { showToast } = useToast();
+  const { closeTabs } = useCloseTabs();
 
   const handleFocusWindow = () => {
-    chrome.windows.update(windowId, { focused: true });
+    focusWindow(windowId);
   };
 
   const handleBulkSelectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,34 +59,27 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
   };
 
   const handleCloseTabsInWindow = async () => {
-    let tabIdsInWindow: number[] = [];
-    try {
-      const results = await Promise.all(
-        Array.from(selectedTabIds).map(async tabId => {
-          try {
-            const tab = await chrome.tabs.get(tabId);
-            return tab.windowId === windowId ? tabId : null;
-          } catch (error) {
-            console.error('Error getting tab:', error);
-            return null;
-          }
-        })
-      );
+    const results = await Promise.all(
+      Array.from(selectedTabIds).map(async tabId => {
+        try {
+          const tab = await chrome.tabs.get(tabId);
+          return tab.windowId === windowId ? tabId : null;
+        } catch (error) {
+          console.error('Error getting tab:', error);
+          return null;
+        }
+      })
+    );
 
-      tabIdsInWindow = results.filter((tabId): tabId is number => tabId !== null);
+    const tabIdsInWindow = results.filter((tabId): tabId is number => tabId !== null);
 
-      // Mark tabs as deleting
-      tabIdsInWindow.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: true }));
-
-      await chrome.tabs.remove(tabIdsInWindow);
-      // Remove only the closed tabs from selection instead of clearing all
+    const closed = await closeTabs(tabIdsInWindow, {
+      successMessage: `Selected ${tabIdsInWindow.length} tabs closed successfully.`,
+      errorMessage: 'Error closing tabs',
+    });
+    // Remove only the closed tabs from selection instead of clearing all
+    if (closed) {
       removeTabsFromSelection(tabIdsInWindow);
-      showToast(<Alert message={`Selected ${tabIdsInWindow.length} tabs closed successfully.`} variant="success" />);
-    } catch (error) {
-      // Reset deleting state for all tabs that failed to close
-      tabIdsInWindow.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: false }));
-      showToast(<Alert message={`Error closing tabs: ${error instanceof Error ? error.message : String(error)}`} />);
-      console.error('Error closing tabs:', error);
     }
   };
 

@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useDeletionState } from '../contexts/DeletionStateContext';
 import { useTabFocusContext } from '../contexts/TabFocusContext';
-import { useToast } from './ToastProvider';
-import Alert from './Alert';
+import { useCloseTabs } from '../hooks/useCloseTabs';
+import ViewHeader from './ViewHeader';
+import EmptyState from './EmptyState';
 import FaviconImage from './FaviconImage';
 import {
   findDuplicateTabs,
@@ -11,6 +11,7 @@ import {
   type DuplicateMatchMode,
 } from '../utils/duplicateDetection';
 import { extractDomain } from '../utils/url';
+import { focusWindow } from '../utils/windowActions';
 
 interface DuplicatesViewProps {
   allTabs: chrome.tabs.Tab[];
@@ -20,9 +21,8 @@ interface DuplicatesViewProps {
 
 const DuplicatesView = ({ allTabs, windowLabels, onBack }: DuplicatesViewProps) => {
   const [matchMode, setMatchMode] = useState<DuplicateMatchMode>('normalized');
-  const { setDeletingState } = useDeletionState();
   const { focusActiveTab } = useTabFocusContext();
-  const { showToast } = useToast();
+  const { closeTabs } = useCloseTabs();
 
   const duplicates = findDuplicateTabs(allTabs, matchMode);
   const duplicateCount = countDuplicateTabs(duplicates);
@@ -30,14 +30,10 @@ const DuplicatesView = ({ allTabs, windowLabels, onBack }: DuplicatesViewProps) 
   const handleCloseGroupDuplicates = async (groupTabs: chrome.tabs.Tab[]) => {
     const toClose = getTabsToClose(groupTabs);
     const ids = toClose.map(t => t.id!);
-    ids.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: true }));
-    try {
-      await chrome.tabs.remove(ids);
-      showToast(<Alert message={`Closed ${ids.length} duplicate tab(s).`} variant="success" />);
-    } catch (error) {
-      ids.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: false }));
-      showToast(<Alert message={`Failed to close tabs: ${error instanceof Error ? error.message : String(error)}`} />);
-    }
+    await closeTabs(ids, {
+      successMessage: `Closed ${ids.length} duplicate tab(s).`,
+      errorMessage: 'Failed to close tabs',
+    });
   };
 
   const handleCloseAllDuplicates = async () => {
@@ -46,32 +42,15 @@ const DuplicatesView = ({ allTabs, windowLabels, onBack }: DuplicatesViewProps) 
       const toClose = getTabsToClose(groupTabs);
       allToClose.push(...toClose.map(t => t.id!));
     }
-    allToClose.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: true }));
-    try {
-      await chrome.tabs.remove(allToClose);
-      showToast(<Alert message={`Closed ${allToClose.length} duplicate tab(s).`} variant="success" />);
-    } catch (error) {
-      allToClose.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: false }));
-      showToast(<Alert message={`Failed to close tabs: ${error instanceof Error ? error.message : String(error)}`} />);
-    }
+    await closeTabs(allToClose, {
+      successMessage: `Closed ${allToClose.length} duplicate tab(s).`,
+      errorMessage: 'Failed to close tabs',
+    });
   };
 
   return (
     <div className="mt-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3 shrink-0">
-          <button className="btn btn-ghost btn-sm" onClick={onBack}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
-              <path
-                fillRule="evenodd"
-                d="M14 8a.75.75 0 0 1-.75.75H4.56l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 1.06L4.56 7.25h8.69A.75.75 0 0 1 14 8Z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Back
-          </button>
-          <h2 className="text-lg font-bold whitespace-nowrap">Duplicate Tabs</h2>
-        </div>
+      <ViewHeader title="Duplicate Tabs" onBack={onBack}>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <div
@@ -101,17 +80,17 @@ const DuplicatesView = ({ allTabs, windowLabels, onBack }: DuplicatesViewProps) 
             </button>
           )}
         </div>
-      </div>
+      </ViewHeader>
 
       {duplicates.size === 0 ? (
-        <div className="text-center py-16 text-base-content/60">
-          <p className="text-lg">No duplicate tabs found.</p>
-          <p className="text-sm mt-2">
-            {matchMode === 'normalized'
+        <EmptyState
+          title="No duplicate tabs found."
+          hint={
+            matchMode === 'normalized'
               ? 'Try switching to Title mode to catch more duplicates.'
-              : 'All your tabs have unique titles per domain.'}
-          </p>
-        </div>
+              : 'All your tabs have unique titles per domain.'
+          }
+        />
       ) : (
         <div className="space-y-4">
           {Array.from(duplicates.entries()).map(([url, groupTabs]) => (
@@ -162,7 +141,7 @@ const DuplicatesView = ({ allTabs, windowLabels, onBack }: DuplicatesViewProps) 
                             <button
                               type="button"
                               className="link link-hover cursor-pointer"
-                              onClick={() => chrome.windows.update(tab.windowId, { focused: true })}
+                              onClick={() => focusWindow(tab.windowId)}
                             >
                               {windowLabels.get(tab.windowId) ?? `W${tab.windowId}`}
                             </button>

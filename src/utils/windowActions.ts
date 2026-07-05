@@ -37,3 +37,14 @@ export const filterTabIdsByWindow = (
 export const shouldCloseTabsBeDisabled = (visibleTabIds: number[], selectedTabIds: Set<number>): boolean => {
   return countSelectedIds(visibleTabIds, selectedTabIds) === 0;
 };
+
+/**
+ * Focus a browser window by its ID, bringing it to the foreground
+ */
+export const focusWindow = async (windowId: number): Promise<void> => {
+  try {
+    await chrome.windows.update(windowId, { focused: true });
+  } catch (error) {
+    console.error('Error focusing window:', error);
+  }
+};
