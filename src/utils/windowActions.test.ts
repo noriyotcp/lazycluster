@@ -1,9 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   countSelectedIds,
   shouldBulkSelectBeChecked,
   filterTabIdsByWindow,
   shouldCloseTabsBeDisabled,
+  focusWindow,
 } from './windowActions';
 
 describe('windowActions utilities', () => {
@@ -155,6 +156,38 @@ describe('windowActions utilities', () => {
       const selectedTabIds = new Set([1, 3, 4]); // Only 1 matches
 
       expect(shouldCloseTabsBeDisabled(visibleTabIds, selectedTabIds)).toBe(false);
+    });
+  });
+
+  describe('focusWindow', () => {
+    const updateMock = vi.fn();
+
+    beforeEach(() => {
+      updateMock.mockReset();
+      vi.stubGlobal('chrome', { windows: { update: updateMock } });
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+
+    it('focuses the window by ID', async () => {
+      updateMock.mockResolvedValue(undefined);
+
+      await focusWindow(42);
+
+      expect(updateMock).toHaveBeenCalledWith(42, { focused: true });
+    });
+
+    it('logs an error when the update fails', async () => {
+      const error = new Error('boom');
+      updateMock.mockRejectedValue(error);
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      await focusWindow(7);
+
+      expect(consoleSpy).toHaveBeenCalledWith('Error focusing window:', error);
     });
   });
 });

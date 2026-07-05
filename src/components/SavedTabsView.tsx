@@ -2,6 +2,9 @@ import { useRef, useState } from 'react';
 import type { SavedTabGroup } from '../types/savedTabs';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
+import ViewHeader from './ViewHeader';
+import EmptyState from './EmptyState';
+import ConfirmDialog from './ConfirmDialog';
 import FaviconImage from './FaviconImage';
 import { formatGroupName } from '../utils/savedTabs';
 import { extractDomain } from '../utils/url';
@@ -51,32 +54,16 @@ const SavedTabsView = ({ savedTabGroups, onBack, onRestoreGroup, onDeleteGroup, 
 
   return (
     <div className="mt-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3 shrink-0">
-          <button className="btn btn-ghost btn-sm" onClick={onBack}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
-              <path
-                fillRule="evenodd"
-                d="M14 8a.75.75 0 0 1-.75.75H4.56l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 1.06L4.56 7.25h8.69A.75.75 0 0 1 14 8Z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Back
-          </button>
-          <h2 className="text-lg font-bold whitespace-nowrap">Saved Tabs</h2>
-        </div>
+      <ViewHeader title="Saved Tabs" onBack={onBack}>
         {savedTabGroups.length > 0 && (
           <button className="btn btn-sm btn-error btn-outline" onClick={() => clearAllDialogRef.current?.showModal()}>
             Clear all
           </button>
         )}
-      </div>
+      </ViewHeader>
 
       {savedTabGroups.length === 0 ? (
-        <div className="text-center py-16 text-base-content/60">
-          <p className="text-lg">No saved tabs.</p>
-          <p className="text-sm mt-2">Use &quot;Save all&quot; in Inactive Tabs to save tabs here.</p>
-        </div>
+        <EmptyState title="No saved tabs." hint={<>Use &quot;Save all&quot; in Inactive Tabs to save tabs here.</>} />
       ) : (
         <div>
           {savedTabGroups.map(group => (
@@ -129,46 +116,23 @@ const SavedTabsView = ({ savedTabGroups, onBack, onRestoreGroup, onDeleteGroup, 
           ))}
         </div>
       )}
-      <dialog ref={deleteDialogRef} className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Delete saved group?</h3>
-          <p className="py-4 text-base-content/70">This cannot be undone.</p>
-          <div className="modal-action">
-            <form method="dialog" className="flex gap-2">
-              <button className="btn btn-sm">Cancel</button>
-              <button
-                className="btn btn-sm btn-error"
-                onClick={() => {
-                  if (pendingDeleteId) handleDeleteGroup(pendingDeleteId);
-                }}
-              >
-                Delete
-              </button>
-            </form>
-          </div>
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>close</button>
-        </form>
-      </dialog>
+      <ConfirmDialog
+        ref={deleteDialogRef}
+        title="Delete saved group?"
+        message="This cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => {
+          if (pendingDeleteId) handleDeleteGroup(pendingDeleteId);
+        }}
+      />
 
-      <dialog ref={clearAllDialogRef} className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Clear all saved groups?</h3>
-          <p className="py-4 text-base-content/70">This cannot be undone.</p>
-          <div className="modal-action">
-            <form method="dialog" className="flex gap-2">
-              <button className="btn btn-sm">Cancel</button>
-              <button className="btn btn-sm btn-error" onClick={handleClearAll}>
-                Clear all
-              </button>
-            </form>
-          </div>
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>close</button>
-        </form>
-      </dialog>
+      <ConfirmDialog
+        ref={clearAllDialogRef}
+        title="Clear all saved groups?"
+        message="This cannot be undone."
+        confirmLabel="Clear all"
+        onConfirm={handleClearAll}
+      />
     </div>
   );
 };
