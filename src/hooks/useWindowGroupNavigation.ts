@@ -177,21 +177,18 @@ export function useWindowGroupNavigation(
   );
 
   // Capture-phase handler: intercept ESC during active sequence before any other handler
-  const handleEscCapture = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && sequenceActiveRef.current) {
-        event.preventDefault();
-        event.stopPropagation();
-        setSequenceActive(false);
-        setInputBuffer('');
-        if (sequenceTimeoutRef.current) {
-          clearTimeout(sequenceTimeoutRef.current);
-          sequenceTimeoutRef.current = null;
-        }
+  const handleEscCapture = useCallback((event: KeyboardEvent) => {
+    if (event.key === 'Escape' && sequenceActiveRef.current) {
+      event.preventDefault();
+      event.stopPropagation();
+      setSequenceActive(false);
+      setInputBuffer('');
+      if (sequenceTimeoutRef.current) {
+        clearTimeout(sequenceTimeoutRef.current);
+        sequenceTimeoutRef.current = null;
       }
-    },
-    []
-  );
+    }
+  }, []);
 
   // Setup keyboard event listeners
   useEffect(() => {

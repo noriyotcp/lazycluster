@@ -5,12 +5,9 @@ import type { Page, Locator } from '@playwright/test';
 async function createWindow(page: Page): Promise<number> {
   const windowId = await page.evaluate(() => {
     return new Promise<number>(resolve => {
-      chrome.windows.create(
-        { url: 'https://example.com', type: 'normal' },
-        window => {
-          if (window && window.id) resolve(window.id);
-        }
-      );
+      chrome.windows.create({ url: 'https://example.com', type: 'normal' }, window => {
+        if (window && window.id) resolve(window.id);
+      });
     });
   });
   await page.waitForTimeout(500);
@@ -40,12 +37,7 @@ async function cmdClick(page: Page, locator: Locator): Promise<void> {
 }
 
 // Start a drag from a source element and hold at a target position without dropping
-async function startDragAndHold(
-  page: Page,
-  source: Locator,
-  targetX: number,
-  targetY: number
-): Promise<void> {
+async function startDragAndHold(page: Page, source: Locator, targetX: number, targetY: number): Promise<void> {
   const sourceBox = await source.boundingBox();
   if (!sourceBox) throw new Error('Could not get bounding box for drag source');
 
@@ -61,12 +53,7 @@ async function startDragAndHold(
 }
 
 // Perform a full drag-and-drop from source to target position
-async function performDragAndDrop(
-  page: Page,
-  source: Locator,
-  targetX: number,
-  targetY: number
-): Promise<void> {
+async function performDragAndDrop(page: Page, source: Locator, targetX: number, targetY: number): Promise<void> {
   await startDragAndHold(page, source, targetX, targetY);
   await page.mouse.up();
   await page.waitForTimeout(1000); // Wait for Chrome API + background script UI update
@@ -74,7 +61,7 @@ async function performDragAndDrop(
 
 // Create an extra tab in a specific window
 async function createTabInWindow(page: Page, windowId?: number): Promise<void> {
-  await page.evaluate((wId) => {
+  await page.evaluate(wId => {
     return new Promise<void>(resolve => {
       const opts: chrome.tabs.CreateProperties = { url: 'https://example.com', active: false };
       if (wId) opts.windowId = wId;
@@ -85,10 +72,7 @@ async function createTabInWindow(page: Page, windowId?: number): Promise<void> {
 }
 
 test.describe('Cross-Window DnD Tab Movement', () => {
-  test('should move a tab to another window on cross-window drop', async ({
-    page,
-    extensionId,
-  }) => {
+  test('should move a tab to another window on cross-window drop', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/manager.html`);
 
     // Create extra tabs so the source window has enough to drag
@@ -196,10 +180,7 @@ test.describe('Cross-Window DnD Tab Movement', () => {
 });
 
 test.describe('Cross-Window Multi-Tab DnD', () => {
-  test('should move multiple selected tabs to another window', async ({
-    page,
-    extensionId,
-  }) => {
+  test('should move multiple selected tabs to another window', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/manager.html`);
 
     // Create extra tabs in source window (need at least 4)
@@ -236,12 +217,7 @@ test.describe('Cross-Window Multi-Tab DnD', () => {
       const targetBox = await targetHandle.boundingBox();
       if (!targetBox) throw new Error('Could not get target handle bounding box');
 
-      await performDragAndDrop(
-        page,
-        lastHandle,
-        targetBox.x + targetBox.width / 2,
-        targetBox.y + targetBox.height / 2
-      );
+      await performDragAndDrop(page, lastHandle, targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2);
 
       // Verify: source lost 2 tabs, target gained 2 tabs
       const srcGroup = page.locator(`[data-window-id="${sourceWinId}"]`);
@@ -253,10 +229,7 @@ test.describe('Cross-Window Multi-Tab DnD', () => {
     }
   });
 
-  test('should move multiple selected tabs to a collapsed window group', async ({
-    page,
-    extensionId,
-  }) => {
+  test('should move multiple selected tabs to a collapsed window group', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/manager.html`);
 
     await createTabInWindow(page);
@@ -314,10 +287,7 @@ test.describe('Cross-Window Multi-Tab DnD', () => {
     }
   });
 
-  test('should show ring highlight and count badge during cross-window multi-drag', async ({
-    page,
-    extensionId,
-  }) => {
+  test('should show ring highlight and count badge during cross-window multi-drag', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/manager.html`);
 
     await createTabInWindow(page);
@@ -371,10 +341,7 @@ test.describe('Cross-Window Multi-Tab DnD', () => {
 });
 
 test.describe('Cross-Window DnD Ring Highlight', () => {
-  test('should show ring highlight when dragging over a different window group', async ({
-    page,
-    extensionId,
-  }) => {
+  test('should show ring highlight when dragging over a different window group', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/manager.html`);
 
     const newWindowId = await createWindow(page);
@@ -398,12 +365,7 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
       if (!targetBox) throw new Error('Could not get target group bounding box');
 
       // Drag from source and hold over the target window group
-      await startDragAndHold(
-        page,
-        firstHandle,
-        targetBox.x + targetBox.width / 2,
-        targetBox.y + targetBox.height / 2
-      );
+      await startDragAndHold(page, firstHandle, targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2);
 
       // Assert: target window group should have ring highlight
       await expect(targetGroup).toHaveClass(/ring-2/);
@@ -422,10 +384,7 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
     }
   });
 
-  test('should NOT show ring highlight when dragging within the same window group', async ({
-    page,
-    extensionId,
-  }) => {
+  test('should NOT show ring highlight when dragging within the same window group', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/manager.html`);
 
     // Create extra tabs in the current window for drag targets
@@ -448,12 +407,7 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
     if (!lastBox) throw new Error('Could not get last handle bounding box');
 
     // Drag first tab toward the last tab (same window)
-    await startDragAndHold(
-      page,
-      firstHandle,
-      lastBox.x + lastBox.width / 2,
-      lastBox.y + lastBox.height / 2
-    );
+    await startDragAndHold(page, firstHandle, lastBox.x + lastBox.width / 2, lastBox.y + lastBox.height / 2);
 
     // Assert: no window group should have ring highlight during same-window drag
     await expect(windowGroup).not.toHaveClass(/ring-2/);
@@ -461,10 +415,7 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
     await page.mouse.up();
   });
 
-  test('should remove ring highlight when drag is cancelled with Escape', async ({
-    page,
-    extensionId,
-  }) => {
+  test('should remove ring highlight when drag is cancelled with Escape', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/manager.html`);
 
     const newWindowId = await createWindow(page);
@@ -484,12 +435,7 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
       if (!targetBox) throw new Error('Could not get target group bounding box');
 
       // Drag from source and hold over target
-      await startDragAndHold(
-        page,
-        firstHandle,
-        targetBox.x + targetBox.width / 2,
-        targetBox.y + targetBox.height / 2
-      );
+      await startDragAndHold(page, firstHandle, targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2);
 
       // Ring should be visible
       await expect(targetGroup).toHaveClass(/ring-2/);
@@ -537,12 +483,7 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
       if (!targetBox) throw new Error('Could not get collapsed target bounding box');
 
       // Drag from source and hold over collapsed target
-      await startDragAndHold(
-        page,
-        firstHandle,
-        targetBox.x + targetBox.width / 2,
-        targetBox.y + targetBox.height / 2
-      );
+      await startDragAndHold(page, firstHandle, targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2);
 
       // Ring should appear on collapsed window group
       await expect(targetGroup).toHaveClass(/ring-2/);
@@ -588,10 +529,7 @@ async function createTabGroup(
 }
 
 test.describe('Cross-Window DnD Tab Group Preservation', () => {
-  test('should preserve tab group when all group tabs are moved to another window', async ({
-    page,
-    extensionId,
-  }) => {
+  test('should preserve tab group when all group tabs are moved to another window', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/manager.html`);
 
     // Create extra ungrouped tabs so the source window survives after moving grouped tabs
@@ -609,9 +547,7 @@ test.describe('Cross-Window DnD Tab Group Preservation', () => {
       const targetWinId = Number(await allGroups[1].getAttribute('data-window-id'));
 
       // Create a 2-tab group in the source window
-      const { tabIds: groupTabIds } = await createTabGroup(
-        page, sourceWinId, 'TestGroup', 'blue', 2
-      );
+      const { tabIds: groupTabIds } = await createTabGroup(page, sourceWinId, 'TestGroup', 'blue', 2);
       await page.waitForTimeout(500);
 
       // Re-query groups after tab creation (UI has updated)
@@ -662,10 +598,7 @@ test.describe('Cross-Window DnD Tab Group Preservation', () => {
     }
   });
 
-  test('should NOT preserve tab group when only some group tabs are moved', async ({
-    page,
-    extensionId,
-  }) => {
+  test('should NOT preserve tab group when only some group tabs are moved', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/manager.html`);
 
     // Create extra ungrouped tabs
@@ -681,9 +614,7 @@ test.describe('Cross-Window DnD Tab Group Preservation', () => {
       const targetWinId = Number(await allGroups[1].getAttribute('data-window-id'));
 
       // Create a 3-tab group in the source window
-      const { tabIds: groupTabIds } = await createTabGroup(
-        page, sourceWinId, 'PartialGroup', 'red', 3
-      );
+      const { tabIds: groupTabIds } = await createTabGroup(page, sourceWinId, 'PartialGroup', 'red', 3);
       await page.waitForTimeout(500);
 
       const srcGroup = page.locator(`[data-window-id="${sourceWinId}"]`);
@@ -698,12 +629,7 @@ test.describe('Cross-Window DnD Tab Group Preservation', () => {
       const targetBox = await targetHandle.boundingBox();
       if (!targetBox) throw new Error('Could not get target handle bounding box');
 
-      await performDragAndDrop(
-        page,
-        lastHandle,
-        targetBox.x + targetBox.width / 2,
-        targetBox.y + targetBox.height / 2
-      );
+      await performDragAndDrop(page, lastHandle, targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2);
 
       await page.waitForTimeout(500);
 

@@ -48,7 +48,7 @@ const getMatchKey = (tab: chrome.tabs.Tab, mode: DuplicateMatchMode): string => 
 
 export const findDuplicateTabs = (
   tabs: chrome.tabs.Tab[],
-  mode: DuplicateMatchMode,
+  mode: DuplicateMatchMode
 ): Map<string, chrome.tabs.Tab[]> => {
   const groups = new Map<string, chrome.tabs.Tab[]>();
 

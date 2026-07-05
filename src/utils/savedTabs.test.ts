@@ -77,9 +77,7 @@ describe('addSavedTabGroup', () => {
     const existing: SavedTabGroup[] = [{ id: 'old', savedAt: 1000, tabs: [] }];
     await saveSavedTabGroups(existing);
 
-    const tabs = [
-      { url: 'https://example.com', title: 'Example', favIconUrl: undefined } as chrome.tabs.Tab,
-    ];
+    const tabs = [{ url: 'https://example.com', title: 'Example', favIconUrl: undefined } as chrome.tabs.Tab];
     const group = await addSavedTabGroup(tabs);
 
     expect(group.tabs).toHaveLength(1);

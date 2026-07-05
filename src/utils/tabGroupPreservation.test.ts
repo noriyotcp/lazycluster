@@ -39,10 +39,7 @@ describe('identifyGroupsToPreserve', () => {
   });
 
   it('returns multiple groups when all tabs in each are moved', () => {
-    const tabs = [
-      makeTab(1, 100), makeTab(2, 100),
-      makeTab(3, 200), makeTab(4, 200),
-    ];
+    const tabs = [makeTab(1, 100), makeTab(2, 100), makeTab(3, 200), makeTab(4, 200)];
     const result = identifyGroupsToPreserve([1, 2, 3, 4], tabs);
     expect(result).toHaveLength(2);
     expect(result).toContainEqual({ groupId: 100, tabIds: [1, 2] });
@@ -50,10 +47,7 @@ describe('identifyGroupsToPreserve', () => {
   });
 
   it('returns only the group where all tabs are moved (mixed case)', () => {
-    const tabs = [
-      makeTab(1, 100), makeTab(2, 100),
-      makeTab(3, 200), makeTab(4, 200), makeTab(5, 200),
-    ];
+    const tabs = [makeTab(1, 100), makeTab(2, 100), makeTab(3, 200), makeTab(4, 200), makeTab(5, 200)];
     // Moving all of group 100 but only part of group 200
     const result = identifyGroupsToPreserve([1, 2, 3], tabs);
     expect(result).toEqual([{ groupId: 100, tabIds: [1, 2] }]);
@@ -66,10 +60,7 @@ describe('identifyGroupsToPreserve', () => {
   });
 
   it('returns only grouped tabs (ignores ungrouped) in mixed set', () => {
-    const tabs = [
-      makeTab(1, 100), makeTab(2, 100),
-      makeTab(3, -1), makeTab(4, -1),
-    ];
+    const tabs = [makeTab(1, 100), makeTab(2, 100), makeTab(3, -1), makeTab(4, -1)];
     // Moving group 100 (all) + ungrouped tabs
     const result = identifyGroupsToPreserve([1, 2, 3], tabs);
     expect(result).toEqual([{ groupId: 100, tabIds: [1, 2] }]);

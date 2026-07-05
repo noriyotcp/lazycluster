@@ -35,7 +35,7 @@ describe('normalizeUrl', () => {
 
   it('removes utm parameters', () => {
     expect(normalizeUrl('https://example.com/page?utm_source=twitter&utm_medium=social&key=value')).toBe(
-      'https://example.com/page?key=value',
+      'https://example.com/page?key=value'
     );
   });
 
@@ -48,9 +48,7 @@ describe('normalizeUrl', () => {
   });
 
   it('preserves non-tracking query parameters', () => {
-    expect(normalizeUrl('https://example.com/search?q=test&page=2')).toBe(
-      'https://example.com/search?q=test&page=2',
-    );
+    expect(normalizeUrl('https://example.com/search?q=test&page=2')).toBe('https://example.com/search?q=test&page=2');
   });
 
   it('removes multiple tracking params at once', () => {
@@ -76,10 +74,7 @@ describe('findDuplicateTabs', () => {
   });
 
   it('returns empty map when no duplicates', () => {
-    const tabs = [
-      makeTab({ id: 1, url: 'https://a.com' }),
-      makeTab({ id: 2, url: 'https://b.com' }),
-    ];
+    const tabs = [makeTab({ id: 1, url: 'https://a.com' }), makeTab({ id: 2, url: 'https://b.com' })];
 
     const result = findDuplicateTabs(tabs, 'normalized');
     expect(result.size).toBe(0);
@@ -116,10 +111,7 @@ describe('findDuplicateTabs', () => {
   });
 
   it('skips chrome:// URLs', () => {
-    const tabs = [
-      makeTab({ id: 1, url: 'chrome://extensions' }),
-      makeTab({ id: 2, url: 'chrome://extensions' }),
-    ];
+    const tabs = [makeTab({ id: 1, url: 'chrome://extensions' }), makeTab({ id: 2, url: 'chrome://extensions' })];
 
     const result = findDuplicateTabs(tabs, 'normalized');
     expect(result.size).toBe(0);
@@ -194,10 +186,7 @@ describe('getTabsToClose', () => {
   });
 
   it('handles undefined lastAccessed', () => {
-    const tabs = [
-      makeTab({ id: 1, lastAccessed: undefined }),
-      makeTab({ id: 2, lastAccessed: 1000 }),
-    ];
+    const tabs = [makeTab({ id: 1, lastAccessed: undefined }), makeTab({ id: 2, lastAccessed: 1000 })];
 
     const result = getTabsToClose(tabs);
 

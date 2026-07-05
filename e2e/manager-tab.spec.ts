@@ -576,10 +576,7 @@ test.describe('Manager Tab E2E Tests', () => {
     await newTab.goto('https://example.com');
 
     // Wait for the tab count to increase (CSP-safe approach)
-    await expect(page.locator('.group\\/tabitem')).toHaveCount(
-      initialTabCount + 1,
-      { timeout: 5000 }
-    );
+    await expect(page.locator('.group\\/tabitem')).toHaveCount(initialTabCount + 1, { timeout: 5000 });
 
     // Current Window should still be visible
     await expect(page.locator('.window-title:has-text("Current Window")')).toBeVisible();
@@ -591,10 +588,7 @@ test.describe('Manager Tab E2E Tests', () => {
     await newTab.close();
 
     // Wait for the tab count to decrease (CSP-safe approach)
-    await expect(page.locator('.group\\/tabitem')).toHaveCount(
-      initialTabCount,
-      { timeout: 5000 }
-    );
+    await expect(page.locator('.group\\/tabitem')).toHaveCount(initialTabCount, { timeout: 5000 });
 
     // Current Window should still be visible after tab removal
     await expect(page.locator('.window-title:has-text("Current Window")')).toBeVisible();
@@ -632,7 +626,10 @@ test.describe('Manager Tab E2E Tests', () => {
     await expect(secondTabItem).toBeFocused();
   });
 
-  test('should not move focus when Escape cancels w+number sequence from inner element', async ({ page, extensionId }) => {
+  test('should not move focus when Escape cancels w+number sequence from inner element', async ({
+    page,
+    extensionId,
+  }) => {
     await page.goto(`chrome-extension://${extensionId}/manager.html`);
 
     // Wait for tab items to load
@@ -679,12 +676,9 @@ test.describe('Manager Tab E2E Tests', () => {
     // Create a second window to have multiple window groups
     const newWindowId = await page.evaluate(() => {
       return new Promise<number>(resolve => {
-        chrome.windows.create(
-          { url: 'https://example.com', type: 'normal' },
-          window => {
-            if (window && window.id) resolve(window.id);
-          }
-        );
+        chrome.windows.create({ url: 'https://example.com', type: 'normal' }, window => {
+          if (window && window.id) resolve(window.id);
+        });
       });
     });
 
@@ -765,12 +759,9 @@ test.describe('Manager Tab E2E Tests', () => {
     // Create a second window
     const newWindowId = await page.evaluate(() => {
       return new Promise<number>(resolve => {
-        chrome.windows.create(
-          { url: 'https://example.com', type: 'normal' },
-          window => {
-            if (window && window.id) resolve(window.id);
-          }
-        );
+        chrome.windows.create({ url: 'https://example.com', type: 'normal' }, window => {
+          if (window && window.id) resolve(window.id);
+        });
       });
     });
 

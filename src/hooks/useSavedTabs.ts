@@ -1,11 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { SavedTabGroup } from '../types/savedTabs';
-import {
-  loadSavedTabGroups,
-  addSavedTabGroup,
-  deleteSavedTabGroup,
-  clearAllSavedTabGroups,
-} from '../utils/savedTabs';
+import { loadSavedTabGroups, addSavedTabGroup, deleteSavedTabGroup, clearAllSavedTabGroups } from '../utils/savedTabs';
 
 export function useSavedTabs() {
   const [savedTabGroups, setSavedTabGroups] = useState<SavedTabGroup[]>([]);

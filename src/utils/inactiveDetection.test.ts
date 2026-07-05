@@ -60,10 +60,7 @@ describe('findInactiveTabs', () => {
   });
 
   it('returns empty array when no tabs are inactive', () => {
-    const tabs = [
-      makeTab({ id: 1, lastAccessed: NOW }),
-      makeTab({ id: 2, lastAccessed: NOW - 1 * DAY_MS }),
-    ];
+    const tabs = [makeTab({ id: 1, lastAccessed: NOW }), makeTab({ id: 2, lastAccessed: NOW - 1 * DAY_MS })];
 
     const result = findInactiveTabs(tabs, 3 * DAY_MS, NOW);
     expect(result).toHaveLength(0);
@@ -95,10 +92,7 @@ describe('sortByInactivity', () => {
   });
 
   it('does not mutate original array', () => {
-    const tabs = [
-      makeTab({ id: 1, lastAccessed: 2000 }),
-      makeTab({ id: 2, lastAccessed: 1000 }),
-    ];
+    const tabs = [makeTab({ id: 1, lastAccessed: 2000 }), makeTab({ id: 2, lastAccessed: 1000 })];
     const original = [...tabs];
 
     sortByInactivity(tabs);
@@ -107,10 +101,7 @@ describe('sortByInactivity', () => {
   });
 
   it('handles undefined lastAccessed (treated as 0)', () => {
-    const tabs = [
-      makeTab({ id: 1, lastAccessed: 1000 }),
-      makeTab({ id: 2, lastAccessed: undefined }),
-    ];
+    const tabs = [makeTab({ id: 1, lastAccessed: 1000 }), makeTab({ id: 2, lastAccessed: undefined })];
 
     const result = sortByInactivity(tabs);
     expect(result[0].id).toBe(2); // undefined → 0, oldest
