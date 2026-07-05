@@ -12,6 +12,7 @@ import FaviconImage from './FaviconImage';
 import { getTabGroupBorderColorClass } from '../utils/tabGroupColors';
 import { getTabIdsInRangeForWindow } from '../utils/dragSelection';
 import { extractDomain } from '../utils/url';
+import type { SortableTabData } from '../types/dnd';
 
 interface TabItemProps {
   tab: chrome.tabs.Tab;
@@ -64,7 +65,7 @@ const TabItem = ({ tab, isFiltered = false, index, windowId, tabs }: TabItemProp
         selectedItems: Array.from(dragSelectedTabIds),
         isSelected: dragSelectedTabIds.has(tab.id!),
         index,
-      },
+      } satisfies SortableTabData,
     });
 
   const style = {
