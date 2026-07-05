@@ -59,3 +59,6 @@ memory-bank/
 # Claude Code
 CLAUDE.md
 .claude
+
+# Vitest coverage output
+coverage/

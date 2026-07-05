@@ -31,9 +31,7 @@ export function shouldBlockKeyboardShortcut(activeElement: Element | null): bool
     return false;
   }
 
-  const isCheckbox =
-    activeElement.tagName === 'INPUT' &&
-    (activeElement as HTMLInputElement).type === 'checkbox';
+  const isCheckbox = activeElement.tagName === 'INPUT' && (activeElement as HTMLInputElement).type === 'checkbox';
 
   // Allow keyboard shortcuts for checkboxes
   if (isCheckbox) {

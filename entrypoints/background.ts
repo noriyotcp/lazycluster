@@ -58,7 +58,7 @@ export default defineBackground(() => {
         devLog(`${new Date()} - onUpdated for tab ${tabId}`, changeInfo);
         debouncedUpdateTabs();
       }
-    },
+    }
   );
 
   // Listen for tab removal

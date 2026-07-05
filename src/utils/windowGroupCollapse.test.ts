@@ -24,10 +24,8 @@ describe('windowGroupCollapse utilities', () => {
 
       toggleAllWindowGroupCollapses(false, mockDoc);
 
-      const checkboxes = mockDoc.querySelectorAll<HTMLInputElement>(
-        'input[id^="window-group-collapse-"]'
-      );
-      checkboxes.forEach((cb) => {
+      const checkboxes = mockDoc.querySelectorAll<HTMLInputElement>('input[id^="window-group-collapse-"]');
+      checkboxes.forEach(cb => {
         expect(cb.checked).toBe(false);
       });
     });
@@ -39,10 +37,8 @@ describe('windowGroupCollapse utilities', () => {
 
       toggleAllWindowGroupCollapses(true, mockDoc);
 
-      const checkboxes = mockDoc.querySelectorAll<HTMLInputElement>(
-        'input[id^="window-group-collapse-"]'
-      );
-      checkboxes.forEach((cb) => {
+      const checkboxes = mockDoc.querySelectorAll<HTMLInputElement>('input[id^="window-group-collapse-"]');
+      checkboxes.forEach(cb => {
         expect(cb.checked).toBe(true);
       });
     });
@@ -53,20 +49,14 @@ describe('windowGroupCollapse utilities', () => {
 
       toggleAllWindowGroupCollapses(false, mockDoc);
 
-      const cb1 = mockDoc.getElementById(
-        'window-group-collapse-100'
-      ) as HTMLInputElement;
-      const cb2 = mockDoc.getElementById(
-        'window-group-collapse-200'
-      ) as HTMLInputElement;
+      const cb1 = mockDoc.getElementById('window-group-collapse-100') as HTMLInputElement;
+      const cb2 = mockDoc.getElementById('window-group-collapse-200') as HTMLInputElement;
       expect(cb1.checked).toBe(false);
       expect(cb2.checked).toBe(false);
     });
 
     it('does nothing when no window groups exist', () => {
-      expect(() =>
-        toggleAllWindowGroupCollapses(true, mockDoc)
-      ).not.toThrow();
+      expect(() => toggleAllWindowGroupCollapses(true, mockDoc)).not.toThrow();
     });
 
     it('ignores non-window-group checkboxes', () => {
@@ -81,10 +71,7 @@ describe('windowGroupCollapse utilities', () => {
       toggleAllWindowGroupCollapses(false, mockDoc);
 
       expect(tabCheckbox.checked).toBe(true);
-      expect(
-        (mockDoc.getElementById('window-group-collapse-1') as HTMLInputElement)
-          .checked
-      ).toBe(false);
+      expect((mockDoc.getElementById('window-group-collapse-1') as HTMLInputElement).checked).toBe(false);
     });
   });
 });

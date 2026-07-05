@@ -9,7 +9,7 @@ export const INACTIVE_THRESHOLD_PRESETS = [
 export const findInactiveTabs = (
   tabs: chrome.tabs.Tab[],
   thresholdMs: number,
-  now: number = Date.now(),
+  now: number = Date.now()
 ): chrome.tabs.Tab[] => {
   return tabs.filter(tab => {
     // Skip active tabs

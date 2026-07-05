@@ -37,7 +37,7 @@ export const TabGroupColorProvider = ({ children }: { children: ReactNode }) => 
         } catch (error) {
           console.error(`Failed to fetch group ${groupId}:`, error);
         }
-      }),
+      })
     );
 
     setGroupColorMap(newColorMap);

@@ -15,9 +15,7 @@ export async function addSavedTabGroup(tabs: chrome.tabs.Tab[]): Promise<SavedTa
   const group: SavedTabGroup = {
     id: crypto.randomUUID(),
     savedAt: Date.now(),
-    tabs: tabs
-      .filter(t => t.url)
-      .map(t => ({ title: t.title ?? t.url ?? '', url: t.url!, favIconUrl: t.favIconUrl })),
+    tabs: tabs.filter(t => t.url).map(t => ({ title: t.title ?? t.url ?? '', url: t.url!, favIconUrl: t.favIconUrl })),
   };
   const existing = await loadSavedTabGroups();
   await saveSavedTabGroups([group, ...existing]);

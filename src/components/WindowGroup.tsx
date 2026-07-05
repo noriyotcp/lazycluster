@@ -28,17 +28,14 @@ const WindowGroup = ({ tabGroup, isFiltered = false, overId, dropPosition, overW
     data: { windowId: tabGroup.windowId, type: 'window-group' },
   });
 
-  const handleCollapseClick = useCallback(
-    (event: React.MouseEvent<HTMLInputElement>) => {
-      if (event.altKey) {
-        // The checkbox has already toggled by the time onClick fires.
-        // Read the new state and apply it to ALL window groups.
-        const targetChecked = event.currentTarget.checked;
-        toggleAllWindowGroupCollapses(targetChecked);
-      }
-    },
-    []
-  );
+  const handleCollapseClick = useCallback((event: React.MouseEvent<HTMLInputElement>) => {
+    if (event.altKey) {
+      // The checkbox has already toggled by the time onClick fires.
+      // Read the new state and apply it to ALL window groups.
+      const targetChecked = event.currentTarget.checked;
+      toggleAllWindowGroupCollapses(targetChecked);
+    }
+  }, []);
 
   return (
     <div ref={setNodeRef} inert={isDeletingWindow || undefined} className="inert:opacity-50">

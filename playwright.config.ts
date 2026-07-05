@@ -4,7 +4,11 @@ import { fileURLToPath, URL } from 'url';
 export default defineConfig({
   testDir: 'e2e',
   fullyParallel: true,
+  retries: process.env.CI ? 2 : 0,
   reporter: 'html',
+  use: {
+    trace: 'on-first-retry',
+  },
   globalSetup: fileURLToPath(new URL('./global-setup', import.meta.url)),
   projects: [
     {

@@ -178,11 +178,7 @@ describe('dragSelection utilities', () => {
     });
 
     it('handles tabs without id (filters them out)', () => {
-      const tabs = [
-        { ...createTab(1, 100), id: undefined },
-        createTab(2, 100),
-        createTab(3, 100),
-      ] as chrome.tabs.Tab[];
+      const tabs = [{ ...createTab(1, 100), id: undefined }, createTab(2, 100), createTab(3, 100)] as chrome.tabs.Tab[];
 
       const result = getTabIdsInRangeForWindow(tabs, 0, 2, 100);
 

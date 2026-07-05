@@ -51,12 +51,7 @@ async function shiftClick(page: Page, locator: Locator): Promise<void> {
 
 // Helper function to perform drag-and-drop using pointer events
 // Note: Keyboard drag doesn't support multi-item selection in dnd-kit
-async function performDrag(
-  page: Page,
-  source: Locator,
-  target: Locator,
-  targetYRatio = 0.5,
-): Promise<void> {
+async function performDrag(page: Page, source: Locator, target: Locator, targetYRatio = 0.5): Promise<void> {
   const sourceBox = await source.boundingBox();
   const targetBox = await target.boundingBox();
 

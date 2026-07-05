@@ -288,7 +288,7 @@ test.describe('Multi-Select E2E Tests', () => {
       const secondWindowFirstTab = secondWindowGroup.locator('.group\\/tabitem').first();
 
       // Second window's tabs should not have drag selection background
-      if (await secondWindowFirstTab.count() > 0) {
+      if ((await secondWindowFirstTab.count()) > 0) {
         await expect(secondWindowFirstTab).not.toHaveClass(/bg-accent\/10/);
       }
     } finally {

@@ -28,7 +28,14 @@ interface InactivesViewProps {
   onSaveAll: (tabs: chrome.tabs.Tab[]) => Promise<SavedTabGroup>;
 }
 
-const InactivesView = ({ allTabs, windowLabels, onBack, thresholdMs, onThresholdChange, onSaveAll }: InactivesViewProps) => {
+const InactivesView = ({
+  allTabs,
+  windowLabels,
+  onBack,
+  thresholdMs,
+  onThresholdChange,
+  onSaveAll,
+}: InactivesViewProps) => {
   const { setDeletingState } = useDeletionState();
   const { focusActiveTab } = useTabFocusContext();
   const { showToast } = useToast();
@@ -74,7 +81,11 @@ const InactivesView = ({ allTabs, windowLabels, onBack, thresholdMs, onThreshold
       showToast(<Alert message={`Saved ${group.tabs.length} tab(s) and closed.`} variant="success" />);
     } catch (error) {
       ids.forEach(id => setDeletingState({ type: 'tab', id, isDeleting: false }));
-      showToast(<Alert message={`Tabs saved but could not close them: ${error instanceof Error ? error.message : String(error)}`} />);
+      showToast(
+        <Alert
+          message={`Tabs saved but could not close them: ${error instanceof Error ? error.message : String(error)}`}
+        />
+      );
     }
   };
 
@@ -84,7 +95,11 @@ const InactivesView = ({ allTabs, windowLabels, onBack, thresholdMs, onThreshold
         <div className="flex items-center gap-3 shrink-0">
           <button className="btn btn-ghost btn-sm" onClick={onBack}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4">
-              <path fillRule="evenodd" d="M14 8a.75.75 0 0 1-.75.75H4.56l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 1.06L4.56 7.25h8.69A.75.75 0 0 1 14 8Z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M14 8a.75.75 0 0 1-.75.75H4.56l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 1.06L4.56 7.25h8.69A.75.75 0 0 1 14 8Z"
+                clipRule="evenodd"
+              />
             </svg>
             Back
           </button>
@@ -119,7 +134,8 @@ const InactivesView = ({ allTabs, windowLabels, onBack, thresholdMs, onThreshold
         <div className="text-center py-16 text-base-content/60">
           <p className="text-lg">No inactive tabs found.</p>
           <p className="text-sm mt-2">
-            All your tabs have been accessed within the last {INACTIVE_THRESHOLD_PRESETS.find(p => p.value === thresholdMs)?.label ?? 'selected period'}.
+            All your tabs have been accessed within the last{' '}
+            {INACTIVE_THRESHOLD_PRESETS.find(p => p.value === thresholdMs)?.label ?? 'selected period'}.
           </p>
         </div>
       ) : (
@@ -153,10 +169,14 @@ const InactivesView = ({ allTabs, windowLabels, onBack, thresholdMs, onThreshold
                     {tab.title || extractDomain(tab.url || '')}
                   </a>
                   <div className="text-xs text-base-content/50">
-                    {extractDomain(tab.url || '')} · <a
+                    {extractDomain(tab.url || '')} ·{' '}
+                    <a
                       className="cursor-pointer hover:underline"
                       onClick={() => chrome.windows.update(tab.windowId, { focused: true })}
-                    >{windowLabels.get(tab.windowId) ?? `W${tab.windowId}`}</a> · {tab.lastAccessed ? formatInactiveDuration(tab.lastAccessed) : ''}
+                    >
+                      {windowLabels.get(tab.windowId) ?? `W${tab.windowId}`}
+                    </a>{' '}
+                    · {tab.lastAccessed ? formatInactiveDuration(tab.lastAccessed) : ''}
                   </div>
                 </div>
                 <button className="btn btn-xs btn-outline btn-error shrink-0" onClick={() => handleCloseTab(tab.id!)}>

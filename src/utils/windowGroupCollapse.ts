@@ -8,14 +8,9 @@
  * @param targetChecked - The desired checked state for all checkboxes
  * @param doc - Document to query (injectable for testing)
  */
-export function toggleAllWindowGroupCollapses(
-  targetChecked: boolean,
-  doc: Document = document
-): void {
-  const checkboxes = doc.querySelectorAll<HTMLInputElement>(
-    'input[id^="window-group-collapse-"]'
-  );
-  checkboxes.forEach((checkbox) => {
+export function toggleAllWindowGroupCollapses(targetChecked: boolean, doc: Document = document): void {
+  const checkboxes = doc.querySelectorAll<HTMLInputElement>('input[id^="window-group-collapse-"]');
+  checkboxes.forEach(checkbox => {
     checkbox.checked = targetChecked;
   });
 }

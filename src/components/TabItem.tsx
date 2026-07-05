@@ -206,12 +206,7 @@ const TabItem = ({ tab, isFiltered = false, index, windowId, tabs }: TabItemProp
           ref={checkboxRef}
         />
         <div>
-          <FaviconImage
-            src={tab.favIconUrl}
-            alt={tab.title ?? ''}
-            className="size-4"
-            fallback={globeIcon()}
-          />
+          <FaviconImage src={tab.favIconUrl} alt={tab.title ?? ''} className="size-4" fallback={globeIcon()} />
         </div>
         <a
           className="list-col-grow cursor-pointer focus:outline-1 truncate hover:underline"

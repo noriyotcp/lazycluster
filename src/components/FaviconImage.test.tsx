@@ -6,9 +6,7 @@ afterEach(cleanup);
 
 describe('FaviconImage', () => {
   it('renders fallback when src is undefined', () => {
-    const { container, getByTestId } = render(
-      <FaviconImage fallback={<span data-testid="fb" />} />
-    );
+    const { container, getByTestId } = render(<FaviconImage fallback={<span data-testid="fb" />} />);
     expect(getByTestId('fb')).toBeTruthy();
     expect(container.querySelector('img')).toBeNull();
   });
@@ -22,9 +20,7 @@ describe('FaviconImage', () => {
   });
 
   it('renders img with src and alt when src is provided', () => {
-    const { container } = render(
-      <FaviconImage src="https://example.com/favicon.ico" alt="Example" />
-    );
+    const { container } = render(<FaviconImage src="https://example.com/favicon.ico" alt="Example" />);
     const img = container.querySelector('img');
     expect(img).not.toBeNull();
     expect(img?.getAttribute('src')).toBe('https://example.com/favicon.ico');
@@ -49,9 +45,7 @@ describe('FaviconImage', () => {
     fireEvent.error(container.querySelector('img')!);
     expect(container.querySelector('img')).toBeNull();
 
-    rerender(
-      <FaviconImage src="https://good.example/favicon.ico" fallback={<span data-testid="fb" />} />
-    );
+    rerender(<FaviconImage src="https://good.example/favicon.ico" fallback={<span data-testid="fb" />} />);
     const img = container.querySelector('img');
     expect(img).not.toBeNull();
     expect(img?.getAttribute('src')).toBe('https://good.example/favicon.ico');

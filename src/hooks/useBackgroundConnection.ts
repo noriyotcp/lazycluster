@@ -66,7 +66,9 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
         stableConnectionTimerRef.current = null;
       }, STABLE_CONNECTION_THRESHOLD);
 
-      devLog(`${new Date()} - Waiting ${STABLE_CONNECTION_THRESHOLD}ms to confirm stable connection (current attempt: ${attemptRef.current})...`);
+      devLog(
+        `${new Date()} - Waiting ${STABLE_CONNECTION_THRESHOLD}ms to confirm stable connection (current attempt: ${attemptRef.current})...`
+      );
 
       portRef.current.onMessage.addListener((message: T) => {
         // Add type annotation
@@ -81,7 +83,9 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
         if (stableConnectionTimerRef.current) {
           clearTimeout(stableConnectionTimerRef.current);
           stableConnectionTimerRef.current = null;
-          devLog(`${new Date()} - Connection lost before stability threshold. Retry attempt preserved: ${attemptRef.current}`);
+          devLog(
+            `${new Date()} - Connection lost before stability threshold. Retry attempt preserved: ${attemptRef.current}`
+          );
         }
 
         devLog(`${new Date()} - Port disconnected.`);
