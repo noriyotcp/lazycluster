@@ -17,13 +17,12 @@ import { useWindowGroupNavigation } from '../../src/hooks/useWindowGroupNavigati
 import { useActiveWindowId } from '../../src/contexts/ActiveWindowIdContext';
 import KeyboardShortcutsModal from '../../src/components/KeyboardShortcutsModal';
 import { DEFAULT_INACTIVE_THRESHOLD_MS } from '../../src/utils/inactiveDetection';
+import {
+  MANAGER_PORT_NAME,
+  type BackgroundToManagerMessage,
+  type ManagerToBackgroundMessage,
+} from '../../src/types/messages';
 import './style.css';
-
-// Define a more specific message type based on BaseMessage from the hook
-interface BackgroundMessage {
-  type: 'UPDATE_TABS' | 'BACKGROUND_INITIALIZED' | 'REQUEST_INITIAL_DATA'; // Known types
-  tabs?: chrome.tabs.Tab[]; // Make tabs optional as it's not always present
-}
 
 const getViewFromHash = (): ViewMode => {
   const hash = window.location.hash.slice(1);
@@ -61,9 +60,9 @@ const Manager = () => {
 
   // Define the message handler using useCallback to maintain reference stability
   const handleBackgroundMessage = useCallback(
-    async (message: BackgroundMessage) => {
+    async (message: BackgroundToManagerMessage) => {
       devLog(`${new Date()} - Received message from background:`, message); // Log received messages
-      if (message.type === 'UPDATE_TABS' && message.tabs) {
+      if (message.type === 'UPDATE_TABS') {
         setAllTabs(message.tabs);
         const currentWindowId = await refreshActiveWindowId();
         updateTabGroups(message.tabs, currentWindowId ?? undefined); // Use the updated tabs
@@ -89,7 +88,10 @@ const Manager = () => {
   );
 
   // Use the custom hook to manage the connection
-  const { sendMessage, isConnected } = useBackgroundConnection<BackgroundMessage>('manager', handleBackgroundMessage);
+  const { sendMessage, isConnected } = useBackgroundConnection<BackgroundToManagerMessage, ManagerToBackgroundMessage>(
+    MANAGER_PORT_NAME,
+    handleBackgroundMessage
+  );
 
   // Effect to request initial data once connected
   useEffect(() => {

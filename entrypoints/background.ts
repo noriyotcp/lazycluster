@@ -1,4 +1,9 @@
 import { devLog } from '../src/utils/devLog';
+import {
+  MANAGER_PORT_NAME,
+  type BackgroundToManagerMessage,
+  type ManagerToBackgroundMessage,
+} from '../src/types/messages';
 
 export default defineBackground(() => {
   devLog('Hello background!', { id: chrome.runtime.id });
@@ -38,7 +43,7 @@ export default defineBackground(() => {
   const updateTabs = async (port: chrome.runtime.Port) => {
     try {
       const tabs = await getTabs();
-      port.postMessage({ type: 'UPDATE_TABS', tabs });
+      port.postMessage({ type: 'UPDATE_TABS', tabs } satisfies BackgroundToManagerMessage);
     } catch (error) {
       console.error('Failed to update tabs:', error);
     }
@@ -108,8 +113,8 @@ export default defineBackground(() => {
     if (import.meta.env.MODE === 'development') {
       console.dir(p);
     }
-    if (p.name === 'manager') {
-      port = p as chrome.runtime.Port;
+    if (p.name === MANAGER_PORT_NAME) {
+      port = p;
       port.onDisconnect.addListener(() => {
         devLog(`${new Date()} - onDisconnect`);
         if (import.meta.env.MODE === 'development') {
@@ -118,13 +123,13 @@ export default defineBackground(() => {
         port = null;
       });
 
-      port.onMessage.addListener(async message => {
+      port.onMessage.addListener(async (message: ManagerToBackgroundMessage) => {
         if (message.type === 'REQUEST_INITIAL_DATA') {
           try {
             const tabs = await getTabs();
             if (port) {
-              port.postMessage({ type: 'UPDATE_TABS', tabs });
-              port.postMessage({ type: 'BACKGROUND_INITIALIZED' });
+              port.postMessage({ type: 'UPDATE_TABS', tabs } satisfies BackgroundToManagerMessage);
+              port.postMessage({ type: 'BACKGROUND_INITIALIZED' } satisfies BackgroundToManagerMessage);
             }
           } catch (error) {
             console.error('Failed to send initial data:', error);
@@ -135,12 +140,4 @@ export default defineBackground(() => {
   };
 
   chrome.runtime.onConnect.addListener(connect);
-
-  chrome.runtime.onMessage.addListener((request: { action?: string; tabId?: number }) => {
-    if (request.action === 'closeTab' && request.tabId) {
-      chrome.tabs.remove(request.tabId).catch(error => {
-        console.error(`Failed to close tab ${request.tabId}:`, error);
-      });
-    }
-  });
 });

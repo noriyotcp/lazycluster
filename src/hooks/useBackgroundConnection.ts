@@ -1,10 +1,8 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { devLog } from '../utils/devLog';
 
-// Define a generic type for messages if possible, or use a base type
-// For now, let's keep it flexible but avoid 'any' directly in the handler signature
-// if we know the structure. If not, unknown is safer than any.
-// Let's assume a base message structure for now.
+// Minimal structural constraint for port messages; concrete protocols
+// (e.g. src/types/messages.ts) are supplied via the type parameters.
 interface BaseMessage {
   type: string;
 }
@@ -20,16 +18,20 @@ const STABLE_CONNECTION_THRESHOLD = 60000;
  * Custom hook to manage a persistent connection to the background script.
  * Handles automatic reconnection on disconnect or connection errors.
  *
- * @param portName The name of the port to connect to.
+ * @typeParam TIncoming Messages received from the background script.
+ * @typeParam TOutgoing Messages sent to the background script.
  * @param portName The name of the port to connect to.
  * @param messageHandler A function to handle messages received from the background script.
  * @returns An object containing a function to send messages and the current connection status.
  */
-export const useBackgroundConnection = <T extends BaseMessage>(portName: string, messageHandler: MessageHandler<T>) => {
+export const useBackgroundConnection = <TIncoming extends BaseMessage, TOutgoing extends BaseMessage>(
+  portName: string,
+  messageHandler: MessageHandler<TIncoming>
+) => {
   const portRef = useRef<chrome.runtime.Port | null>(null);
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const stableConnectionTimerRef = useRef<NodeJS.Timeout | null>(null); // Timer to detect stable connections
-  const messageHandlerRef = useRef<MessageHandler<T>>(messageHandler);
+  const messageHandlerRef = useRef<MessageHandler<TIncoming>>(messageHandler);
   const attemptRef = useRef<number>(0); // Track retry attempts
   const [isConnected, setIsConnected] = useState(false); // Track connection status
 
@@ -62,8 +64,7 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
         `${new Date()} - Waiting ${STABLE_CONNECTION_THRESHOLD}ms to confirm stable connection (current attempt: ${attemptRef.current})...`
       );
 
-      portRef.current.onMessage.addListener((message: T) => {
-        // Add type annotation
+      portRef.current.onMessage.addListener((message: TIncoming) => {
         // Use the ref to ensure the latest handler is called
         messageHandlerRef.current(message);
       });
@@ -112,8 +113,7 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
   }, [connect]);
 
   const sendMessage = useCallback(
-    (message: T) => {
-      // Use the generic type T
+    (message: TOutgoing) => {
       if (!portRef.current) {
         console.warn(`${new Date()} - Cannot send message: Port is not connected.`);
         // Optionally, queue the message or attempt to reconnect immediately
