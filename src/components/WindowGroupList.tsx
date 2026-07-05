@@ -463,29 +463,23 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
 
       {/* DragOverlay shows clone of dragged item with optional selection badge */}
       <DragOverlay>
-        {activeTab
-          ? (() => {
-              return (
-                <div className="relative">
-                  <ul className="list shadow-md">
-                    <TabItem
-                      tab={activeTab}
-                      isFiltered={false}
-                      index={activeTabWindowTabs.findIndex(t => t.id === activeId)}
-                      windowId={activeTab.windowId!}
-                      tabs={activeTabWindowTabs}
-                    />
-                  </ul>
-                  {/* Show badge with selection count during multi-drag */}
-                  {dragSelectedTabIds.has(activeId!) && dragSelectedTabIds.size > 1 && (
-                    <div className="absolute -top-2 -right-2 badge badge-sm badge-accent">
-                      {dragSelectedTabIds.size}
-                    </div>
-                  )}
-                </div>
-              );
-            })()
-          : null}
+        {activeTab ? (
+          <div className="relative">
+            <ul className="list shadow-md">
+              <TabItem
+                tab={activeTab}
+                isFiltered={false}
+                index={activeTabWindowTabs.findIndex(t => t.id === activeId)}
+                windowId={activeTab.windowId!}
+                tabs={activeTabWindowTabs}
+              />
+            </ul>
+            {/* Show badge with selection count during multi-drag */}
+            {dragSelectedTabIds.has(activeId!) && dragSelectedTabIds.size > 1 && (
+              <div className="absolute -top-2 -right-2 badge badge-sm badge-accent">{dragSelectedTabIds.size}</div>
+            )}
+          </div>
+        ) : null}
       </DragOverlay>
     </DndContext>
   );

@@ -6,11 +6,11 @@ describe('calculateBackoff', () => {
     vi.restoreAllMocks();
   });
 
-  it('returns correct delay with default options (attempt=5)', () => {
+  it('returns correct delay for attempt=5 with default intervals', () => {
     // calculatedDelay = 30000 * 2^5 = 960000
     // delay = 960000/2 + (Math.random() * 960000)/2
     vi.spyOn(Math, 'random').mockReturnValue(0.5);
-    const delay = calculateBackoff();
+    const delay = calculateBackoff({ attempt: 5 });
     // 960000/2 = 480000, (0.5*960000)/2 = 240000, total = 720000
     expect(delay).toBe(720000);
   });

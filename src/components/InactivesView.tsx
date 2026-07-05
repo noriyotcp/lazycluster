@@ -10,14 +10,7 @@ import {
   INACTIVE_THRESHOLD_PRESETS,
 } from '../utils/inactiveDetection';
 import type { SavedTabGroup } from '../types/savedTabs';
-
-const extractDomain = (url: string): string => {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return '';
-  }
-};
+import { extractDomain } from '../utils/url';
 
 interface InactivesViewProps {
   allTabs: chrome.tabs.Tab[];
@@ -170,12 +163,13 @@ const InactivesView = ({
                   </a>
                   <div className="text-xs text-base-content/50">
                     {extractDomain(tab.url || '')} ·{' '}
-                    <a
-                      className="cursor-pointer hover:underline"
+                    <button
+                      type="button"
+                      className="link link-hover cursor-pointer"
                       onClick={() => chrome.windows.update(tab.windowId, { focused: true })}
                     >
                       {windowLabels.get(tab.windowId) ?? `W${tab.windowId}`}
-                    </a>{' '}
+                    </button>{' '}
                     · {tab.lastAccessed ? formatInactiveDuration(tab.lastAccessed) : ''}
                   </div>
                 </div>

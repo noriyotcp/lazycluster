@@ -15,7 +15,11 @@ const App = () => {
     const allTabs = await chrome.tabs.query({ url: managerUrl });
     const tabsInOtherWindows = allTabs.filter(tab => tab.windowId !== currentWindowId);
     if (tabsInOtherWindows.length > 0) {
-      await Promise.all(tabsInOtherWindows.map(tab => chrome.tabs.remove(tab.id!)));
+      try {
+        await Promise.all(tabsInOtherWindows.map(tab => chrome.tabs.remove(tab.id!)));
+      } catch (error) {
+        console.error('Failed to remove manager tabs in other windows:', error);
+      }
       return true;
     }
     return false;
@@ -39,15 +43,10 @@ const App = () => {
   }, []);
 
   return (
-    // Apply styles to center content and set min height/width, mimicking original body styles
     <div className="flex items-center justify-center min-h-screen min-w-[320px]">
-      {/* Apply max-width, auto margin, padding, and text alignment, mimicking original #root styles */}
       <div className="max-w-screen-xl mx-auto p-8 text-center">
-        {/* Center the image and add some margin below it */}
         <img src="/icon/48.png" className="inline-block mb-4" />
-        {/* Apply heading styles */}
         <h1 className="text-5xl leading-tight">lazycluster</h1>
-        {/* Apply card styles with padding */}
         <div className="card p-8">
           <button className="btn btn-secondary" onClick={openWindowManager}>
             Window Manager

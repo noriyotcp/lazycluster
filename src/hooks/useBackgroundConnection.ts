@@ -7,7 +7,6 @@ import { devLog } from '../utils/devLog';
 // Let's assume a base message structure for now.
 interface BaseMessage {
   type: string;
-  payload?: unknown; // Use unknown instead of any for better type safety
 }
 
 type MessageHandler<T extends BaseMessage> = (message: T) => void;
@@ -43,13 +42,6 @@ export const useBackgroundConnection = <T extends BaseMessage>(portName: string,
     devLog(`${new Date()} - Attempting to connect to background script with port name: ${portName}`);
     try {
       portRef.current = chrome.runtime.connect({ name: portName });
-
-      if (chrome.runtime.lastError) {
-        console.error(`${new Date()} - Connection failed:`, chrome.runtime.lastError.message);
-        portRef.current = null;
-        scheduleReconnect();
-        return;
-      }
 
       devLog(`${new Date()} - Successfully connected to background script.`);
       setIsConnected(true); // Update connection status

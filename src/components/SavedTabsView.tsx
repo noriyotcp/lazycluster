@@ -4,14 +4,7 @@ import { useToast } from './ToastProvider';
 import Alert from './Alert';
 import FaviconImage from './FaviconImage';
 import { formatGroupName } from '../utils/savedTabs';
-
-const extractDomain = (url: string): string => {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return '';
-  }
-};
+import { extractDomain } from '../utils/url';
 
 interface SavedTabsViewProps {
   savedTabGroups: SavedTabGroup[];
@@ -112,7 +105,7 @@ const SavedTabsView = ({ savedTabGroups, onBack, onRestoreGroup, onDeleteGroup, 
                 </div>
                 <ul className="list">
                   {group.tabs.map((tab, i) => (
-                    <li key={i} className="list-row rounded-none items-center p-2 even:bg-base-300">
+                    <li key={`${tab.url}-${i}`} className="list-row rounded-none items-center p-2 even:bg-base-300">
                       <div>
                         <FaviconImage src={tab.favIconUrl} />
                       </div>

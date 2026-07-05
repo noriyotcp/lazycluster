@@ -11,14 +11,7 @@ import Alert from './Alert';
 import FaviconImage from './FaviconImage';
 import { getTabGroupBorderColorClass } from '../utils/tabGroupColors';
 import { getTabIdsInRangeForWindow } from '../utils/dragSelection';
-
-const extractDomain = (url: string): string => {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return '';
-  }
-};
+import { extractDomain } from '../utils/url';
 
 interface TabItemProps {
   tab: chrome.tabs.Tab;

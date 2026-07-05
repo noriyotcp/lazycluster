@@ -23,7 +23,6 @@ import './style.css';
 interface BackgroundMessage {
   type: 'UPDATE_TABS' | 'BACKGROUND_INITIALIZED' | 'REQUEST_INITIAL_DATA'; // Known types
   tabs?: chrome.tabs.Tab[]; // Make tabs optional as it's not always present
-  payload?: unknown; // Keep payload flexible if needed
 }
 
 const getViewFromHash = (): ViewMode => {

@@ -1,4 +1,4 @@
-import React from 'react';
+import type { RefObject } from 'react';
 import SearchBar from './SearchBar';
 import ThemeSwitcher from './ThemeSwitcher';
 import TabCountBadge from './TabCountBadge';
@@ -15,7 +15,7 @@ export type ViewMode = 'tabs' | 'duplicates' | 'inactives' | 'saved';
 interface HeaderProps {
   searchQuery: string;
   onSearchQueryChange: (query: string) => void;
-  searchBarRef: React.RefObject<HTMLInputElement | null>;
+  searchBarRef: RefObject<HTMLInputElement | null>;
   allTabs: chrome.tabs.Tab[];
   viewMode: ViewMode;
   onViewChange: (view: ViewMode) => void;
