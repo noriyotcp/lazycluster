@@ -6,6 +6,7 @@ import WindowActions from './WindowActions';
 import { useWindowGroupContext } from '../contexts/WindowGroupContext';
 import { useDeletionState } from '../contexts/DeletionStateContext';
 import { toggleAllWindowGroupCollapses } from '../utils/windowGroupCollapse';
+import type { WindowGroupDropData } from '../types/dnd';
 
 interface WindowGroupProps {
   tabGroup: {
@@ -25,7 +26,7 @@ const WindowGroup = ({ tabGroup, isFiltered = false, overId, dropPosition, overW
   // Register as a drop zone for cross-window drag-and-drop
   const { setNodeRef } = useDroppable({
     id: `window-${tabGroup.windowId}`,
-    data: { windowId: tabGroup.windowId, type: 'window-group' },
+    data: { windowId: tabGroup.windowId, type: 'window-group' } satisfies WindowGroupDropData,
   });
 
   const handleCollapseClick = useCallback((event: React.MouseEvent<HTMLInputElement>) => {

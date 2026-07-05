@@ -21,6 +21,7 @@ import { useToast } from './ToastProvider';
 import Alert from './Alert';
 import { useDragSelectionContext } from '../contexts/DragSelectionContext';
 import { identifyGroupsToPreserve } from '../utils/tabGroupPreservation';
+import { getSortableTabData, getWindowGroupDropData } from '../types/dnd';
 
 interface WindowGroupListProps {
   filteredTabGroups: { windowId: number; tabs: chrome.tabs.Tab[]; windowGroupNumber: number }[];
@@ -99,7 +100,7 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
 
   // Handle drag start to track active item for DragOverlay
   const handleDragStart = (event: DragStartEvent) => {
-    const newActiveId = event.active.id as number;
+    const newActiveId = Number(event.active.id);
     const activeTab = allTabs.find(t => t.id === newActiveId);
     sourceWindowIdRef.current = activeTab?.windowId ?? null;
     setActiveId(newActiveId);
@@ -111,7 +112,7 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
 
     if (over) {
       // Window group droppable (collapsed group or empty area) — no tab-level indicator
-      if (over.data.current?.type === 'window-group') {
+      if (getWindowGroupDropData(over)) {
         setOverId(null);
         return;
       }
@@ -120,7 +121,7 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
       const overTab = allTabs.find(t => t.id === over.id);
 
       if (activeTab && overTab) {
-        setOverId(over.id as number);
+        setOverId(Number(over.id));
 
         if (activeTab.windowId === overTab.windowId) {
           // Same window: direction based on index comparison
@@ -151,12 +152,12 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
     if (!activeTab) return;
 
     // Determine target window ID based on drop target type
-    const isWindowGroupDrop = over.data.current?.type === 'window-group';
+    const windowGroupDrop = getWindowGroupDropData(over);
     let targetWindowId: number;
 
-    if (isWindowGroupDrop) {
+    if (windowGroupDrop) {
       // Dropped on a window group container (e.g., collapsed group header)
-      targetWindowId = over.data.current!.windowId as number;
+      targetWindowId = windowGroupDrop.windowId;
     } else {
       // Dropped on a specific tab
       const overTab = allTabs.find(t => t.id === over.id);
@@ -178,8 +179,9 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
 
       try {
         // Get drag selection data from useSortable
-        const selectedItems = active.data.current?.selectedItems as number[] | undefined;
-        const isSelected = active.data.current?.isSelected as boolean;
+        const sortableData = getSortableTabData(active);
+        const selectedItems = sortableData?.selectedItems;
+        const isSelected = sortableData?.isSelected ?? false;
 
         // Determine which tabs to move
         let tabsToMove: number[];
@@ -195,7 +197,7 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
             .sort((a, b) => a.index - b.index)
             .map(item => item.id);
         } else {
-          tabsToMove = [active.id as number];
+          tabsToMove = [Number(active.id)];
         }
 
         // Identify tab groups to preserve (all members of a group are being moved)
@@ -303,12 +305,13 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
       // ---- Cross-window move ----
 
       // Get drag selection data from useSortable
-      const selectedItems = active.data.current?.selectedItems as number[] | undefined;
-      const isSelected = active.data.current?.isSelected as boolean;
+      const sortableData = getSortableTabData(active);
+      const selectedItems = sortableData?.selectedItems;
+      const isSelected = sortableData?.isSelected ?? false;
 
       // Calculate target index
       let targetIndex: number;
-      if (isWindowGroupDrop) {
+      if (windowGroupDrop) {
         // Dropped on window group container (collapsed group) — append to end
         targetIndex = -1;
       } else {
@@ -335,7 +338,7 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
           .map(item => item.id);
       } else {
         // Single-tab cross-window move
-        tabsToMove = [active.id as number];
+        tabsToMove = [Number(active.id)];
       }
 
       try {
