@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, memo } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useTabSelectionContext } from '../../src/contexts/TabSelectionContext';
@@ -53,6 +53,17 @@ const TabItem = ({ tab, isFiltered = false, index, windowId, tabs }: TabItemProp
   const { getGroupColor } = useTabGroupColor();
   const groupColor = getGroupColor(tab.groupId ?? chrome.tabGroups.TAB_GROUP_ID_NONE);
 
+  // Pass drag selection data for multi-drag in handleDragEnd.
+  // Memoized so the array is not re-allocated for every tab on every render.
+  const sortableData = useMemo<SortableTabData>(
+    () => ({
+      selectedItems: Array.from(dragSelectedTabIds),
+      isSelected: dragSelectedTabIds.has(tab.id!),
+      index,
+    }),
+    [dragSelectedTabIds, tab.id, index]
+  );
+
   // useSortable hook for drag-and-drop
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging, isSorting } =
     useSortable({
@@ -60,12 +71,7 @@ const TabItem = ({ tab, isFiltered = false, index, windowId, tabs }: TabItemProp
       disabled: isFiltered,
       // Disable layout animation during sorting to prevent items from moving immediately
       animateLayoutChanges: ({ isSorting }) => !isSorting,
-      // Pass drag selection data for multi-drag in handleDragEnd
-      data: {
-        selectedItems: Array.from(dragSelectedTabIds),
-        isSelected: dragSelectedTabIds.has(tab.id!),
-        index,
-      } satisfies SortableTabData,
+      data: sortableData,
     });
 
   const style = {
@@ -235,4 +241,6 @@ const TabItem = ({ tab, isFiltered = false, index, windowId, tabs }: TabItemProp
   );
 };
 
-export default TabItem;
+// Memoized: a drag-state change in WindowGroupList re-renders every window's
+// list; items whose props are unchanged can skip.
+export default memo(TabItem);

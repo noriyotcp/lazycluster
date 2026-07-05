@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback, useContext } from 'react';
+import React, { createContext, useState, useCallback, useContext, useMemo } from 'react';
 
 interface TabGroup {
   windowId: number;
@@ -11,6 +11,26 @@ interface TabGroupContextProps {
 }
 
 const TabGroupContext = createContext<TabGroupContextProps | undefined>(undefined);
+
+const sortTabGroups = (tabGroups: TabGroup[], activeWindowId: number): TabGroup[] => {
+  const activeGroup = tabGroups.find(group => group.windowId === activeWindowId);
+  if (!activeGroup) return tabGroups;
+  return [activeGroup, ...tabGroups.filter(group => group.windowId !== activeWindowId)];
+};
+
+const groupTabsByWindow = (tabs: chrome.tabs.Tab[]): TabGroup[] => {
+  const groups: { [windowId: number]: chrome.tabs.Tab[] } = {};
+  tabs.forEach(tab => {
+    if (tab.windowId) {
+      if (!groups[tab.windowId]) {
+        groups[tab.windowId] = [];
+      }
+      groups[tab.windowId].push(tab);
+    }
+  });
+
+  return Object.entries(groups).map(([windowId, tabs]) => ({ windowId: parseInt(windowId), tabs }));
+};
 
 export const TabGroupProvider = ({ children }: { children: React.ReactNode }): React.ReactElement => {
   const [tabGroups, setTabGroups] = useState<TabGroup[]>([]);
@@ -25,30 +45,7 @@ export const TabGroupProvider = ({ children }: { children: React.ReactNode }): R
     }
   }, []);
 
-  const sortTabGroups = (tabGroups: TabGroup[], activeWindowId: number): TabGroup[] => {
-    const activeGroup = tabGroups.find(group => group.windowId === activeWindowId);
-    if (!activeGroup) return tabGroups;
-    return [activeGroup, ...tabGroups.filter(group => group.windowId !== activeWindowId)];
-  };
-
-  const groupTabsByWindow = (tabs: chrome.tabs.Tab[]): TabGroup[] => {
-    const groups: { [windowId: number]: chrome.tabs.Tab[] } = {};
-    tabs.forEach(tab => {
-      if (tab.windowId) {
-        if (!groups[tab.windowId]) {
-          groups[tab.windowId] = [];
-        }
-        groups[tab.windowId].push(tab);
-      }
-    });
-
-    return Object.entries(groups).map(([windowId, tabs]) => ({ windowId: parseInt(windowId), tabs }));
-  };
-
-  const value: TabGroupContextProps = {
-    tabGroups,
-    updateTabGroups,
-  };
+  const value = useMemo<TabGroupContextProps>(() => ({ tabGroups, updateTabGroups }), [tabGroups, updateTabGroups]);
 
   return <TabGroupContext.Provider value={value}>{children}</TabGroupContext.Provider>;
 };

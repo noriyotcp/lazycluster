@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback, useMemo } from 'react';
 
 interface ActiveWindowIdContextProps {
   activeWindowId: number | null;
@@ -21,11 +21,12 @@ export const ActiveWindowIdProvider = ({ children }: { children: React.ReactNode
     refreshActiveWindowId();
   }, [refreshActiveWindowId]);
 
-  return (
-    <ActiveWindowIdContext.Provider value={{ activeWindowId, refreshActiveWindowId }}>
-      {children}
-    </ActiveWindowIdContext.Provider>
+  const value = useMemo<ActiveWindowIdContextProps>(
+    () => ({ activeWindowId, refreshActiveWindowId }),
+    [activeWindowId, refreshActiveWindowId]
   );
+
+  return <ActiveWindowIdContext.Provider value={value}>{children}</ActiveWindowIdContext.Provider>;
 };
 
 export const useActiveWindowId = () => {

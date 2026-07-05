@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   DndContext,
   DragEndEvent,
@@ -64,8 +64,9 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
     return rectIntersection(args);
   };
 
-  // All tabs across all windows (for lookups)
-  const allTabs = filteredTabGroups.flatMap(g => g.tabs);
+  // All tabs across all windows (for lookups); memoized so drag-state renders
+  // don't rebuild it
+  const allTabs = useMemo(() => filteredTabGroups.flatMap(g => g.tabs), [filteredTabGroups]);
 
   // Store source window ID for pointer tracking (set in handleDragStart, read in useEffect)
   const sourceWindowIdRef = useRef<number | null>(null);

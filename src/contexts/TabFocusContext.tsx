@@ -1,4 +1,4 @@
-import React, { createContext, useContext, PropsWithChildren, useCallback } from 'react';
+import React, { createContext, useContext, PropsWithChildren, useCallback, useMemo } from 'react';
 import { devLog } from '../utils/devLog';
 
 interface TabFocusContextType {
@@ -21,9 +21,7 @@ export const TabFocusProvider = ({ children }: PropsWithChildren): React.ReactEl
     }
   }, []);
 
-  const value: TabFocusContextType = {
-    focusActiveTab,
-  };
+  const value = useMemo<TabFocusContextType>(() => ({ focusActiveTab }), [focusActiveTab]);
 
   return <TabFocusContext.Provider value={value}>{children}</TabFocusContext.Provider>;
 };

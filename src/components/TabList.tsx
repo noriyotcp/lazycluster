@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, memo } from 'react';
 import type { KeyboardEvent } from 'react';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import TabItem from './TabItem';
@@ -83,4 +83,6 @@ const TabList = ({ tabs, isFiltered = false, overId, dropPosition }: TabListProp
   );
 };
 
-export default TabList;
+// Memoized: skips re-renders caused by unrelated window groups' drag state
+// (e.g. the cross-window ring highlight) when this list's props are unchanged.
+export default memo(TabList);
