@@ -57,7 +57,7 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
   );
 
   // Pointer-first collision detection for multi-container DnD
-  const collisionDetection: CollisionDetection = (args) => {
+  const collisionDetection: CollisionDetection = args => {
     const pointerCollisions = pointerWithin(args);
     if (pointerCollisions.length > 0) return pointerCollisions;
     return rectIntersection(args);
@@ -208,8 +208,8 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
           const tabMap = new Map(windowTabs.map(t => [t.id!, t]));
 
           // Build segments: consecutive groups and ungrouped runs
-          type MoveSegment = { type: 'group'; groupId: number; tabIds: number[] }
-            | { type: 'ungrouped'; tabIds: number[] };
+          type MoveSegment =
+            { type: 'group'; groupId: number; tabIds: number[] } | { type: 'ungrouped'; tabIds: number[] };
           const segments: MoveSegment[] = [];
           let currentSeg: MoveSegment | null = null;
 
@@ -348,8 +348,8 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
           const tabMap = new Map(sourceWindowTabs.map(t => [t.id!, t]));
 
           // Build segments: consecutive groups and ungrouped runs
-          type MoveSegment = { type: 'group'; groupId: number; tabIds: number[] }
-            | { type: 'ungrouped'; tabIds: number[] };
+          type MoveSegment =
+            { type: 'group'; groupId: number; tabIds: number[] } | { type: 'ungrouped'; tabIds: number[] };
           const segments: MoveSegment[] = [];
           let currentSeg: MoveSegment | null = null;
 
@@ -428,7 +428,7 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
   // Find active tab data for DragOverlay
   const activeTab = activeId ? allTabs.find(t => t.id === activeId) : null;
   const activeTabWindowTabs = activeTab
-    ? filteredTabGroups.find(g => g.windowId === activeTab.windowId)?.tabs ?? []
+    ? (filteredTabGroups.find(g => g.windowId === activeTab.windowId)?.tabs ?? [])
     : [];
 
   return (
@@ -445,7 +445,10 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
           .filter(group => group.tabs.length > 0)
           .map(tabGroup => (
             <div key={tabGroup.windowId} className="break-inside-avoid-column">
-              <WindowGroupContextProvider key={tabGroup.windowId} value={{ windowGroupNumber: tabGroup.windowGroupNumber }}>
+              <WindowGroupContextProvider
+                key={tabGroup.windowId}
+                value={{ windowGroupNumber: tabGroup.windowGroupNumber }}
+              >
                 <WindowGroup
                   tabGroup={tabGroup}
                   isFiltered={isFiltered}

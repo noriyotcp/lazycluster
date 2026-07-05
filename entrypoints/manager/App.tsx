@@ -146,16 +146,20 @@ const Manager = () => {
       />
       <div className="p-5 pt-0">
         {viewMode === 'tabs' && (
-          <WindowGroupList
-            filteredTabGroups={filteredTabGroups}
-            isFiltered={searchQuery !== ''}
-          />
+          <WindowGroupList filteredTabGroups={filteredTabGroups} isFiltered={searchQuery !== ''} />
         )}
         {viewMode === 'duplicates' && (
           <DuplicatesView allTabs={allTabs} windowLabels={windowLabels} onBack={() => changeView('tabs')} />
         )}
         {viewMode === 'inactives' && (
-          <InactivesView allTabs={allTabs} windowLabels={windowLabels} onBack={() => changeView('tabs')} thresholdMs={inactiveThresholdMs} onThresholdChange={setInactiveThresholdMs} onSaveAll={saveInactiveTabs} />
+          <InactivesView
+            allTabs={allTabs}
+            windowLabels={windowLabels}
+            onBack={() => changeView('tabs')}
+            thresholdMs={inactiveThresholdMs}
+            onThresholdChange={setInactiveThresholdMs}
+            onSaveAll={saveInactiveTabs}
+          />
         )}
         {viewMode === 'saved' && (
           <SavedTabsView
