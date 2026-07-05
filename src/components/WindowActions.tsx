@@ -13,7 +13,6 @@ const extractTabIds = (tabs: chrome.tabs.Tab[]): number[] => {
   return tabs.map(tab => tab.id).filter((id): id is number => id !== undefined);
 };
 
-// visibleTabs is used to determine the checked state of the bulk select checkbox
 const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
   const { selectedTabIds, addTabsToSelection, removeTabsFromSelection } = useTabSelectionContext();
   const { setDeletingState } = useDeletionState();
@@ -89,37 +88,35 @@ const WindowActions = ({ windowId, visibleTabs }: WindowActionsProps) => {
   const selectedCountInWindow = countSelectedIds(visibleTabIds, selectedTabIds);
 
   return (
-    <>
-      <ul className="list shadow-md">
-        <li className="list-row p-2 items-center rounded-none gap-1.5 border-l-[3px] border-l-transparent">
-          <div>
-            <input
-              id={`bulk-select-tabs-on-window-${windowId}`}
-              className="checkbox checkbox-xs"
-              type="checkbox"
-              onChange={handleBulkSelectChange}
-              checked={shouldBulkSelectBeChecked(visibleTabIds, selectedTabIds)}
-            />
-          </div>
-          <div className="list-grow">
-            <button className="btn btn-link btn-xs" onClick={handleFocusWindow}>
-              Focus
-            </button>
-            <button className="btn btn-link btn-xs" onClick={handleCloseWindow}>
-              Close Window
-            </button>
-            <button
-              className="btn btn-link btn-xs"
-              onClick={handleCloseTabsInWindow}
-              disabled={shouldCloseTabsBeDisabled(visibleTabIds, selectedTabIds)}
-            >
-              Close Tabs
-            </button>
-            {selectedCountInWindow > 0 && `(${selectedCountInWindow})`}
-          </div>
-        </li>
-      </ul>
-    </>
+    <ul className="list shadow-md">
+      <li className="list-row p-2 items-center rounded-none gap-1.5 border-l-[3px] border-l-transparent">
+        <div>
+          <input
+            id={`bulk-select-tabs-on-window-${windowId}`}
+            className="checkbox checkbox-xs"
+            type="checkbox"
+            onChange={handleBulkSelectChange}
+            checked={shouldBulkSelectBeChecked(visibleTabIds, selectedTabIds)}
+          />
+        </div>
+        <div className="list-grow">
+          <button className="btn btn-link btn-xs" onClick={handleFocusWindow}>
+            Focus
+          </button>
+          <button className="btn btn-link btn-xs" onClick={handleCloseWindow}>
+            Close Window
+          </button>
+          <button
+            className="btn btn-link btn-xs"
+            onClick={handleCloseTabsInWindow}
+            disabled={shouldCloseTabsBeDisabled(visibleTabIds, selectedTabIds)}
+          >
+            Close Tabs
+          </button>
+          {selectedCountInWindow > 0 && `(${selectedCountInWindow})`}
+        </div>
+      </li>
+    </ul>
   );
 };
 

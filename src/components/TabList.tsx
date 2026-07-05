@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
+import type { KeyboardEvent } from 'react';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import TabItem from './TabItem';
 
@@ -12,7 +13,7 @@ interface TabListProps {
 const TabList = ({ tabs, isFiltered = false, overId, dropPosition }: TabListProps) => {
   const listRef = useRef<HTMLUListElement>(null);
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLUListElement>) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLUListElement>) => {
     const activeElement = document.activeElement;
     if (!activeElement || !listRef.current?.contains(activeElement)) {
       return;

@@ -10,14 +10,7 @@ import {
   getTabsToClose,
   type DuplicateMatchMode,
 } from '../utils/duplicateDetection';
-
-const extractDomain = (url: string): string => {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return '';
-  }
-};
+import { extractDomain } from '../utils/url';
 
 interface DuplicatesViewProps {
   allTabs: chrome.tabs.Tab[];
@@ -166,12 +159,13 @@ const DuplicatesView = ({ allTabs, windowLabels, onBack }: DuplicatesViewProps) 
                           </td>
                           <td className="text-base-content/60 truncate">{extractDomain(tab.url || '')}</td>
                           <td className="text-base-content/60">
-                            <a
-                              className="cursor-pointer hover:underline"
+                            <button
+                              type="button"
+                              className="link link-hover cursor-pointer"
                               onClick={() => chrome.windows.update(tab.windowId, { focused: true })}
                             >
                               {windowLabels.get(tab.windowId) ?? `W${tab.windowId}`}
-                            </a>
+                            </button>
                           </td>
                         </tr>
                       ))}
