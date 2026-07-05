@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { devLog } from '../../src/utils/devLog';
 import Header from '../../src/components/Header';
 import type { ViewMode } from '../../src/components/Header';
@@ -116,22 +116,33 @@ const Manager = () => {
   );
 
   // Map windowId to display label (Current Window / Window 1, 2, ...)
-  const windowLabels = new Map<number, string>();
-  tabGroups.forEach((group, index) => {
-    windowLabels.set(group.windowId, index === 0 ? 'Current Window' : `Window ${index}`);
-  });
+  const windowLabels = useMemo(() => {
+    const labels = new Map<number, string>();
+    tabGroups.forEach((group, index) => {
+      labels.set(group.windowId, index === 0 ? 'Current Window' : `Window ${index}`);
+    });
+    return labels;
+  }, [tabGroups]);
 
-  const filteredTabGroups = tabGroups
-    .map((group, index) => ({ ...group, windowGroupNumber: index }))
-    .map(group => ({
-      ...group,
-      tabs: group.tabs.filter(tab =>
-        ['title', 'url'].some(target => {
-          const value = (tab as chrome.tabs.Tab)[target as keyof chrome.tabs.Tab];
-          return typeof value === 'string' && value.toLowerCase().includes(searchQuery.toLowerCase());
-        })
-      ) as chrome.tabs.Tab[],
-    })) satisfies { windowId: number; tabs: chrome.tabs.Tab[]; windowGroupNumber: number }[]; // Enforce chrome.tabs.Tab[] type.
+  // Memoized so unrelated state changes (view mode, threshold) don't rebuild
+  // the groups and cascade re-renders into WindowGroupList
+  const filteredTabGroups = useMemo(
+    () =>
+      tabGroups
+        .map((group, index) => ({ ...group, windowGroupNumber: index }))
+        .map(group => ({
+          ...group,
+          tabs: group.tabs.filter(tab =>
+            ['title', 'url'].some(target => {
+              const value = (tab as chrome.tabs.Tab)[target as keyof chrome.tabs.Tab];
+              return typeof value === 'string' && value.toLowerCase().includes(searchQuery.toLowerCase());
+            })
+          ) as chrome.tabs.Tab[],
+        })) satisfies { windowId: number; tabs: chrome.tabs.Tab[]; windowGroupNumber: number }[], // Enforce chrome.tabs.Tab[] type.
+    [tabGroups, searchQuery]
+  );
+
+  const backToTabs = useCallback(() => changeView('tabs'), [changeView]);
 
   return (
     <TabFocusProvider>
@@ -150,13 +161,13 @@ const Manager = () => {
           <WindowGroupList filteredTabGroups={filteredTabGroups} isFiltered={searchQuery !== ''} />
         )}
         {viewMode === 'duplicates' && (
-          <DuplicatesView allTabs={allTabs} windowLabels={windowLabels} onBack={() => changeView('tabs')} />
+          <DuplicatesView allTabs={allTabs} windowLabels={windowLabels} onBack={backToTabs} />
         )}
         {viewMode === 'inactives' && (
           <InactivesView
             allTabs={allTabs}
             windowLabels={windowLabels}
-            onBack={() => changeView('tabs')}
+            onBack={backToTabs}
             thresholdMs={inactiveThresholdMs}
             onThresholdChange={setInactiveThresholdMs}
             onSaveAll={saveInactiveTabs}
@@ -165,7 +176,7 @@ const Manager = () => {
         {viewMode === 'saved' && (
           <SavedTabsView
             savedTabGroups={savedTabGroups}
-            onBack={() => changeView('tabs')}
+            onBack={backToTabs}
             onRestoreGroup={restoreGroup}
             onDeleteGroup={deleteGroup}
             onClearAll={clearAll}

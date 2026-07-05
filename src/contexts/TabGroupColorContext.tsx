@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
 import { TabGroupColor } from '../types/tabGroup';
 
 interface TabGroupColorContextType {
@@ -11,14 +11,17 @@ const TabGroupColorContext = createContext<TabGroupColorContextType | undefined>
 export const TabGroupColorProvider = ({ children }: { children: ReactNode }) => {
   const [groupColorMap, setGroupColorMap] = useState<Map<number, TabGroupColor>>(new Map());
 
-  const getGroupColor = (groupId: number): TabGroupColor | null => {
-    if (groupId === chrome.tabGroups.TAB_GROUP_ID_NONE) {
-      return null;
-    }
-    return groupColorMap.get(groupId) ?? null;
-  };
+  const getGroupColor = useCallback(
+    (groupId: number): TabGroupColor | null => {
+      if (groupId === chrome.tabGroups.TAB_GROUP_ID_NONE) {
+        return null;
+      }
+      return groupColorMap.get(groupId) ?? null;
+    },
+    [groupColorMap]
+  );
 
-  const updateGroupColors = async (tabs: chrome.tabs.Tab[]) => {
+  const updateGroupColors = useCallback(async (tabs: chrome.tabs.Tab[]) => {
     // Extract unique group IDs from tabs
     const groupIds = new Set<number>();
     tabs.forEach(tab => {
@@ -41,13 +44,14 @@ export const TabGroupColorProvider = ({ children }: { children: ReactNode }) => 
     );
 
     setGroupColorMap(newColorMap);
-  };
+  }, []);
 
-  return (
-    <TabGroupColorContext.Provider value={{ getGroupColor, updateGroupColors }}>
-      {children}
-    </TabGroupColorContext.Provider>
+  const value = useMemo<TabGroupColorContextType>(
+    () => ({ getGroupColor, updateGroupColors }),
+    [getGroupColor, updateGroupColors]
   );
+
+  return <TabGroupColorContext.Provider value={value}>{children}</TabGroupColorContext.Provider>;
 };
 
 export const useTabGroupColor = () => {

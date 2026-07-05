@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import * as dragSelectionUtils from '../utils/dragSelection';
 
 interface DragSelectionContextProps {
@@ -27,39 +27,59 @@ export const DragSelectionContextProvider = ({ children }: { children: React.Rea
   const [lastDragSelectedIndex, setLastDragSelectedIndex] = useState<number | null>(null);
   const [windowId, setWindowId] = useState<number | null>(null);
 
-  const addTabToDragSelection = (tabId: number, tabWindowId: number, index: number) => {
-    const result = dragSelectionUtils.addTabToDragSelection(dragSelectedTabIds, windowId, tabId, tabWindowId);
-    setDragSelectedTabIds(result.selectedIds);
-    setWindowId(result.windowId);
-    setLastDragSelectedIndex(index);
-  };
+  const addTabToDragSelection = useCallback(
+    (tabId: number, tabWindowId: number, index: number) => {
+      const result = dragSelectionUtils.addTabToDragSelection(dragSelectedTabIds, windowId, tabId, tabWindowId);
+      setDragSelectedTabIds(result.selectedIds);
+      setWindowId(result.windowId);
+      setLastDragSelectedIndex(index);
+    },
+    [dragSelectedTabIds, windowId]
+  );
 
-  const removeTabFromDragSelection = (tabId: number) => {
-    setDragSelectedTabIds(dragSelectionUtils.removeTabFromDragSelection(dragSelectedTabIds, tabId));
-  };
+  const removeTabFromDragSelection = useCallback(
+    (tabId: number) => {
+      setDragSelectedTabIds(dragSelectionUtils.removeTabFromDragSelection(dragSelectedTabIds, tabId));
+    },
+    [dragSelectedTabIds]
+  );
 
-  const clearDragSelection = () => {
+  const clearDragSelection = useCallback(() => {
     setDragSelectedTabIds(dragSelectionUtils.clearDragSelection());
     setWindowId(null);
     setLastDragSelectedIndex(null);
-  };
+  }, []);
 
-  const addTabsToDragSelection = (tabIds: number[], tabWindowId: number) => {
-    const result = dragSelectionUtils.addTabsToDragSelection(dragSelectedTabIds, windowId, tabIds, tabWindowId);
-    setDragSelectedTabIds(result.selectedIds);
-    setWindowId(result.windowId);
-  };
+  const addTabsToDragSelection = useCallback(
+    (tabIds: number[], tabWindowId: number) => {
+      const result = dragSelectionUtils.addTabsToDragSelection(dragSelectedTabIds, windowId, tabIds, tabWindowId);
+      setDragSelectedTabIds(result.selectedIds);
+      setWindowId(result.windowId);
+    },
+    [dragSelectedTabIds, windowId]
+  );
 
-  const value: DragSelectionContextProps = {
-    dragSelectedTabIds,
-    lastDragSelectedIndex,
-    windowId,
-    addTabToDragSelection,
-    removeTabFromDragSelection,
-    clearDragSelection,
-    addTabsToDragSelection,
-    setLastDragSelectedIndex,
-  };
+  const value = useMemo<DragSelectionContextProps>(
+    () => ({
+      dragSelectedTabIds,
+      lastDragSelectedIndex,
+      windowId,
+      addTabToDragSelection,
+      removeTabFromDragSelection,
+      clearDragSelection,
+      addTabsToDragSelection,
+      setLastDragSelectedIndex,
+    }),
+    [
+      dragSelectedTabIds,
+      lastDragSelectedIndex,
+      windowId,
+      addTabToDragSelection,
+      removeTabFromDragSelection,
+      clearDragSelection,
+      addTabsToDragSelection,
+    ]
+  );
 
   return <DragSelectionContext.Provider value={value}>{children}</DragSelectionContext.Provider>;
 };
