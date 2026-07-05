@@ -19,8 +19,10 @@ interface SavedTabsViewProps {
 
 const SavedTabsView = ({ savedTabGroups, onBack, onRestoreGroup, onDeleteGroup, onClearAll }: SavedTabsViewProps) => {
   const { showToast } = useToast();
+  const restoreDialogRef = useRef<HTMLDialogElement>(null);
   const deleteDialogRef = useRef<HTMLDialogElement>(null);
   const clearAllDialogRef = useRef<HTMLDialogElement>(null);
+  const [pendingRestoreId, setPendingRestoreId] = useState<string | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const handleRestoreGroup = async (id: string) => {
@@ -77,7 +79,13 @@ const SavedTabsView = ({ savedTabGroups, onBack, onRestoreGroup, onDeleteGroup, 
               </div>
               <div className="collapse-content">
                 <div className="flex gap-2 justify-end mb-3">
-                  <button className="btn btn-sm btn-success" onClick={() => handleRestoreGroup(group.id)}>
+                  <button
+                    className="btn btn-sm btn-success"
+                    onClick={() => {
+                      setPendingRestoreId(group.id);
+                      restoreDialogRef.current?.showModal();
+                    }}
+                  >
                     Restore all
                   </button>
                   <button
@@ -116,6 +124,20 @@ const SavedTabsView = ({ savedTabGroups, onBack, onRestoreGroup, onDeleteGroup, 
           ))}
         </div>
       )}
+      <ConfirmDialog
+        ref={restoreDialogRef}
+        title="Restore all tabs?"
+        message={
+          pendingRestoreId
+            ? `This opens ${savedTabGroups.find(g => g.id === pendingRestoreId)?.tabs.length ?? 0} tab(s) in a new window.`
+            : ''
+        }
+        confirmLabel="Restore"
+        onConfirm={() => {
+          if (pendingRestoreId) handleRestoreGroup(pendingRestoreId);
+        }}
+      />
+
       <ConfirmDialog
         ref={deleteDialogRef}
         title="Delete saved group?"
