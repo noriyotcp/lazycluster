@@ -118,3 +118,79 @@ describe('clearAllSavedTabGroups', () => {
     expect(await loadSavedTabGroups()).toEqual([]);
   });
 });
+
+// --- Serialization (mutex) tests ---
+//
+// Without serialization, two mutations that start within the same microtask
+// window both read the same "existing" state via loadSavedTabGroups(); the
+// second save then overwrites the first, silently losing changes. The mutex
+// forces mutations into a FIFO chain so each one sees the previous one's
+// committed state.
+
+describe('mutation serialization', () => {
+  it('preserves all groups when adds run in parallel', async () => {
+    const tabsList = Array.from({ length: 5 }, (_, i) => [
+      { url: `https://example.com/${i}`, title: `T${i}` } as chrome.tabs.Tab,
+    ]);
+
+    await Promise.all(tabsList.map(tabs => addSavedTabGroup(tabs)));
+
+    const stored = await loadSavedTabGroups();
+    expect(stored).toHaveLength(5);
+    const urls = stored.map(g => g.tabs[0].url).sort();
+    expect(urls).toEqual([
+      'https://example.com/0',
+      'https://example.com/1',
+      'https://example.com/2',
+      'https://example.com/3',
+      'https://example.com/4',
+    ]);
+  });
+
+  it('serializes add and delete such that both take effect', async () => {
+    await saveSavedTabGroups([{ id: 'existing', savedAt: 1, tabs: [] }]);
+
+    const newTabs = [{ url: 'https://new.com', title: 'New' } as chrome.tabs.Tab];
+    await Promise.all([addSavedTabGroup(newTabs), deleteSavedTabGroup('existing')]);
+
+    const stored = await loadSavedTabGroups();
+    expect(stored).toHaveLength(1);
+    expect(stored[0].tabs[0].url).toBe('https://new.com');
+  });
+
+  it('serializes clearAll and a following add in FIFO order', async () => {
+    await saveSavedTabGroups([
+      { id: 'a', savedAt: 1, tabs: [] },
+      { id: 'b', savedAt: 2, tabs: [] },
+    ]);
+
+    // clearAll is queued first (sync), so it runs first, then the add sees an
+    // empty store and persists the new group.
+    const clearPromise = clearAllSavedTabGroups();
+    const addPromise = addSavedTabGroup([{ url: 'https://after.com', title: 'After' } as chrome.tabs.Tab]);
+    await Promise.all([clearPromise, addPromise]);
+
+    const stored = await loadSavedTabGroups();
+    expect(stored).toHaveLength(1);
+    expect(stored[0].tabs[0].url).toBe('https://after.com');
+  });
+
+  it('keeps processing the queue after a rejected mutation', async () => {
+    // Force the next set() to reject exactly once, so the mutation inside
+    // the queue throws. The queue must still process subsequent mutations.
+    const setMock = chrome.storage.local.set as unknown as ReturnType<typeof vi.fn>;
+    setMock.mockImplementationOnce(async () => {
+      throw new Error('quota exceeded');
+    });
+
+    const failing = addSavedTabGroup([{ url: 'https://fails.com', title: 'Fail' } as chrome.tabs.Tab]);
+    const succeeding = addSavedTabGroup([{ url: 'https://ok.com', title: 'OK' } as chrome.tabs.Tab]);
+
+    await expect(failing).rejects.toThrow('quota exceeded');
+    await expect(succeeding).resolves.toBeDefined();
+
+    const stored = await loadSavedTabGroups();
+    expect(stored).toHaveLength(1);
+    expect(stored[0].tabs[0].url).toBe('https://ok.com');
+  });
+});
