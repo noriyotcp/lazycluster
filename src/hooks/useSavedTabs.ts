@@ -1,6 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { SavedTabGroup } from '../types/savedTabs';
-import { loadSavedTabGroups, addSavedTabGroup, deleteSavedTabGroup, clearAllSavedTabGroups } from '../utils/savedTabs';
+import {
+  loadSavedTabGroups,
+  addSavedTabGroup,
+  deleteSavedTabGroup,
+  clearAllSavedTabGroups,
+  isRestorableUrl,
+} from '../utils/savedTabs';
+
+export interface RestoreResult {
+  restoredCount: number;
+  filteredCount: number;
+}
 
 export function useSavedTabs() {
   const [savedTabGroups, setSavedTabGroups] = useState<SavedTabGroup[]>([]);
@@ -16,12 +27,24 @@ export function useSavedTabs() {
   }, []);
 
   const restoreGroup = useCallback(
-    async (id: string): Promise<void> => {
+    async (id: string): Promise<RestoreResult> => {
       const group = savedTabGroups.find(g => g.id === id);
-      if (!group) return;
-      await chrome.windows.create({ url: group.tabs.map(t => t.url) });
+      if (!group) return { restoredCount: 0, filteredCount: 0 };
+
+      const restorableUrls = group.tabs.map(t => t.url).filter(isRestorableUrl);
+      const filteredCount = group.tabs.length - restorableUrls.length;
+
+      if (restorableUrls.length === 0) {
+        throw new Error(
+          `No restorable URLs in this group (${filteredCount} URL(s) are chrome://, extension pages, or otherwise not openable from an extension).`
+        );
+      }
+
+      await chrome.windows.create({ url: restorableUrls });
       await deleteSavedTabGroup(id);
       setSavedTabGroups(prev => prev.filter(g => g.id !== id));
+
+      return { restoredCount: restorableUrls.length, filteredCount };
     },
     [savedTabGroups]
   );
