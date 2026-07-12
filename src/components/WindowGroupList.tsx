@@ -1,7 +1,8 @@
-import { DndContext, DragOverlay } from '@dnd-kit/core';
+import { DndContext, DragOverlay, MeasuringStrategy } from '@dnd-kit/core';
 import WindowGroup from './WindowGroup';
 import TabDragOverlay from './TabDragOverlay';
 import { WindowGroupContextProvider } from '../contexts/WindowGroupContext';
+import { DragStateProvider } from '../contexts/DragStateContexts';
 import { useTabDragAndDrop, type FilteredTabGroup } from '../hooks/useTabDragAndDrop';
 
 interface WindowGroupListProps {
@@ -32,27 +33,21 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
       onDragOver={onDragOver}
       onDragEnd={onDragEnd}
       onDragCancel={onDragCancel}
+      measuring={{ droppable: { strategy: MeasuringStrategy.BeforeDragging } }}
     >
-      <div className="lg:columns-2 mt-4">
-        {filteredTabGroups
-          .filter(group => group.tabs.length > 0)
-          .map(tabGroup => (
-            <div key={tabGroup.windowId} className="break-inside-avoid-column">
-              <WindowGroupContextProvider
-                key={tabGroup.windowId}
-                value={{ windowGroupNumber: tabGroup.windowGroupNumber }}
-              >
-                <WindowGroup
-                  tabGroup={tabGroup}
-                  isFiltered={isFiltered}
-                  overId={overId}
-                  dropPosition={dropPosition}
-                  overWindowId={overWindowId}
-                />
-              </WindowGroupContextProvider>
-            </div>
-          ))}
-      </div>
+      <DragStateProvider overWindowId={overWindowId} overId={overId} dropPosition={dropPosition}>
+        <div className="lg:columns-2 mt-4">
+          {filteredTabGroups
+            .filter(group => group.tabs.length > 0)
+            .map(tabGroup => (
+              <div key={tabGroup.windowId} className="break-inside-avoid-column">
+                <WindowGroupContextProvider key={tabGroup.windowId} value={tabGroup.windowGroupNumber}>
+                  <WindowGroup tabGroup={tabGroup} isFiltered={isFiltered} />
+                </WindowGroupContextProvider>
+              </div>
+            ))}
+        </div>
+      </DragStateProvider>
 
       <DragOverlay>
         {activeTab ? <TabDragOverlay activeTab={activeTab} activeTabWindowTabs={activeTabWindowTabs} /> : null}

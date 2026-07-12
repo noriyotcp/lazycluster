@@ -7,7 +7,7 @@ interface WindowTitleProps {
 
 const WindowTitle = ({ windowId }: WindowTitleProps) => {
   const { activeWindowId } = useActiveWindowId();
-  const { windowGroupNumber } = useWindowGroupContext();
+  const windowGroupNumber = useWindowGroupContext();
   const title = windowId === activeWindowId ? 'Current Window' : `Window ${windowGroupNumber}`;
   return <h2 className="window-title text-lg font-semibold">{title}</h2>;
 };
