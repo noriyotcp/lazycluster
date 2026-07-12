@@ -6,6 +6,7 @@ import {
   addSavedTabGroup,
   deleteSavedTabGroup,
   clearAllSavedTabGroups,
+  isRestorableUrl,
 } from './savedTabs';
 import type { SavedTabGroup } from '../types/savedTabs';
 
@@ -116,6 +117,36 @@ describe('clearAllSavedTabGroups', () => {
     await saveSavedTabGroups([{ id: 'a', savedAt: 1000, tabs: [] }]);
     await clearAllSavedTabGroups();
     expect(await loadSavedTabGroups()).toEqual([]);
+  });
+});
+
+// --- isRestorableUrl (pure predicate) ---
+
+describe('isRestorableUrl', () => {
+  it.each([
+    'https://example.com',
+    'http://example.com',
+    'about:blank',
+    'file:///Users/name/file.pdf',
+    'data:text/html,hi',
+  ])('returns true for %s', url => {
+    expect(isRestorableUrl(url)).toBe(true);
+  });
+
+  it.each([
+    'chrome://extensions/',
+    'chrome://history/',
+    'chrome-extension://abcdef/page.html',
+    'javascript:alert(1)',
+    'edge://settings/',
+    'about:preferences',
+  ])('returns false for %s', url => {
+    expect(isRestorableUrl(url)).toBe(false);
+  });
+
+  it('returns false for empty or undefined', () => {
+    expect(isRestorableUrl('')).toBe(false);
+    expect(isRestorableUrl(undefined)).toBe(false);
   });
 });
 

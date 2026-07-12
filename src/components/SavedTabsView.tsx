@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import type { SavedTabGroup } from '../types/savedTabs';
+import type { RestoreResult } from '../hooks/useSavedTabs';
 import { useToast } from './ToastProvider';
 import Alert from './Alert';
 import ViewHeader from './ViewHeader';
@@ -12,7 +13,7 @@ import { extractDomain } from '../utils/url';
 interface SavedTabsViewProps {
   savedTabGroups: SavedTabGroup[];
   onBack: () => void;
-  onRestoreGroup: (id: string) => Promise<void>;
+  onRestoreGroup: (id: string) => Promise<RestoreResult>;
   onDeleteGroup: (id: string) => Promise<void>;
   onClearAll: () => Promise<void>;
 }
@@ -29,8 +30,12 @@ const SavedTabsView = ({ savedTabGroups, onBack, onRestoreGroup, onDeleteGroup, 
     const group = savedTabGroups.find(g => g.id === id);
     if (!group) return;
     try {
-      await onRestoreGroup(id);
-      showToast(<Alert message={`Restored ${group.tabs.length} tab(s) in a new window.`} variant="success" />);
+      const { restoredCount, filteredCount } = await onRestoreGroup(id);
+      const message =
+        filteredCount > 0
+          ? `Restored ${restoredCount} of ${restoredCount + filteredCount} tab(s). Skipped ${filteredCount} non-restorable URL(s).`
+          : `Restored ${restoredCount} tab(s) in a new window.`;
+      showToast(<Alert message={message} variant="success" />);
     } catch (error) {
       showToast(<Alert message={`Failed to restore: ${error instanceof Error ? error.message : String(error)}`} />);
     }

@@ -50,6 +50,19 @@ export function clearAllSavedTabGroups(): Promise<void> {
   });
 }
 
+// URL schemes chrome.windows.create refuses to open from an extension context.
+// `about:blank` is a common exception — Chrome does open it in a new window.
+export function isRestorableUrl(url: string | undefined): boolean {
+  if (!url) return false;
+  if (url === 'about:blank') return true;
+  if (url.startsWith('chrome:')) return false;
+  if (url.startsWith('chrome-extension:')) return false;
+  if (url.startsWith('javascript:')) return false;
+  if (url.startsWith('edge:')) return false;
+  if (url.startsWith('about:')) return false;
+  return true;
+}
+
 export function formatGroupName(savedAt: number): string {
   const date = new Date(savedAt);
   const month = date.toLocaleString('en-US', { month: 'short' });
