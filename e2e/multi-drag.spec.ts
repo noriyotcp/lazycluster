@@ -1,78 +1,5 @@
 import { test, expect } from './fixtures';
-import type { Page, Locator } from '@playwright/test';
-
-// Helper function to create additional tabs for testing
-async function createTabs(page: Page, count: number): Promise<void> {
-  for (let i = 0; i < count; i++) {
-    await page.evaluate(() => {
-      return new Promise<void>(resolve => {
-        chrome.tabs.create({ url: 'https://example.com', active: false }, () => resolve());
-      });
-    });
-  }
-  // Wait for tabs to be created
-  await page.waitForTimeout(500);
-}
-
-// Helper function for Cmd/Ctrl+click using native event dispatch
-async function cmdClick(page: Page, locator: Locator): Promise<void> {
-  const isMac = process.platform === 'darwin';
-
-  await locator.evaluate((element: HTMLElement, isMac: boolean) => {
-    const event = new MouseEvent('click', {
-      bubbles: true,
-      cancelable: true,
-      view: window,
-      metaKey: isMac,
-      ctrlKey: !isMac,
-    });
-    element.dispatchEvent(event);
-  }, isMac);
-
-  // Wait for React state update and DOM rendering
-  await page.waitForTimeout(100);
-}
-
-// Helper function for Shift+click using native event dispatch
-async function shiftClick(page: Page, locator: Locator): Promise<void> {
-  await locator.evaluate((element: HTMLElement) => {
-    const event = new MouseEvent('click', {
-      bubbles: true,
-      cancelable: true,
-      view: window,
-      shiftKey: true,
-    });
-    element.dispatchEvent(event);
-  });
-
-  // Wait for React state update and DOM rendering
-  await page.waitForTimeout(100);
-}
-
-// Helper function to perform drag-and-drop using pointer events
-// Note: Keyboard drag doesn't support multi-item selection in dnd-kit
-async function performDrag(page: Page, source: Locator, target: Locator, targetYRatio = 0.5): Promise<void> {
-  const sourceBox = await source.boundingBox();
-  const targetBox = await target.boundingBox();
-
-  if (!sourceBox || !targetBox) {
-    throw new Error('Could not get bounding boxes for drag operation');
-  }
-
-  // Calculate positions (targetYRatio: 0.5 = center, 0.8 = bottom)
-  const sourceX = sourceBox.x + sourceBox.width / 2;
-  const sourceY = sourceBox.y + sourceBox.height / 2;
-  const targetX = targetBox.x + targetBox.width / 2;
-  const targetY = targetBox.y + targetBox.height * targetYRatio;
-
-  // Perform drag: mouse down, move, mouse up
-  await page.mouse.move(sourceX, sourceY);
-  await page.mouse.down();
-  await page.waitForTimeout(100); // Wait for drag to activate
-  await page.mouse.move(targetX, targetY, { steps: 10 }); // Smooth movement
-  await page.waitForTimeout(100);
-  await page.mouse.up();
-}
+import { createTabs, cmdClick, shiftClick, performDrag, startDrag } from './helpers';
 
 test.describe('Multi-Drag E2E Tests', () => {
   test('should drag single tab to new position', async ({ page, extensionId }) => {
@@ -104,8 +31,8 @@ test.describe('Multi-Drag E2E Tests', () => {
     // Use mouse drag to move the first tab to the third position
     await performDrag(page, firstDragHandle, thirdTabItem);
 
-    // Wait for Chrome API to update
-    await page.waitForTimeout(500);
+    // Wait for the Chrome API update to reach the DOM: the first tab is no longer the original one
+    await expect(page.locator('.group\\/tabitem a.list-col-grow').first()).not.toHaveText(tabTitles[0]);
 
     // Get tab titles after drag
     const newTabTitles = await page.locator('.group\\/tabitem a.list-col-grow').allTextContents();
@@ -158,8 +85,8 @@ test.describe('Multi-Drag E2E Tests', () => {
     const fifthTabItem = page.locator('.group\\/tabitem').nth(4);
     await performDrag(page, firstDragHandle, fifthTabItem);
 
-    // Wait for Chrome API to update
-    await page.waitForTimeout(500);
+    // Wait for the Chrome API update to reach the DOM: the first tab moved down
+    await expect(page.locator('.group\\/tabitem a.list-col-grow').first()).not.toHaveText(tabTitles[0]);
 
     // Get tab titles after drag
     const newTabTitles = await page.locator('.group\\/tabitem a.list-col-grow').allTextContents();
@@ -202,21 +129,16 @@ test.describe('Multi-Drag E2E Tests', () => {
     await cmdClick(page, secondDragHandle);
     await cmdClick(page, thirdDragHandle);
 
-    // Start dragging the first selected tab to trigger DragOverlay
+    // Start dragging the first selected tab to trigger DragOverlay.
+    // startDrag presses down on the handle, waits for drag activation
+    // (opacity: 0.5), then moves ~14px past the 8px activation threshold.
     const handleBox = await firstDragHandle.boundingBox();
     if (!handleBox) throw new Error('Could not get drag handle bounding box');
+    const targetX = handleBox.x + handleBox.width / 2 + 10;
+    const targetY = handleBox.y + handleBox.height / 2 + 10;
+    await startDrag(page, firstDragHandle, targetX, targetY);
 
-    const startX = handleBox.x + handleBox.width / 2;
-    const startY = handleBox.y + handleBox.height / 2;
-
-    await page.mouse.move(startX, startY);
-    await page.mouse.down();
-    await page.waitForTimeout(100); // Wait for drag to activate
-    // Move mouse slightly to trigger DragOverlay
-    await page.mouse.move(startX + 10, startY + 10);
-    await page.waitForTimeout(100);
-
-    // Verify badge is visible with correct count
+    // Verify badge is visible with correct count (assertions poll for the DragOverlay)
     const badge = page.locator('.badge-accent');
     await expect(badge).toBeVisible();
     await expect(badge).toHaveText('3');
@@ -263,8 +185,8 @@ test.describe('Multi-Drag E2E Tests', () => {
     const secondTabItem = page.locator('.group\\/tabitem').nth(1);
     await performDrag(page, fourthDragHandle, secondTabItem);
 
-    // Wait for Chrome API to update
-    await page.waitForTimeout(500);
+    // Wait for the Chrome API update to reach the DOM: tab originally at index 3 lands at index 1
+    await expect(page.locator('.group\\/tabitem a.list-col-grow').nth(1)).toHaveText(tabTitles[3]);
 
     // Get tab titles after drag
     const newTabTitles = await page.locator('.group\\/tabitem a.list-col-grow').allTextContents();
@@ -313,8 +235,8 @@ test.describe('Multi-Drag E2E Tests', () => {
     const fourthTabItem = page.locator('.group\\/tabitem').nth(3);
     await performDrag(page, firstDragHandle, fourthTabItem);
 
-    // Wait for Chrome API to update
-    await page.waitForTimeout(500);
+    // Wait for the Chrome API update to reach the DOM: tab originally at index 0 lands at index 2
+    await expect(page.locator('.group\\/tabitem a.list-col-grow').nth(2)).toHaveText(tabTitles[0]);
 
     // Get tab titles after drag
     const newTabTitles = await page.locator('.group\\/tabitem a.list-col-grow').allTextContents();
@@ -369,8 +291,9 @@ test.describe('Multi-Drag E2E Tests', () => {
     // Drop at bottom of last tab to ensure "insert after" placement
     await performDrag(page, secondDragHandle, lastTabItem, 0.8);
 
-    // Wait for Chrome API to update
-    await page.waitForTimeout(500);
+    // Wait for the Chrome API update to reach the DOM: the range left index 1,
+    // so the tab that was at index 1 is no longer there
+    await expect(page.locator('.group\\/tabitem a.list-col-grow').nth(1)).not.toHaveText(tabTitles[1]);
 
     // Get tab titles after drag
     const newTabTitles = await page.locator('.group\\/tabitem a.list-col-grow').allTextContents();
