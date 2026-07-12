@@ -1,65 +1,18 @@
 import { test, expect } from './fixtures';
-import type { Page, Locator } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import {
+  gotoManager,
+  createWindow,
+  removeWindow,
+  cmdClick,
+  createTabs,
+  startDrag,
+  performDragAndDrop,
+  tabItemOf,
+} from './helpers';
 
-// Helper function to create a new browser window with a tab
-async function createWindow(page: Page): Promise<number> {
-  const windowId = await page.evaluate(() => {
-    return new Promise<number>(resolve => {
-      chrome.windows.create({ url: 'https://example.com', type: 'normal' }, window => {
-        if (window && window.id) resolve(window.id);
-      });
-    });
-  });
-  await page.waitForTimeout(500);
-  return windowId;
-}
-
-// Helper to clean up a window
-async function removeWindow(page: Page, windowId: number): Promise<void> {
-  await page.evaluate(id => chrome.windows.remove(id), windowId);
-  await page.waitForTimeout(500);
-}
-
-// Helper function for Cmd/Ctrl+click using native event dispatch
-async function cmdClick(page: Page, locator: Locator): Promise<void> {
-  const isMac = process.platform === 'darwin';
-  await locator.evaluate((element: HTMLElement, isMac: boolean) => {
-    const event = new MouseEvent('click', {
-      bubbles: true,
-      cancelable: true,
-      view: window,
-      metaKey: isMac,
-      ctrlKey: !isMac,
-    });
-    element.dispatchEvent(event);
-  }, isMac);
-  await page.waitForTimeout(100);
-}
-
-// Start a drag from a source element and hold at a target position without dropping
-async function startDragAndHold(page: Page, source: Locator, targetX: number, targetY: number): Promise<void> {
-  const sourceBox = await source.boundingBox();
-  if (!sourceBox) throw new Error('Could not get bounding box for drag source');
-
-  const sourceX = sourceBox.x + sourceBox.width / 2;
-  const sourceY = sourceBox.y + sourceBox.height / 2;
-
-  await page.mouse.move(sourceX, sourceY);
-  await page.mouse.down();
-  await page.waitForTimeout(100); // Wait for drag activation (PointerSensor distance: 8)
-  await page.mouse.move(targetX, targetY, { steps: 10 });
-  await page.waitForTimeout(200); // Wait for pointermove handler and React state update
-  // Mouse is still held down — caller should release with page.mouse.up()
-}
-
-// Perform a full drag-and-drop from source to target position
-async function performDragAndDrop(page: Page, source: Locator, targetX: number, targetY: number): Promise<void> {
-  await startDragAndHold(page, source, targetX, targetY);
-  await page.mouse.up();
-  await page.waitForTimeout(1000); // Wait for Chrome API + background script UI update
-}
-
-// Create an extra tab in a specific window
+// Create an extra tab in a specific (or the current) window. Not covered by
+// helpers.ts's createTabs (which doesn't target a specific windowId), so kept local.
 async function createTabInWindow(page: Page, windowId?: number): Promise<void> {
   await page.evaluate(wId => {
     return new Promise<void>(resolve => {
@@ -68,12 +21,40 @@ async function createTabInWindow(page: Page, windowId?: number): Promise<void> {
       chrome.tabs.create(opts, () => resolve());
     });
   }, windowId ?? null);
-  await page.waitForTimeout(500);
+}
+
+// Create a tab group with specified tabs in a window
+async function createTabGroup(
+  page: Page,
+  windowId: number,
+  title: string,
+  color: string,
+  tabCount: number
+): Promise<{ groupId: number; tabIds: number[] }> {
+  return page.evaluate(
+    async ({ windowId, title, color, tabCount }) => {
+      // Create tabs in the target window
+      const tabIds: number[] = [];
+      for (let i = 0; i < tabCount; i++) {
+        const tab = await chrome.tabs.create({
+          url: 'https://example.com',
+          windowId,
+          active: false,
+        });
+        if (tab.id) tabIds.push(tab.id);
+      }
+      // Group and configure
+      const groupId = await chrome.tabs.group({ tabIds: tabIds as [number, ...number[]] });
+      await chrome.tabGroups.update(groupId, { title, color: color as chrome.tabGroups.Color });
+      return { groupId, tabIds };
+    },
+    { windowId, title, color, tabCount }
+  );
 }
 
 test.describe('Cross-Window DnD Tab Movement', () => {
   test('should move a tab to another window on cross-window drop', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     // Create extra tabs so the source window has enough to drag
     await createTabInWindow(page);
@@ -123,7 +104,7 @@ test.describe('Cross-Window DnD Tab Movement', () => {
   });
 
   test('should move a tab to a collapsed window group', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     // Create extra tabs so the source window has enough to drag
     await createTabInWindow(page);
@@ -145,8 +126,11 @@ test.describe('Cross-Window DnD Tab Movement', () => {
       // Collapse the target window group
       const collapseCheckbox = targetGroup.locator(`#window-group-collapse-${targetWinId}`);
       await collapseCheckbox.click();
-      await page.waitForTimeout(100);
       await expect(collapseCheckbox).not.toBeChecked();
+      // daisyUI's collapse CSS animates visibility over ~200ms; wait for it to
+      // finish before reading targetGroup.boundingBox(), otherwise the drop
+      // coordinate lands below the (still-shrinking) target group.
+      await expect(targetGroup.locator('.collapse-content')).toBeHidden();
 
       // Count initial tabs dynamically
       const sourceCountBefore = await sourceGroup.locator('button[aria-label="Drag to reorder"]').count();
@@ -171,7 +155,6 @@ test.describe('Cross-Window DnD Tab Movement', () => {
       const tgtGroup = page.locator(`[data-window-id="${targetWinId}"]`);
       const tgtCheckbox = tgtGroup.locator(`#window-group-collapse-${targetWinId}`);
       await tgtCheckbox.click();
-      await page.waitForTimeout(100);
       await expect(tgtGroup.locator('button[aria-label="Drag to reorder"]')).toHaveCount(2);
     } finally {
       await removeWindow(page, newWindowId);
@@ -181,7 +164,7 @@ test.describe('Cross-Window DnD Tab Movement', () => {
 
 test.describe('Cross-Window Multi-Tab DnD', () => {
   test('should move multiple selected tabs to another window', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     // Create extra tabs in source window (need at least 4)
     await createTabInWindow(page);
@@ -211,6 +194,7 @@ test.describe('Cross-Window Multi-Tab DnD', () => {
       const secondLastHandle = sourceHandles.nth(sourceCountBefore - 2);
       await cmdClick(page, secondLastHandle);
       await cmdClick(page, lastHandle);
+      await expect(tabItemOf(lastHandle)).toHaveClass(/bg-accent\/10/);
 
       // Drag last selected handle to target window's first tab
       const targetHandle = targetHandles.first();
@@ -230,7 +214,7 @@ test.describe('Cross-Window Multi-Tab DnD', () => {
   });
 
   test('should move multiple selected tabs to a collapsed window group', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     await createTabInWindow(page);
     await createTabInWindow(page);
@@ -252,7 +236,7 @@ test.describe('Cross-Window Multi-Tab DnD', () => {
       // Collapse target window group
       const collapseCheckbox = targetGroup.locator(`#window-group-collapse-${targetWinId}`);
       await collapseCheckbox.click();
-      await page.waitForTimeout(100);
+      await expect(collapseCheckbox).not.toBeChecked();
 
       const sourceHandles = sourceGroup.locator('button[aria-label="Drag to reorder"]');
       const sourceCountBefore = await sourceHandles.count();
@@ -260,6 +244,7 @@ test.describe('Cross-Window Multi-Tab DnD', () => {
       // Select last two tabs (avoid selecting manager.html tab)
       await cmdClick(page, sourceHandles.nth(sourceCountBefore - 2));
       await cmdClick(page, sourceHandles.last());
+      await expect(tabItemOf(sourceHandles.last())).toHaveClass(/bg-accent\/10/);
 
       // Drag to collapsed target group
       const targetBox = await targetGroup.boundingBox();
@@ -280,7 +265,6 @@ test.describe('Cross-Window Multi-Tab DnD', () => {
       const tgtGroup = page.locator(`[data-window-id="${targetWinId}"]`);
       const tgtCheckbox = tgtGroup.locator(`#window-group-collapse-${targetWinId}`);
       await tgtCheckbox.click();
-      await page.waitForTimeout(100);
       await expect(tgtGroup.locator('button[aria-label="Drag to reorder"]')).toHaveCount(3); // 1 original + 2 moved
     } finally {
       await removeWindow(page, newWindowId);
@@ -288,7 +272,7 @@ test.describe('Cross-Window Multi-Tab DnD', () => {
   });
 
   test('should show ring highlight and count badge during cross-window multi-drag', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     await createTabInWindow(page);
     await createTabInWindow(page);
@@ -309,12 +293,13 @@ test.describe('Cross-Window Multi-Tab DnD', () => {
       const handleCount = await sourceHandles.count();
       await cmdClick(page, sourceHandles.nth(handleCount - 2));
       await cmdClick(page, sourceHandles.last());
+      await expect(tabItemOf(sourceHandles.last())).toHaveClass(/bg-accent\/10/);
 
       // Start drag and hold over target window (do NOT release)
       const targetBox = await targetGroup.boundingBox();
       if (!targetBox) throw new Error('Could not get target group bounding box');
 
-      await startDragAndHold(
+      await startDrag(
         page,
         sourceHandles.last(),
         targetBox.x + targetBox.width / 2,
@@ -342,7 +327,7 @@ test.describe('Cross-Window Multi-Tab DnD', () => {
 
 test.describe('Cross-Window DnD Ring Highlight', () => {
   test('should show ring highlight when dragging over a different window group', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     const newWindowId = await createWindow(page);
 
@@ -365,7 +350,7 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
       if (!targetBox) throw new Error('Could not get target group bounding box');
 
       // Drag from source and hold over the target window group
-      await startDragAndHold(page, firstHandle, targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2);
+      await startDrag(page, firstHandle, targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2);
 
       // Assert: target window group should have ring highlight
       await expect(targetGroup).toHaveClass(/ring-2/);
@@ -375,7 +360,6 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
 
       // Release to end drag
       await page.mouse.up();
-      await page.waitForTimeout(100);
 
       // Assert: ring should be gone after drag end
       await expect(targetGroup).not.toHaveClass(/ring-2/);
@@ -385,20 +369,15 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
   });
 
   test('should NOT show ring highlight when dragging within the same window group', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Create extra tabs in the current window for drag targets
-    for (let i = 0; i < 3; i++) {
-      await page.evaluate(() => {
-        return new Promise<void>(resolve => {
-          chrome.tabs.create({ url: 'https://example.com', active: false }, () => resolve());
-        });
-      });
-    }
-    await page.waitForTimeout(500);
+    await gotoManager(page, extensionId);
 
     const windowGroup = page.locator('[data-window-id]').first();
     const dragHandles = windowGroup.locator('button[aria-label="Drag to reorder"]');
+    const countBefore = await dragHandles.count();
+
+    // Create extra tabs in the current window for drag targets
+    await createTabs(page, 3);
+    await expect(dragHandles).toHaveCount(countBefore + 3);
 
     // Get first and last drag handle positions
     const firstHandle = dragHandles.first();
@@ -407,7 +386,7 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
     if (!lastBox) throw new Error('Could not get last handle bounding box');
 
     // Drag first tab toward the last tab (same window)
-    await startDragAndHold(page, firstHandle, lastBox.x + lastBox.width / 2, lastBox.y + lastBox.height / 2);
+    await startDrag(page, firstHandle, lastBox.x + lastBox.width / 2, lastBox.y + lastBox.height / 2);
 
     // Assert: no window group should have ring highlight during same-window drag
     await expect(windowGroup).not.toHaveClass(/ring-2/);
@@ -416,7 +395,7 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
   });
 
   test('should remove ring highlight when drag is cancelled with Escape', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     const newWindowId = await createWindow(page);
 
@@ -435,14 +414,13 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
       if (!targetBox) throw new Error('Could not get target group bounding box');
 
       // Drag from source and hold over target
-      await startDragAndHold(page, firstHandle, targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2);
+      await startDrag(page, firstHandle, targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2);
 
       // Ring should be visible
       await expect(targetGroup).toHaveClass(/ring-2/);
 
       // Cancel drag with Escape
       await page.keyboard.press('Escape');
-      await page.waitForTimeout(100);
 
       // Ring should be gone
       await expect(targetGroup).not.toHaveClass(/ring-2/);
@@ -452,7 +430,7 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
   });
 
   test('should show ring highlight on collapsed window group', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     const newWindowId = await createWindow(page);
 
@@ -469,10 +447,13 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
       const targetWindowId = await targetGroup.getAttribute('data-window-id');
       const collapseCheckbox = targetGroup.locator(`#window-group-collapse-${targetWindowId}`);
       await collapseCheckbox.click();
-      await page.waitForTimeout(100);
 
       // Verify it's collapsed (checkbox unchecked)
       await expect(collapseCheckbox).not.toBeChecked();
+      // daisyUI's collapse CSS animates visibility over ~200ms; wait for it to
+      // finish before reading targetGroup.boundingBox(), otherwise the drop
+      // coordinate lands below the (still-shrinking) target group.
+      await expect(targetGroup.locator('.collapse-content')).toBeHidden();
 
       // Get drag handle from source window
       const sourceDragHandles = sourceGroup.locator('button[aria-label="Drag to reorder"]');
@@ -483,13 +464,12 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
       if (!targetBox) throw new Error('Could not get collapsed target bounding box');
 
       // Drag from source and hold over collapsed target
-      await startDragAndHold(page, firstHandle, targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2);
+      await startDrag(page, firstHandle, targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2);
 
       // Ring should appear on collapsed window group
       await expect(targetGroup).toHaveClass(/ring-2/);
 
       await page.mouse.up();
-      await page.waitForTimeout(100);
 
       // Ring should be gone
       await expect(targetGroup).not.toHaveClass(/ring-2/);
@@ -499,38 +479,9 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
   });
 });
 
-// Helper to create a tab group with specified tabs in a window
-async function createTabGroup(
-  page: Page,
-  windowId: number,
-  title: string,
-  color: string,
-  tabCount: number
-): Promise<{ groupId: number; tabIds: number[] }> {
-  return page.evaluate(
-    async ({ windowId, title, color, tabCount }) => {
-      // Create tabs in the target window
-      const tabIds: number[] = [];
-      for (let i = 0; i < tabCount; i++) {
-        const tab = await chrome.tabs.create({
-          url: 'https://example.com',
-          windowId,
-          active: false,
-        });
-        if (tab.id) tabIds.push(tab.id);
-      }
-      // Group and configure
-      const groupId = await chrome.tabs.group({ tabIds: tabIds as [number, ...number[]] });
-      await chrome.tabGroups.update(groupId, { title, color: color as chrome.tabGroups.Color });
-      return { groupId, tabIds };
-    },
-    { windowId, title, color, tabCount }
-  );
-}
-
 test.describe('Cross-Window DnD Tab Group Preservation', () => {
   test('should preserve tab group when all group tabs are moved to another window', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     // Create extra ungrouped tabs so the source window survives after moving grouped tabs
     await createTabInWindow(page);
@@ -546,22 +497,24 @@ test.describe('Cross-Window DnD Tab Group Preservation', () => {
       const sourceWinId = Number(await allGroups[0].getAttribute('data-window-id'));
       const targetWinId = Number(await allGroups[1].getAttribute('data-window-id'));
 
-      // Create a 2-tab group in the source window
-      const { tabIds: groupTabIds } = await createTabGroup(page, sourceWinId, 'TestGroup', 'blue', 2);
-      await page.waitForTimeout(500);
-
-      // Re-query groups after tab creation (UI has updated)
       const srcGroup = page.locator(`[data-window-id="${sourceWinId}"]`);
       const tgtGroup = page.locator(`[data-window-id="${targetWinId}"]`);
-
       const sourceHandles = srcGroup.locator('button[aria-label="Drag to reorder"]');
       const targetHandles = tgtGroup.locator('button[aria-label="Drag to reorder"]');
+
+      const countBeforeGroupCreation = await sourceHandles.count();
+
+      // Create a 2-tab group in the source window
+      const { tabIds: groupTabIds } = await createTabGroup(page, sourceWinId, 'TestGroup', 'blue', 2);
+      await expect(sourceHandles).toHaveCount(countBeforeGroupCreation + 2);
+
       const sourceCountBefore = await sourceHandles.count();
       const targetCountBefore = await targetHandles.count();
 
       // Cmd+click the drag handles for both grouped tabs (at the end of the list)
       await cmdClick(page, sourceHandles.nth(sourceCountBefore - 2));
       await cmdClick(page, sourceHandles.nth(sourceCountBefore - 1));
+      await expect(tabItemOf(sourceHandles.nth(sourceCountBefore - 1))).toHaveClass(/bg-accent\/10/);
 
       // Drag to target window
       const targetHandle = targetHandles.first();
@@ -575,10 +528,9 @@ test.describe('Cross-Window DnD Tab Group Preservation', () => {
         targetBox.y + targetBox.height / 2
       );
 
-      // Wait for Chrome API to process group recreation
-      await page.waitForTimeout(500);
-
-      // Verify tabs moved
+      // Verify tabs moved. These assertions poll until the move (and therefore any
+      // group-recreation side effect of the same chrome.tabGroups.move/tabs.move
+      // calls) has settled, so the tabGroups.get() check right after needs no extra wait.
       await expect(srcGroup.locator('button[aria-label="Drag to reorder"]')).toHaveCount(sourceCountBefore - 2);
       await expect(tgtGroup.locator('button[aria-label="Drag to reorder"]')).toHaveCount(targetCountBefore + 2);
 
@@ -599,7 +551,7 @@ test.describe('Cross-Window DnD Tab Group Preservation', () => {
   });
 
   test('should NOT preserve tab group when only some group tabs are moved', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     // Create extra ungrouped tabs
     await createTabInWindow(page);
@@ -613,17 +565,19 @@ test.describe('Cross-Window DnD Tab Group Preservation', () => {
       const sourceWinId = Number(await allGroups[0].getAttribute('data-window-id'));
       const targetWinId = Number(await allGroups[1].getAttribute('data-window-id'));
 
-      // Create a 3-tab group in the source window
-      const { tabIds: groupTabIds } = await createTabGroup(page, sourceWinId, 'PartialGroup', 'red', 3);
-      await page.waitForTimeout(500);
-
       const srcGroup = page.locator(`[data-window-id="${sourceWinId}"]`);
       const tgtGroup = page.locator(`[data-window-id="${targetWinId}"]`);
-
       const sourceHandles = srcGroup.locator('button[aria-label="Drag to reorder"]');
       const targetHandles = tgtGroup.locator('button[aria-label="Drag to reorder"]');
 
+      const countBeforeGroupCreation = await sourceHandles.count();
+
+      // Create a 3-tab group in the source window
+      const { tabIds: groupTabIds } = await createTabGroup(page, sourceWinId, 'PartialGroup', 'red', 3);
+      await expect(sourceHandles).toHaveCount(countBeforeGroupCreation + 3);
+
       // Drag only the last grouped tab (1 of 3) to target window
+      const sourceCountBeforeMove = await sourceHandles.count();
       const lastHandle = sourceHandles.last();
       const targetHandle = targetHandles.first();
       const targetBox = await targetHandle.boundingBox();
@@ -631,7 +585,9 @@ test.describe('Cross-Window DnD Tab Group Preservation', () => {
 
       await performDragAndDrop(page, lastHandle, targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2);
 
-      await page.waitForTimeout(500);
+      // Wait for the move to settle (a real DOM signal) before reading tab group
+      // membership via chrome.tabGroups — same reasoning as the test above.
+      await expect(sourceHandles).toHaveCount(sourceCountBeforeMove - 1);
 
       // Verify the moved tab is ungrouped (groupId === -1)
       const movedTabGroupId = await page.evaluate(async (tabId: number) => {
