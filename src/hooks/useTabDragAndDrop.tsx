@@ -40,9 +40,7 @@ export interface UseTabDragAndDropResult {
   activeTabWindowTabs: chrome.tabs.Tab[];
 }
 
-export function useTabDragAndDrop(args: {
-  filteredTabGroups: FilteredTabGroup[];
-}): UseTabDragAndDropResult {
+export function useTabDragAndDrop(args: { filteredTabGroups: FilteredTabGroup[] }): UseTabDragAndDropResult {
   const { filteredTabGroups } = args;
   const { showToast } = useToast();
   const { clearDragSelection } = useDragSelectionContext();
@@ -294,11 +292,9 @@ export function useTabDragAndDrop(args: {
       const isSelected = sortableData?.isSelected ?? false;
 
       // Calculate target index from overTab (null iff dropped on window-group container)
-      const targetIndex =
-        overTab === null ? -1 : dropPosition === 'top' ? overTab.index : overTab.index + 1;
+      const targetIndex = overTab === null ? -1 : dropPosition === 'top' ? overTab.index : overTab.index + 1;
 
-      const sourceWindowTabs =
-        filteredTabGroups.find(g => g.windowId === activeTab.windowId)?.tabs ?? [];
+      const sourceWindowTabs = filteredTabGroups.find(g => g.windowId === activeTab.windowId)?.tabs ?? [];
 
       let tabsToMove: number[];
 
