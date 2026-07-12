@@ -129,10 +129,9 @@ describe('clearAllSavedTabGroups', () => {
 
 describe('mutation serialization', () => {
   it('preserves all groups when adds run in parallel', async () => {
-    const tabsList = Array.from(
-      { length: 5 },
-      (_, i) => [{ url: `https://example.com/${i}`, title: `T${i}` } as chrome.tabs.Tab]
-    );
+    const tabsList = Array.from({ length: 5 }, (_, i) => [
+      { url: `https://example.com/${i}`, title: `T${i}` } as chrome.tabs.Tab,
+    ]);
 
     await Promise.all(tabsList.map(tabs => addSavedTabGroup(tabs)));
 
