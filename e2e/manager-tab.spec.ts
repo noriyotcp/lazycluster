@@ -1,17 +1,11 @@
 import { test, expect } from './fixtures';
-
-// Test constants
-const CHROME_CLEANUP_DELAY_MS = 100; // Chrome needs time to fully clean up window resources
+import { gotoManager, createWindow, removeWindow } from './helpers';
 
 test.describe('Manager Tab E2E Tests', () => {
   test('manager tab should open and display window groups', async ({ page, extensionId }) => {
-    // Open the manager tab
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
-    // Verify that the window group list is visible
     const windowGroupList = page.locator('.p-5.pt-0');
-    await windowGroupList.waitFor({ state: 'visible', timeout: 10000 });
-
     await expect(windowGroupList.locator('.collapse').first()).toBeVisible({ timeout: 10000 });
 
     // Verify that at least one window group is displayed
@@ -41,11 +35,7 @@ test.describe('Manager Tab E2E Tests', () => {
 
   // New test case for slash key focus
   test('should focus search bar when "/" key is pressed', async ({ page, extensionId }) => {
-    // Open the manager tab
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for the page to load (e.g., wait for the header)
-    await page.locator('header').waitFor({ state: 'visible' });
+    await gotoManager(page, extensionId);
 
     const searchBar = page.locator('#search-bar');
 
@@ -66,10 +56,7 @@ test.describe('Manager Tab E2E Tests', () => {
 
   // Test for window group keyboard sequence navigation
   test('should focus window group with w+number sequence', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for window groups to load
-    await page.locator('[data-window-group-number]').first().waitFor();
+    await gotoManager(page, extensionId);
 
     // Get the actual window group number of the first group
     const firstGroupNumber = await page
@@ -91,10 +78,7 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('should timeout sequence after 3 seconds', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for window groups to load
-    await page.locator('[data-window-group-number]').first().waitFor();
+    await gotoManager(page, extensionId);
 
     // Press w to start sequence
     await page.keyboard.press('w');
@@ -103,16 +87,16 @@ test.describe('Manager Tab E2E Tests', () => {
     const badge = page.locator('.badge-jump-to-window-group');
     await expect(badge).toBeVisible();
 
-    // Wait for 2 seconds (still within timeout)
+    // Wait for 2 seconds (still within the app's real 3-second timeout) — this is
+    // intentionally a real-time wait: the test verifies the badge is STILL visible
+    // mid-timeout, so there is no DOM condition to substitute for the passage of time.
     await page.waitForTimeout(2000);
 
     // Badge should still be visible
     await expect(badge).toBeVisible();
 
-    // Wait for timeout to complete (additional 1.5 seconds = total 3.5 seconds)
-    await page.waitForTimeout(1500);
-
-    // Badge should now be hidden (sequence timed out)
+    // The remaining ~1 second until the real 3-second timeout fires is covered by
+    // expect()'s own polling (default 5s), so no additional sleep is needed here.
     await expect(badge).not.toBeVisible();
 
     // Press 1 after timeout - should not navigate
@@ -127,7 +111,7 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('should not activate when input is focused', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     // Focus search bar
     await page.locator('#search-bar').focus();
@@ -145,10 +129,7 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('should show visual feedback when sequence is active', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for window groups to load
-    await page.locator('[data-window-group-number]').first().waitFor();
+    await gotoManager(page, extensionId);
 
     // Press w to activate sequence
     await page.keyboard.press('w');
@@ -167,10 +148,7 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('should focus current window with w+0', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for window groups to load
-    await page.locator('[data-window-group-number]').first().waitFor();
+    await gotoManager(page, extensionId);
 
     // Get current window ID
     const currentWindowId = await page.evaluate(() => {
@@ -195,10 +173,7 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('should cancel sequence with ESC key', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for window groups to load
-    await page.locator('[data-window-group-number]').first().waitFor();
+    await gotoManager(page, extensionId);
 
     // Press w to activate sequence
     await page.keyboard.press('w');
@@ -225,31 +200,15 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('should navigate to window group 1 when checkbox focused (multiple windows)', async ({ page, extensionId }) => {
-    // First, open the manager tab to establish extension context
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     // Create a new window and store its ID for cleanup
-    const newWindowId = await page.evaluate(() => {
-      return new Promise<number>(resolve => {
-        chrome.windows.create(
-          {
-            url: 'https://example.com',
-            type: 'normal',
-          },
-          window => {
-            if (window && window.id) {
-              resolve(window.id);
-            }
-          }
-        );
-      });
-    });
+    const newWindowId = await createWindow(page);
 
     try {
-      // Wait for the new window to be recognized
-      await page.waitForTimeout(2000);
-
-      // Reload the manager tab to get updated window list
+      // Reload the manager tab to get the updated window list. The window already
+      // exists in the browser (createWindow's promise resolved), so the reload's
+      // own REQUEST_INITIAL_DATA fetch will see it — no arbitrary wait needed first.
       await page.reload();
 
       // Verify that 2 window groups exist
@@ -283,19 +242,9 @@ test.describe('Manager Tab E2E Tests', () => {
       });
       expect(focusedElement).toBe('1');
     } finally {
-      // Cleanup: close only the window we created with proper wait
+      // Cleanup: close only the window we created
       try {
-        await page.evaluate(
-          ({ windowId, cleanupDelay }: { windowId: number; cleanupDelay: number }) => {
-            return new Promise<void>(resolve => {
-              chrome.windows.remove(windowId, () => {
-                // Give Chrome time to fully clean up window resources
-                setTimeout(resolve, cleanupDelay);
-              });
-            });
-          },
-          { windowId: newWindowId, cleanupDelay: CHROME_CLEANUP_DELAY_MS }
-        );
+        await removeWindow(page, newWindowId);
       } catch (_e) {
         // (expected error, no action needed)
       }
@@ -304,12 +253,10 @@ test.describe('Manager Tab E2E Tests', () => {
 
   test('should not navigate when pressing 1 with single window', async ({ page, extensionId }) => {
     // Open the manager tab (single window environment)
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
-    // Wait and verify only 1 window group exists
-    await page.waitForTimeout(500);
-    const windowGroupCount = await page.locator('[data-window-group-number]').count();
-    expect(windowGroupCount).toBe(1);
+    // Verify only 1 window group exists
+    await expect(page.locator('[data-window-group-number]')).toHaveCount(1);
 
     // Focus on the collapse checkbox
     const collapseCheckbox = page.locator('input[id^="window-group-collapse-"]').first();
@@ -340,10 +287,7 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('should allow w sequence on tab checkbox focus', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for window groups to load
-    await page.locator('[data-window-group-number]').first().waitFor();
+    await gotoManager(page, extensionId);
 
     // Focus on a tab checkbox
     const tabCheckbox = page.locator('input[id^="tab-"]').first();
@@ -381,11 +325,7 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('Current Window label should persist and no Window 0 should appear', async ({ page, extensionId }) => {
-    // Open the manager tab
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for the window groups to load
-    await page.locator('[data-window-group-number]').first().waitFor({ state: 'visible' });
+    await gotoManager(page, extensionId);
 
     // Verify Current Window is displayed for the window with the extension
     // Use more specific selector to avoid matching help text
@@ -411,35 +351,18 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('should support multi-digit window group numbers', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     // Create additional windows to have window group 12 available
     const windowIds: number[] = [];
     try {
       // Create 12 additional windows (plus original window = 13 total, giving us window groups 0-12)
       for (let i = 0; i < 12; i++) {
-        const windowId = await page.evaluate(() => {
-          return new Promise<number>(resolve => {
-            chrome.windows.create(
-              {
-                url: 'https://example.com',
-                type: 'normal',
-              },
-              window => {
-                if (window && window.id) {
-                  resolve(window.id);
-                }
-              }
-            );
-          });
-        });
-        windowIds.push(windowId);
+        windowIds.push(await createWindow(page));
       }
 
-      // Wait for all windows to be created
-      await page.waitForTimeout(2000);
-
-      // Reload to get updated window list
+      // Reload to get the updated window list — each createWindow() call already
+      // awaited the browser recognizing the window, so no extra wait is needed first.
       await page.reload();
 
       // Verify window group 12 exists
@@ -461,16 +384,7 @@ test.describe('Manager Tab E2E Tests', () => {
       // Cleanup: close all created windows
       for (const windowId of windowIds) {
         try {
-          await page.evaluate(
-            ({ id, cleanupDelay }: { id: number; cleanupDelay: number }) => {
-              return new Promise<void>(resolve => {
-                chrome.windows.remove(id, () => {
-                  setTimeout(resolve, cleanupDelay);
-                });
-              });
-            },
-            { id: windowId, cleanupDelay: CHROME_CLEANUP_DELAY_MS }
-          );
+          await removeWindow(page, windowId);
         } catch (_e) {
           // (expected error, no action needed)
         }
@@ -479,10 +393,7 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('should allow editing with Backspace key', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for window groups to load
-    await page.locator('[data-window-group-number]').first().waitFor();
+    await gotoManager(page, extensionId);
 
     // Get the first window group number
     const firstGroupNumber = await page
@@ -508,10 +419,7 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('should not navigate with empty buffer', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for window groups to load
-    await page.locator('[data-window-group-number]').first().waitFor();
+    await gotoManager(page, extensionId);
 
     // Press w, then 1, then Backspace, then Enter
     await page.keyboard.press('w');
@@ -529,17 +437,16 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('should NOT timeout during continuous input (Debounce)', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for window groups to load
-    await page.locator('[data-window-group-number]').first().waitFor();
+    await gotoManager(page, extensionId);
 
     const firstGroupNumber = await page
       .locator('[data-window-group-number]')
       .first()
       .getAttribute('data-window-group-number');
 
-    // Press keys with 2-second intervals (less than 3-second timeout)
+    // Press keys with 2-second intervals (less than the app's real 3-second timeout).
+    // These waits ARE the behavior under test — proving the timeout doesn't fire
+    // across real time gaps — so they cannot be replaced by a DOM-condition wait.
     await page.keyboard.press('w');
     await page.waitForTimeout(2000);
     await page.keyboard.press(firstGroupNumber || '1');
@@ -558,11 +465,7 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('Current Window label updates dynamically when tabs change', async ({ page, context, extensionId }) => {
-    // Open the manager tab
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for initial load
-    await page.locator('[data-window-group-number]').first().waitFor({ state: 'visible' });
+    await gotoManager(page, extensionId);
 
     // Verify Current Window is initially displayed
     // Use more specific selector to avoid matching help text
@@ -595,7 +498,7 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('should return focus to tab item li when Escape pressed from inner element', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     // Wait for tab items to load
     await page.locator('.collapse-content li[tabindex="0"]').first().waitFor();
@@ -615,7 +518,6 @@ test.describe('Manager Tab E2E Tests', () => {
 
     // Press Escape to return focus to the <li>
     await page.keyboard.press('Escape');
-    await page.waitForTimeout(100);
 
     // Verify focus returned to the <li> tab item
     await expect(firstTabItem).toBeFocused();
@@ -630,7 +532,7 @@ test.describe('Manager Tab E2E Tests', () => {
     page,
     extensionId,
   }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     // Wait for tab items to load
     await page.locator('.collapse-content li[tabindex="0"]').first().waitFor();
@@ -648,18 +550,17 @@ test.describe('Manager Tab E2E Tests', () => {
     const focusedTagAfterFocus = await page.evaluate(() => document.activeElement?.tagName);
     expect(focusedTagAfterFocus).toBe('A');
 
-    // Start w+number sequence
+    // Start w+number sequence. Key sequence buffering is synchronous ref-based state
+    // (useWindowGroupNavigation), not async React state, so no settle time is needed
+    // between presses — the badge assertion below polls for the visual result anyway.
     await page.keyboard.press('w');
-    await page.waitForTimeout(100);
     await page.keyboard.press('1');
-    await page.waitForTimeout(100);
 
     // Verify sequence is active (badge visible)
     await expect(page.locator('.badge-jump-to-window-group')).toBeVisible();
 
     // Press Escape to cancel the sequence
     await page.keyboard.press('Escape');
-    await page.waitForTimeout(100);
 
     // Verify sequence is cancelled (badge gone)
     await expect(page.locator('.badge-jump-to-window-group')).not.toBeVisible();
@@ -671,19 +572,12 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('should collapse all window groups when Alt+clicking a collapse header', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     // Create a second window to have multiple window groups
-    const newWindowId = await page.evaluate(() => {
-      return new Promise<number>(resolve => {
-        chrome.windows.create({ url: 'https://example.com', type: 'normal' }, window => {
-          if (window && window.id) resolve(window.id);
-        });
-      });
-    });
+    const newWindowId = await createWindow(page);
 
     try {
-      await page.waitForTimeout(2000);
       await page.reload();
 
       // Verify 2 window groups exist
@@ -711,7 +605,6 @@ test.describe('Manager Tab E2E Tests', () => {
           })
         );
       });
-      await page.waitForTimeout(100);
 
       // Verify ALL window groups are collapsed
       for (let i = 0; i < windowGroupCount; i++) {
@@ -729,7 +622,6 @@ test.describe('Manager Tab E2E Tests', () => {
           })
         );
       });
-      await page.waitForTimeout(100);
 
       // Verify ALL window groups are expanded
       for (let i = 0; i < windowGroupCount; i++) {
@@ -737,16 +629,7 @@ test.describe('Manager Tab E2E Tests', () => {
       }
     } finally {
       try {
-        await page.evaluate(
-          ({ windowId, cleanupDelay }: { windowId: number; cleanupDelay: number }) => {
-            return new Promise<void>(resolve => {
-              chrome.windows.remove(windowId, () => {
-                setTimeout(resolve, cleanupDelay);
-              });
-            });
-          },
-          { windowId: newWindowId, cleanupDelay: CHROME_CLEANUP_DELAY_MS }
-        );
+        await removeWindow(page, newWindowId);
       } catch (_e) {
         // (expected error, no action needed)
       }
@@ -754,19 +637,12 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('should not toggle other groups when clicking without Alt', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     // Create a second window
-    const newWindowId = await page.evaluate(() => {
-      return new Promise<number>(resolve => {
-        chrome.windows.create({ url: 'https://example.com', type: 'normal' }, window => {
-          if (window && window.id) resolve(window.id);
-        });
-      });
-    });
+    const newWindowId = await createWindow(page);
 
     try {
-      await page.waitForTimeout(2000);
       await page.reload();
 
       await page.locator('[data-window-group-number]').nth(1).waitFor({ timeout: 5000 });
@@ -775,23 +651,13 @@ test.describe('Manager Tab E2E Tests', () => {
 
       // Normal click (no Alt) on first checkbox
       await checkboxes.first().click();
-      await page.waitForTimeout(100);
 
       // First should be collapsed, second should still be expanded
       await expect(checkboxes.first()).not.toBeChecked();
       await expect(checkboxes.nth(1)).toBeChecked();
     } finally {
       try {
-        await page.evaluate(
-          ({ windowId, cleanupDelay }: { windowId: number; cleanupDelay: number }) => {
-            return new Promise<void>(resolve => {
-              chrome.windows.remove(windowId, () => {
-                setTimeout(resolve, cleanupDelay);
-              });
-            });
-          },
-          { windowId: newWindowId, cleanupDelay: CHROME_CLEANUP_DELAY_MS }
-        );
+        await removeWindow(page, newWindowId);
       } catch (_e) {
         // (expected error, no action needed)
       }
@@ -799,7 +665,7 @@ test.describe('Manager Tab E2E Tests', () => {
   });
 
   test('should not change focus when Escape pressed while li itself is focused', async ({ page, extensionId }) => {
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     // Wait for tab items to load
     await page.locator('.collapse-content li[tabindex="0"]').first().waitFor();
