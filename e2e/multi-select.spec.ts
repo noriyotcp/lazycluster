@@ -1,60 +1,9 @@
 import { test, expect } from './fixtures';
-import type { Page, Locator } from '@playwright/test';
-
-// Helper function for Cmd/Ctrl+click using native event dispatch
-async function cmdClick(page: Page, locator: Locator): Promise<void> {
-  const isMac = process.platform === 'darwin';
-
-  await locator.evaluate((element: HTMLElement, isMac: boolean) => {
-    const event = new MouseEvent('click', {
-      bubbles: true,
-      cancelable: true,
-      view: window,
-      metaKey: isMac,
-      ctrlKey: !isMac,
-    });
-    element.dispatchEvent(event);
-  }, isMac);
-
-  // Wait for React state update and DOM rendering
-  await page.waitForTimeout(100);
-}
-
-// Helper function for Shift+click using native event dispatch
-async function shiftClick(page: Page, locator: Locator): Promise<void> {
-  await locator.evaluate((element: HTMLElement) => {
-    const event = new MouseEvent('click', {
-      bubbles: true,
-      cancelable: true,
-      view: window,
-      shiftKey: true,
-    });
-    element.dispatchEvent(event);
-  });
-
-  // Wait for React state update and DOM rendering
-  await page.waitForTimeout(100);
-}
-
-// Helper function to create additional tabs
-async function createTabs(page: Page, count: number): Promise<void> {
-  for (let i = 0; i < count; i++) {
-    await page.evaluate(() => {
-      return new Promise<void>(resolve => {
-        chrome.tabs.create({ url: 'https://example.com', active: false }, () => resolve());
-      });
-    });
-  }
-  await page.waitForTimeout(500);
-}
+import { gotoManager, cmdClick, shiftClick, createTabs, createWindow, removeWindow } from './helpers';
 
 test.describe('Multi-Select E2E Tests', () => {
   test('should select and deselect tabs with Cmd+click on drag handle', async ({ page, extensionId }) => {
-    // Open the manager tab
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for tabs to load
-    await page.locator('.group\\/tabitem').first().waitFor({ state: 'visible' });
+    await gotoManager(page, extensionId);
 
     // Get first two drag handles
     const firstDragHandle = page.locator('button[aria-label="Drag to reorder"]').first();
@@ -86,11 +35,7 @@ test.describe('Multi-Select E2E Tests', () => {
   });
 
   test('should select range with Shift+click on drag handle', async ({ page, extensionId }) => {
-    // Open the manager tab
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for tabs to load
-    await page.locator('.group\\/tabitem').first().waitFor({ state: 'visible' });
+    await gotoManager(page, extensionId);
 
     // Ensure we have at least 5 tabs
     const initialCount = await page.locator('.group\\/tabitem').count();
@@ -126,11 +71,7 @@ test.describe('Multi-Select E2E Tests', () => {
   });
 
   test('should select range in reverse order with Shift+click', async ({ page, extensionId }) => {
-    // Open the manager tab
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for tabs to load
-    await page.locator('.group\\/tabitem').first().waitFor({ state: 'visible' });
+    await gotoManager(page, extensionId);
 
     // Ensure we have at least 6 tabs
     const initialCount = await page.locator('.group\\/tabitem').count();
@@ -166,11 +107,7 @@ test.describe('Multi-Select E2E Tests', () => {
   });
 
   test('should clear drag selection when clicking selected tab without modifiers', async ({ page, extensionId }) => {
-    // Open the manager tab
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for tabs to load
-    await page.locator('.group\\/tabitem').first().waitFor({ state: 'visible' });
+    await gotoManager(page, extensionId);
 
     // Get drag handles
     const firstDragHandle = page.locator('button[aria-label="Drag to reorder"]').first();
@@ -195,11 +132,7 @@ test.describe('Multi-Select E2E Tests', () => {
   });
 
   test('should maintain drag selection independent of checkbox selection', async ({ page, extensionId }) => {
-    // Open the manager tab
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
-
-    // Wait for tabs to load
-    await page.locator('.group\\/tabitem').first().waitFor({ state: 'visible' });
+    await gotoManager(page, extensionId);
 
     // Get first tab checkbox and drag handle
     const firstCheckbox = page.locator('input[id^="tab-"]').first();
@@ -227,25 +160,10 @@ test.describe('Multi-Select E2E Tests', () => {
   });
 
   test('should only select tabs within same window for Shift+click range', async ({ page, extensionId }) => {
-    // First, open the manager tab
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
     // Create a new window
-    const newWindowId = await page.evaluate(() => {
-      return new Promise<number>(resolve => {
-        chrome.windows.create(
-          {
-            url: 'https://example.com',
-            type: 'normal',
-          },
-          window => {
-            if (window && window.id) {
-              resolve(window.id);
-            }
-          }
-        );
-      });
-    });
+    const newWindowId = await createWindow(page);
 
     try {
       // Wait for the new window to be recognized
@@ -293,29 +211,15 @@ test.describe('Multi-Select E2E Tests', () => {
       }
     } finally {
       // Cleanup: close the created window
-      try {
-        await page.evaluate((windowId: number) => {
-          return new Promise<void>(resolve => {
-            chrome.windows.remove(windowId, () => {
-              setTimeout(resolve, 100);
-            });
-          });
-        }, newWindowId);
-      } catch (_e) {
-        // Expected error, no action needed
-      }
+      await removeWindow(page, newWindowId);
     }
   });
 
   test('should not interfere with existing keyboard navigation', async ({ page, extensionId }) => {
-    // Open the manager tab
-    await page.goto(`chrome-extension://${extensionId}/manager.html`);
+    await gotoManager(page, extensionId);
 
-    // Wait for tabs to load
+    // Focus first tab item
     const firstTabItem = page.locator('.group\\/tabitem').first();
-    await firstTabItem.waitFor({ state: 'visible' });
-
-    // Focus first tab item using Tab key
     await firstTabItem.focus();
 
     // Verify first tab is focused
