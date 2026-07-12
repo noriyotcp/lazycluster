@@ -1,17 +1,13 @@
 import { createContext, useContext } from 'react';
 
-interface WindowGroupContextProps {
-  windowGroupNumber: number;
-}
+const WindowGroupContext = createContext<number | undefined>(undefined);
 
-const WindowGroupContext = createContext<WindowGroupContextProps | undefined>(undefined);
-
-export const useWindowGroupContext = () => {
-  const context = useContext(WindowGroupContext);
-  if (!context) {
+export const useWindowGroupContext = (): number => {
+  const value = useContext(WindowGroupContext);
+  if (value === undefined) {
     throw new Error('useWindowGroupContext must be used within a WindowGroupContextProvider');
   }
-  return context;
+  return value;
 };
 
 export const WindowGroupContextProvider = WindowGroupContext.Provider;

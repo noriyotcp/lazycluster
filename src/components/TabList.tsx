@@ -2,15 +2,14 @@ import { useRef, memo } from 'react';
 import type { KeyboardEvent } from 'react';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import TabItem from './TabItem';
+import TabDropIndicator from './TabDropIndicator';
 
 interface TabListProps {
   tabs: chrome.tabs.Tab[];
   isFiltered?: boolean;
-  overId: number | null;
-  dropPosition: 'top' | 'bottom';
 }
 
-const TabList = ({ tabs, isFiltered = false, overId, dropPosition }: TabListProps) => {
+const TabList = ({ tabs, isFiltered = false }: TabListProps) => {
   const listRef = useRef<HTMLUListElement>(null);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLUListElement>) => {
@@ -63,19 +62,9 @@ const TabList = ({ tabs, isFiltered = false, overId, dropPosition }: TabListProp
       <ul ref={listRef} className="list shadow-md" onKeyDown={handleKeyDown}>
         {tabs.map((tab, index) => (
           <div key={tab.id}>
-            {/* Top drop indicator */}
-            <div
-              className={`h-0.5 bg-info transition-opacity ${
-                overId === tab.id && dropPosition === 'top' ? 'opacity-100' : 'opacity-0'
-              }`}
-            />
+            <TabDropIndicator tabId={tab.id!} position="top" />
             <TabItem tab={tab} isFiltered={isFiltered} index={index} windowId={tab.windowId!} tabs={tabs} />
-            {/* Bottom drop indicator */}
-            <div
-              className={`h-0.5 bg-info transition-opacity ${
-                overId === tab.id && dropPosition === 'bottom' ? 'opacity-100' : 'opacity-0'
-              }`}
-            />
+            <TabDropIndicator tabId={tab.id!} position="bottom" />
           </div>
         ))}
       </ul>
@@ -83,6 +72,6 @@ const TabList = ({ tabs, isFiltered = false, overId, dropPosition }: TabListProp
   );
 };
 
-// Memoized: skips re-renders caused by unrelated window groups' drag state
-// (e.g. the cross-window ring highlight) when this list's props are unchanged.
+// Memoized: TabList props no longer include drag state, so drag-over updates
+// bypass this component entirely — only the tiny TabDropIndicator consumers re-render.
 export default memo(TabList);

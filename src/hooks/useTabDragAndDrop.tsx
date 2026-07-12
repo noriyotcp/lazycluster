@@ -86,13 +86,18 @@ export function useTabDragAndDrop(args: { filteredTabGroups: FilteredTabGroup[] 
   // Track pointer position during drag for reliable cross-window ring highlight.
   // Uses DOM elementsFromPoint() instead of dnd-kit collision detection to avoid
   // flickering caused by rectIntersection fallback matching adjacent window groups.
+  // rAF-throttled: pointermove fires up to 60Hz and elementsFromPoint is expensive.
   useEffect(() => {
     if (activeId === null) return;
 
     const sourceWindowId = sourceWindowIdRef.current;
+    let rafId: number | null = null;
+    let lastX = 0;
+    let lastY = 0;
 
-    const handlePointerMove = (e: PointerEvent) => {
-      const elements = document.elementsFromPoint(e.clientX, e.clientY);
+    const runHitTest = () => {
+      rafId = null;
+      const elements = document.elementsFromPoint(lastX, lastY);
       const windowGroupEl = elements.find(
         (el): el is HTMLElement => el instanceof HTMLElement && 'windowId' in el.dataset
       );
@@ -104,9 +109,18 @@ export function useTabDragAndDrop(args: { filteredTabGroups: FilteredTabGroup[] 
       }
     };
 
+    const handlePointerMove = (e: PointerEvent) => {
+      lastX = e.clientX;
+      lastY = e.clientY;
+      if (rafId === null) {
+        rafId = requestAnimationFrame(runHitTest);
+      }
+    };
+
     document.addEventListener('pointermove', handlePointerMove);
     return () => {
       document.removeEventListener('pointermove', handlePointerMove);
+      if (rafId !== null) cancelAnimationFrame(rafId);
       setOverWindowId(null);
     };
   }, [activeId]);
