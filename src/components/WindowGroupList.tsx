@@ -21,6 +21,7 @@ import { useToast } from './ToastProvider';
 import Alert from './Alert';
 import { useDragSelectionContext } from '../contexts/DragSelectionContext';
 import { identifyGroupsToPreserve } from '../utils/tabGroupPreservation';
+import { buildMoveSegments } from '../utils/tabMove';
 import { getSortableTabData, getWindowGroupDropData } from '../types/dnd';
 
 interface WindowGroupListProps {
@@ -209,36 +210,7 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
           // chrome.tabs.move() breaking group membership.
           const preservedGroupIds = new Set(groupsToPreserve.map(g => g.groupId));
           const tabMap = new Map(windowTabs.map(t => [t.id!, t]));
-
-          // Build segments: consecutive groups and ungrouped runs
-          type MoveSegment =
-            { type: 'group'; groupId: number; tabIds: number[] } | { type: 'ungrouped'; tabIds: number[] };
-          const segments: MoveSegment[] = [];
-          let currentSeg: MoveSegment | null = null;
-
-          for (const tabId of tabsToMove) {
-            const tab = tabMap.get(tabId);
-            if (!tab) continue;
-            const gid = tab.groupId;
-            const isPreserved = gid !== -1 && gid !== undefined && preservedGroupIds.has(gid);
-
-            if (isPreserved) {
-              if (currentSeg?.type === 'group' && currentSeg.groupId === gid) {
-                currentSeg.tabIds.push(tabId);
-              } else {
-                if (currentSeg) segments.push(currentSeg);
-                currentSeg = { type: 'group', groupId: gid, tabIds: [tabId] };
-              }
-            } else {
-              if (currentSeg?.type === 'ungrouped') {
-                currentSeg.tabIds.push(tabId);
-              } else {
-                if (currentSeg) segments.push(currentSeg);
-                currentSeg = { type: 'ungrouped', tabIds: [tabId] };
-              }
-            }
-          }
-          if (currentSeg) segments.push(currentSeg);
+          const segments = buildMoveSegments(tabsToMove, tabMap, preservedGroupIds);
 
           // Step 1: Collect all segments at end of window (preserves relative order)
           for (const seg of segments) {
@@ -350,36 +322,7 @@ const WindowGroupList = ({ filteredTabGroups, isFiltered = false }: WindowGroupL
           // Segment-based cross-window move: use chrome.tabGroups.move() for groups
           const preservedGroupIds = new Set(groupsToPreserve.map(g => g.groupId));
           const tabMap = new Map(sourceWindowTabs.map(t => [t.id!, t]));
-
-          // Build segments: consecutive groups and ungrouped runs
-          type MoveSegment =
-            { type: 'group'; groupId: number; tabIds: number[] } | { type: 'ungrouped'; tabIds: number[] };
-          const segments: MoveSegment[] = [];
-          let currentSeg: MoveSegment | null = null;
-
-          for (const tabId of tabsToMove) {
-            const tab = tabMap.get(tabId);
-            if (!tab) continue;
-            const gid = tab.groupId;
-            const isPreserved = gid !== -1 && gid !== undefined && preservedGroupIds.has(gid);
-
-            if (isPreserved) {
-              if (currentSeg?.type === 'group' && currentSeg.groupId === gid) {
-                currentSeg.tabIds.push(tabId);
-              } else {
-                if (currentSeg) segments.push(currentSeg);
-                currentSeg = { type: 'group', groupId: gid, tabIds: [tabId] };
-              }
-            } else {
-              if (currentSeg?.type === 'ungrouped') {
-                currentSeg.tabIds.push(tabId);
-              } else {
-                if (currentSeg) segments.push(currentSeg);
-                currentSeg = { type: 'ungrouped', tabIds: [tabId] };
-              }
-            }
-          }
-          if (currentSeg) segments.push(currentSeg);
+          const segments = buildMoveSegments(tabsToMove, tabMap, preservedGroupIds);
 
           // Step 1: Move all segments to target window (append to end, preserves relative order)
           for (const seg of segments) {
