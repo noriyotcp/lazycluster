@@ -12,13 +12,13 @@ async function readTabIds(page: import('@playwright/test').Page): Promise<number
 }
 
 test.describe('Keyboard Drag E2E Tests', () => {
-  // Skipped: dnd-kit's `sortableKeyboardCoordinates` computes destination
-  // coordinates within a single SortableContext. LazyCluster renders one
-  // SortableContext per window's TabList, so ArrowDown from the first tab
-  // never resolves to a new coordinate — the drag activates but sits still
-  // and the drop is a no-op. Enabling this test requires either unifying
-  // all tabs into one SortableContext or implementing a MultipleContainers
-  // coordinateGetter; tracked as follow-up separate from the hook extraction.
+  // Skipped: fails in CI and local runs as of 2026-07 — the Enter → ArrowDown
+  // → Enter sequence leaves the tab order unchanged. The cause is NOT
+  // established: a structural dnd-kit limitation (sortableKeyboardCoordinates
+  // vs per-window SortableContexts) was first suspected, but commit 59a26c2
+  // records this exact test passing, which rules out a hard "can never work"
+  // reading. Reproduce and diagnose (flaky timing / focus handling / a real
+  // conditional regression) before re-enabling or rewriting.
   test.skip('should reorder tab via keyboard drag (Enter → ArrowDown → Enter)', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/manager.html`);
     await page.locator('.group\\/tabitem').first().waitFor({ state: 'visible' });
