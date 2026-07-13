@@ -11,6 +11,15 @@ async function readTabIds(page: import('@playwright/test').Page): Promise<number
   });
 }
 
+// Y coordinate of the currently-visible drop indicator (the .bg-info element
+// dnd-kit's over state makes opacity-100). Returns null when no drag is active.
+async function dropIndicatorY(page: import('@playwright/test').Page): Promise<number | null> {
+  return page.evaluate(() => {
+    const el = document.querySelector('.opacity-100.bg-info');
+    return el ? Math.round((el as HTMLElement).getBoundingClientRect().top) : null;
+  });
+}
+
 test.describe('Keyboard Drag E2E Tests', () => {
   test('should reorder tab via keyboard drag (Enter → ArrowDown → Enter)', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/manager.html`);
@@ -31,14 +40,16 @@ test.describe('Keyboard Drag E2E Tests', () => {
     const firstDragHandle = page.locator('button[aria-label="Drag to reorder"]').first();
     await firstDragHandle.focus();
     await page.keyboard.press('Enter'); // Start drag
-    // Wait for dnd-kit to mark the item active before firing arrow keys, so the
-    // sortableKeyboardCoordinates path has a settled DragOverlay to measure against.
+    // Signal-based: wait for dnd-kit to mark the item active before firing arrow
+    // keys, so the KeyboardSensor + sortableKeyboardCoordinates path has a
+    // settled DragOverlay to measure against.
     await expect(firstItem).toHaveAttribute('aria-pressed', 'true');
 
-    // Arrow keys drive sortableKeyboardCoordinates, which reads DOM rects each
-    // press. Playwright's back-to-back keydowns can outrun that measurement,
-    // so give each press one settled frame before the next — documented
-    // exception per .claude/rules/e2e-testing.md.
+    // The race: sortableKeyboardCoordinates needs the previous keydown fully
+    // processed before the next arrives — polling AFTER a press cannot recover
+    // a keydown that raced (nothing further fires), so we settle BEFORE each
+    // next press. This is the documented waitForTimeout exception under
+    // .claude/rules/e2e-testing.md.
     await page.keyboard.press('ArrowDown');
     await page.waitForTimeout(30);
     await page.keyboard.press('ArrowDown');
@@ -70,12 +81,18 @@ test.describe('Keyboard Drag E2E Tests', () => {
     const firstDragHandle = page.locator('button[aria-label="Drag to reorder"]').first();
     await firstDragHandle.focus();
     await page.keyboard.press('Enter'); // Start drag
-    // Same rationale as the reorder test: confirm activation before firing
-    // arrow keys so Escape actually has an in-flight drag to cancel.
     await expect(firstItem).toHaveAttribute('aria-pressed', 'true');
     await page.keyboard.press('ArrowDown'); // Move (preview only)
     await page.waitForTimeout(30);
     await page.keyboard.press('Escape'); // Cancel — should trigger onDragCancel
+
+    // Positive control for the cancel path: without these, a broken onDragCancel
+    // would still pass the "no reorder" assertion because ArrowDown alone never
+    // calls chrome.tabs.move — a hung drag looks identical to a cancelled one
+    // in tab-order terms. Instrumenting the hook at HEAD shows onDragCancel
+    // does fire in practice, so this hardens rather than uncovers a bug.
+    await expect(firstItem).not.toHaveAttribute('aria-pressed', 'true');
+    await expect.poll(() => dropIndicatorY(page)).toBeNull();
 
     // Assert the pre-existing tab order is unchanged. Slice off any tabs
     // that appear during the poll window (test environment may spawn stray
