@@ -22,6 +22,11 @@ const KeyboardShortcutsModal = () => {
       { key: 'Space', description: 'Toggle tab selection' },
       { key: 'ESC', description: 'Return focus to tab item (from inner elements)' },
     ],
+    'Tab Drag Selection': [
+      { key: 'Cmd/Ctrl + Click ⋮⋮', description: 'Add or remove a tab from the drag selection' },
+      { key: 'Shift + Click ⋮⋮', description: 'Select a range of tabs in the same window' },
+      { key: 'Click ⋮⋮', description: 'Clear the drag selection (click any selected tab)' },
+    ],
   };
 
   return (
