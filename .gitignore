@@ -62,3 +62,6 @@ CLAUDE.md
 
 # Vitest coverage output
 coverage/
+
+.mcp.json
+
