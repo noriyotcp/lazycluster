@@ -5,7 +5,7 @@ const App = () => {
   const focusExistingTabInCurrentWindow = async (managerUrl: string, currentWindowId: number) => {
     const tabsInCurrentWindow = await chrome.tabs.query({ url: managerUrl, windowId: currentWindowId });
     if (tabsInCurrentWindow.length > 0) {
-      await chrome.tabs.update(tabsInCurrentWindow[0].id!, { active: true });
+      await chrome.tabs.update(tabsInCurrentWindow[0]!.id!, { active: true });
       return true;
     }
     return false;

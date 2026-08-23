@@ -1,4 +1,4 @@
-import { TabGroupColor } from '../types/tabGroup';
+import type { TabGroupColor } from '../types/tabGroup';
 
 // Map Chrome Tab Group colors to Tailwind CSS border-left-color classes
 // Uses switch statement to enable Tailwind's static analysis for class detection

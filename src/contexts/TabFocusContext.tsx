@@ -1,4 +1,5 @@
-import React, { createContext, useContext, PropsWithChildren, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useCallback, useMemo } from 'react';
+import type { PropsWithChildren } from 'react';
 import { devLog } from '../utils/devLog';
 
 interface TabFocusContextType {

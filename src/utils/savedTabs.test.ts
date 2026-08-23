@@ -82,11 +82,11 @@ describe('addSavedTabGroup', () => {
     const group = await addSavedTabGroup(tabs);
 
     expect(group.tabs).toHaveLength(1);
-    expect(group.tabs[0].url).toBe('https://example.com');
+    expect(group.tabs[0]!.url).toBe('https://example.com');
 
     const stored = await loadSavedTabGroups();
-    expect(stored[0].id).toBe('test-uuid');
-    expect(stored[1].id).toBe('old');
+    expect(stored[0]!.id).toBe('test-uuid');
+    expect(stored[1]!.id).toBe('old');
   });
 
   it('filters out tabs without url', async () => {
@@ -108,7 +108,7 @@ describe('deleteSavedTabGroup', () => {
     await deleteSavedTabGroup('a');
     const stored = await loadSavedTabGroups();
     expect(stored).toHaveLength(1);
-    expect(stored[0].id).toBe('b');
+    expect(stored[0]!.id).toBe('b');
   });
 });
 
@@ -168,7 +168,7 @@ describe('mutation serialization', () => {
 
     const stored = await loadSavedTabGroups();
     expect(stored).toHaveLength(5);
-    const urls = stored.map(g => g.tabs[0].url).sort();
+    const urls = stored.map(g => g.tabs[0]!.url).sort();
     expect(urls).toEqual([
       'https://example.com/0',
       'https://example.com/1',
@@ -186,7 +186,7 @@ describe('mutation serialization', () => {
 
     const stored = await loadSavedTabGroups();
     expect(stored).toHaveLength(1);
-    expect(stored[0].tabs[0].url).toBe('https://new.com');
+    expect(stored[0]!.tabs[0]!.url).toBe('https://new.com');
   });
 
   it('serializes clearAll and a following add in FIFO order', async () => {
@@ -203,7 +203,7 @@ describe('mutation serialization', () => {
 
     const stored = await loadSavedTabGroups();
     expect(stored).toHaveLength(1);
-    expect(stored[0].tabs[0].url).toBe('https://after.com');
+    expect(stored[0]!.tabs[0]!.url).toBe('https://after.com');
   });
 
   it('keeps processing the queue after a rejected mutation', async () => {
@@ -222,6 +222,6 @@ describe('mutation serialization', () => {
 
     const stored = await loadSavedTabGroups();
     expect(stored).toHaveLength(1);
-    expect(stored[0].tabs[0].url).toBe('https://ok.com');
+    expect(stored[0]!.tabs[0]!.url).toBe('https://ok.com');
   });
 });

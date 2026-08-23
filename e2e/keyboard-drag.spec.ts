@@ -34,7 +34,7 @@ test.describe('Keyboard Drag E2E Tests', () => {
 
     const tabIdsBefore = await readTabIds(page);
     expect(tabIdsBefore.length).toBeGreaterThanOrEqual(3);
-    const originalFirstId = tabIdsBefore[0];
+    const originalFirstId = tabIdsBefore[0]!;
     const firstItem = page.locator('.group\\/tabitem').first();
 
     const firstDragHandle = page.locator('button[aria-label="Drag to reorder"]').first();

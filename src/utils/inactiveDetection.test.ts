@@ -35,7 +35,7 @@ describe('findInactiveTabs', () => {
     const result = findInactiveTabs(tabs, 3 * DAY_MS, NOW);
 
     expect(result).toHaveLength(1);
-    expect(result[0].id).toBe(1);
+    expect(result[0]!.id).toBe(1);
   });
 
   it('excludes active tabs', () => {
@@ -104,7 +104,7 @@ describe('sortByInactivity', () => {
     const tabs = [makeTab({ id: 1, lastAccessed: 1000 }), makeTab({ id: 2, lastAccessed: undefined })];
 
     const result = sortByInactivity(tabs);
-    expect(result[0].id).toBe(2); // undefined → 0, oldest
+    expect(result[0]!.id).toBe(2); // undefined → 0, oldest
   });
 });
 
