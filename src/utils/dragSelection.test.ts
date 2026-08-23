@@ -130,6 +130,7 @@ describe('dragSelection utilities', () => {
       autoDiscardable: true,
       groupId: -1,
       frozen: false,
+      lastAccessed: 0,
     });
 
     it('returns tab IDs in range for same window', () => {

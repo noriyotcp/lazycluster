@@ -16,6 +16,7 @@ function makeTab(id: number, groupId: number): chrome.tabs.Tab {
     discarded: false,
     autoDiscardable: true,
     frozen: false,
+    lastAccessed: 0,
   };
 }
 
