@@ -18,6 +18,7 @@ function makeTab(id: number, groupId: number | undefined, index = 0): chrome.tab
     discarded: false,
     autoDiscardable: true,
     frozen: false,
+    lastAccessed: 0,
   };
 }
 
