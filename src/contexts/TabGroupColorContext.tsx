@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
-import { TabGroupColor } from '../types/tabGroup';
+import { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import type { ReactNode } from 'react';
+import type { TabGroupColor } from '../types/tabGroup';
 
 interface TabGroupColorContextType {
   getGroupColor: (groupId: number) => TabGroupColor | null;

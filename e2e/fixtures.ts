@@ -68,7 +68,7 @@ export const test = base.extend<{
       throw new Error('Background page or URL not available');
     }
     console.log('Background serviceworker URL:', background.url());
-    const extensionId = background.url().split('/')[2];
+    const extensionId = background.url().split('/')[2]!;
     await use(extensionId);
   },
 });

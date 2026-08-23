@@ -344,7 +344,7 @@ test.describe('Manager Tab E2E Tests', () => {
     for (const title of numberedWindows) {
       const match = title.match(/Window (\d+)/);
       if (match) {
-        const windowNumber = parseInt(match[1], 10);
+        const windowNumber = parseInt(match[1]!, 10);
         expect(windowNumber).toBeGreaterThan(0); // Should be 1, 2, 3... never 0
       }
     }

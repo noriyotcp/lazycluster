@@ -32,7 +32,7 @@ test.describe('Multi-Drag E2E Tests', () => {
     await performDrag(page, firstDragHandle, thirdTabItem);
 
     // Wait for the Chrome API update to reach the DOM: the first tab is no longer the original one
-    await expect(page.locator('.group\\/tabitem a.list-col-grow').first()).not.toHaveText(tabTitles[0]);
+    await expect(page.locator('.group\\/tabitem a.list-col-grow').first()).not.toHaveText(tabTitles[0]!);
 
     // Get tab titles after drag
     const newTabTitles = await page.locator('.group\\/tabitem a.list-col-grow').allTextContents();
@@ -86,14 +86,14 @@ test.describe('Multi-Drag E2E Tests', () => {
     await performDrag(page, firstDragHandle, fifthTabItem);
 
     // Wait for the Chrome API update to reach the DOM: the first tab moved down
-    await expect(page.locator('.group\\/tabitem a.list-col-grow').first()).not.toHaveText(tabTitles[0]);
+    await expect(page.locator('.group\\/tabitem a.list-col-grow').first()).not.toHaveText(tabTitles[0]!);
 
     // Get tab titles after drag
     const newTabTitles = await page.locator('.group\\/tabitem a.list-col-grow').allTextContents();
 
     // Verify the three tabs moved together and preserved their order
     // Find where the first tab ended up
-    const newIndex = newTabTitles.indexOf(tabTitles[0]);
+    const newIndex = newTabTitles.indexOf(tabTitles[0]!);
     expect(newIndex).toBeGreaterThan(0); // Should have moved down
 
     // Verify the next two tabs are still in order after it
@@ -186,7 +186,7 @@ test.describe('Multi-Drag E2E Tests', () => {
     await performDrag(page, fourthDragHandle, secondTabItem);
 
     // Wait for the Chrome API update to reach the DOM: tab originally at index 3 lands at index 1
-    await expect(page.locator('.group\\/tabitem a.list-col-grow').nth(1)).toHaveText(tabTitles[3]);
+    await expect(page.locator('.group\\/tabitem a.list-col-grow').nth(1)).toHaveText(tabTitles[3]!);
 
     // Get tab titles after drag
     const newTabTitles = await page.locator('.group\\/tabitem a.list-col-grow').allTextContents();
@@ -236,7 +236,7 @@ test.describe('Multi-Drag E2E Tests', () => {
     await performDrag(page, firstDragHandle, fourthTabItem);
 
     // Wait for the Chrome API update to reach the DOM: tab originally at index 0 lands at index 2
-    await expect(page.locator('.group\\/tabitem a.list-col-grow').nth(2)).toHaveText(tabTitles[0]);
+    await expect(page.locator('.group\\/tabitem a.list-col-grow').nth(2)).toHaveText(tabTitles[0]!);
 
     // Get tab titles after drag
     const newTabTitles = await page.locator('.group\\/tabitem a.list-col-grow').allTextContents();
@@ -293,14 +293,14 @@ test.describe('Multi-Drag E2E Tests', () => {
 
     // Wait for the Chrome API update to reach the DOM: the range left index 1,
     // so the tab that was at index 1 is no longer there
-    await expect(page.locator('.group\\/tabitem a.list-col-grow').nth(1)).not.toHaveText(tabTitles[1]);
+    await expect(page.locator('.group\\/tabitem a.list-col-grow').nth(1)).not.toHaveText(tabTitles[1]!);
 
     // Get tab titles after drag
     const newTabTitles = await page.locator('.group\\/tabitem a.list-col-grow').allTextContents();
 
     // Verify the range moved together and preserved order
     // Original tabs at index 1,2,3 should now be at the end
-    const newIndex = newTabTitles.indexOf(tabTitles[1]);
+    const newIndex = newTabTitles.indexOf(tabTitles[1]!);
     expect(newIndex).toBeGreaterThan(1); // Should have moved down
 
     // Verify order preserved

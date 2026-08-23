@@ -191,7 +191,7 @@ describe('getTabsToClose', () => {
     const result = getTabsToClose(tabs);
 
     expect(result).toHaveLength(1);
-    expect(result[0].id).toBe(1); // undefined lastAccessed treated as 0, so closed
+    expect(result[0]!.id).toBe(1); // undefined lastAccessed treated as 0, so closed
   });
 });
 

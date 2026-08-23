@@ -22,10 +22,7 @@ const groupTabsByWindow = (tabs: chrome.tabs.Tab[]): TabGroup[] => {
   const groups: { [windowId: number]: chrome.tabs.Tab[] } = {};
   tabs.forEach(tab => {
     if (tab.windowId) {
-      if (!groups[tab.windowId]) {
-        groups[tab.windowId] = [];
-      }
-      groups[tab.windowId].push(tab);
+      (groups[tab.windowId] ??= []).push(tab);
     }
   });
 

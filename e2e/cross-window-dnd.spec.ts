@@ -67,8 +67,8 @@ test.describe('Cross-Window DnD Tab Movement', () => {
       await expect(windowGroups).toHaveCount(2);
 
       const allGroups = await windowGroups.all();
-      const sourceGroup = allGroups[0];
-      const targetGroup = allGroups[1];
+      const sourceGroup = allGroups[0]!;
+      const targetGroup = allGroups[1]!;
 
       // Remember window IDs for stable post-drop queries
       const sourceWinId = await sourceGroup.getAttribute('data-window-id');
@@ -117,8 +117,8 @@ test.describe('Cross-Window DnD Tab Movement', () => {
       await expect(windowGroups).toHaveCount(2);
 
       const allGroups = await windowGroups.all();
-      const sourceGroup = allGroups[0];
-      const targetGroup = allGroups[1];
+      const sourceGroup = allGroups[0]!;
+      const targetGroup = allGroups[1]!;
 
       const sourceWinId = await sourceGroup.getAttribute('data-window-id');
       const targetWinId = await targetGroup.getAttribute('data-window-id');
@@ -178,8 +178,8 @@ test.describe('Cross-Window Multi-Tab DnD', () => {
       await expect(windowGroups).toHaveCount(2);
 
       const allGroups = await windowGroups.all();
-      const sourceGroup = allGroups[0];
-      const targetGroup = allGroups[1];
+      const sourceGroup = allGroups[0]!;
+      const targetGroup = allGroups[1]!;
 
       const sourceWinId = await sourceGroup.getAttribute('data-window-id');
       const targetWinId = await targetGroup.getAttribute('data-window-id');
@@ -227,8 +227,8 @@ test.describe('Cross-Window Multi-Tab DnD', () => {
       await expect(windowGroups).toHaveCount(2);
 
       const allGroups = await windowGroups.all();
-      const sourceGroup = allGroups[0];
-      const targetGroup = allGroups[1];
+      const sourceGroup = allGroups[0]!;
+      const targetGroup = allGroups[1]!;
 
       const sourceWinId = await sourceGroup.getAttribute('data-window-id');
       const targetWinId = await targetGroup.getAttribute('data-window-id');
@@ -284,8 +284,8 @@ test.describe('Cross-Window Multi-Tab DnD', () => {
       await expect(windowGroups).toHaveCount(2);
 
       const allGroups = await windowGroups.all();
-      const sourceGroup = allGroups[0];
-      const targetGroup = allGroups[1];
+      const sourceGroup = allGroups[0]!;
+      const targetGroup = allGroups[1]!;
 
       const sourceHandles = sourceGroup.locator('button[aria-label="Drag to reorder"]');
 
@@ -338,8 +338,8 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
 
       // Get the window group elements
       const allGroups = await windowGroups.all();
-      const sourceGroup = allGroups[0];
-      const targetGroup = allGroups[1];
+      const sourceGroup = allGroups[0]!;
+      const targetGroup = allGroups[1]!;
 
       // Get drag handles in the source window group
       const sourceDragHandles = sourceGroup.locator('button[aria-label="Drag to reorder"]');
@@ -404,8 +404,8 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
       await expect(windowGroups).toHaveCount(2);
 
       const allGroups = await windowGroups.all();
-      const sourceGroup = allGroups[0];
-      const targetGroup = allGroups[1];
+      const sourceGroup = allGroups[0]!;
+      const targetGroup = allGroups[1]!;
 
       const sourceDragHandles = sourceGroup.locator('button[aria-label="Drag to reorder"]');
       const firstHandle = sourceDragHandles.first();
@@ -439,8 +439,8 @@ test.describe('Cross-Window DnD Ring Highlight', () => {
       await expect(windowGroups).toHaveCount(2);
 
       const allGroups = await windowGroups.all();
-      const sourceGroup = allGroups[0];
-      const targetGroup = allGroups[1];
+      const sourceGroup = allGroups[0]!;
+      const targetGroup = allGroups[1]!;
 
       // Collapse the target window group by clicking its collapse checkbox
       // Use the specific collapse checkbox ID (not bulk-select or tab checkboxes)
@@ -494,8 +494,8 @@ test.describe('Cross-Window DnD Tab Group Preservation', () => {
       const windowGroups = page.locator('[data-window-id]');
       await expect(windowGroups).toHaveCount(2);
       const allGroups = await windowGroups.all();
-      const sourceWinId = Number(await allGroups[0].getAttribute('data-window-id'));
-      const targetWinId = Number(await allGroups[1].getAttribute('data-window-id'));
+      const sourceWinId = Number(await allGroups[0]!.getAttribute('data-window-id'));
+      const targetWinId = Number(await allGroups[1]!.getAttribute('data-window-id'));
 
       const srcGroup = page.locator(`[data-window-id="${sourceWinId}"]`);
       const tgtGroup = page.locator(`[data-window-id="${targetWinId}"]`);
@@ -536,7 +536,7 @@ test.describe('Cross-Window DnD Tab Group Preservation', () => {
 
       // Verify tab group was preserved in target window
       const targetGroupInfo = await page.evaluate(async (tabIds: number[]) => {
-        const tab = await chrome.tabs.get(tabIds[0]);
+        const tab = await chrome.tabs.get(tabIds[0]!);
         if (tab.groupId === -1) return null;
         const group = await chrome.tabGroups.get(tab.groupId);
         return { title: group.title, color: group.color };
@@ -562,8 +562,8 @@ test.describe('Cross-Window DnD Tab Group Preservation', () => {
       const windowGroups = page.locator('[data-window-id]');
       await expect(windowGroups).toHaveCount(2);
       const allGroups = await windowGroups.all();
-      const sourceWinId = Number(await allGroups[0].getAttribute('data-window-id'));
-      const targetWinId = Number(await allGroups[1].getAttribute('data-window-id'));
+      const sourceWinId = Number(await allGroups[0]!.getAttribute('data-window-id'));
+      const targetWinId = Number(await allGroups[1]!.getAttribute('data-window-id'));
 
       const srcGroup = page.locator(`[data-window-id="${sourceWinId}"]`);
       const tgtGroup = page.locator(`[data-window-id="${targetWinId}"]`);
@@ -593,7 +593,7 @@ test.describe('Cross-Window DnD Tab Group Preservation', () => {
       const movedTabGroupId = await page.evaluate(async (tabId: number) => {
         const tab = await chrome.tabs.get(tabId);
         return tab.groupId;
-      }, groupTabIds[2]); // Last tab was moved
+      }, groupTabIds[2]!); // Last tab was moved
 
       expect(movedTabGroupId).toBe(-1);
 
@@ -601,7 +601,7 @@ test.describe('Cross-Window DnD Tab Group Preservation', () => {
       const remainingGroupId = await page.evaluate(async (tabId: number) => {
         const tab = await chrome.tabs.get(tabId);
         return tab.groupId;
-      }, groupTabIds[0]);
+      }, groupTabIds[0]!);
 
       expect(remainingGroupId).not.toBe(-1);
     } finally {

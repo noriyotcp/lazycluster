@@ -1,16 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import {
-  DragEndEvent,
-  DragOverEvent,
-  DragStartEvent,
-  PointerSensor,
-  KeyboardSensor,
-  useSensor,
-  useSensors,
-  pointerWithin,
-  rectIntersection,
-  CollisionDetection,
-} from '@dnd-kit/core';
+import { PointerSensor, KeyboardSensor, useSensor, useSensors, pointerWithin, rectIntersection } from '@dnd-kit/core';
+import type { DragEndEvent, DragOverEvent, DragStartEvent, CollisionDetection } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useToast } from '../components/ToastProvider';
 import Alert from '../components/Alert';
@@ -275,17 +265,17 @@ export function useTabDragAndDrop(args: { filteredTabGroups: FilteredTabGroup[] 
           if (isMovingDown) targetIndex -= tabsToMove.length;
 
           if (tabsToMove.length === 1) {
-            await chrome.tabs.move(tabsToMove[0], { index: targetIndex });
+            await chrome.tabs.move(tabsToMove[0]!, { index: targetIndex });
           } else {
             if (isMovingDown) {
               // Downward: move in reverse order (last tab first)
               for (let i = tabsToMove.length - 1; i >= 0; i--) {
-                await chrome.tabs.move(tabsToMove[i], { index: targetIndex + i });
+                await chrome.tabs.move(tabsToMove[i]!, { index: targetIndex + i });
               }
             } else {
               // Upward: move in forward order (first tab first)
               for (let i = 0; i < tabsToMove.length; i++) {
-                await chrome.tabs.move(tabsToMove[i], { index: targetIndex + i });
+                await chrome.tabs.move(tabsToMove[i]!, { index: targetIndex + i });
               }
             }
           }
