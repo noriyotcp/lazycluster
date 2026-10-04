@@ -23,6 +23,10 @@ updates:
           - 'tailwindcss'
           - '@tailwindcss/*'
           - 'daisyui'
+      vitest:
+        patterns:
+          - 'vitest'
+          - '@vitest/*'
     # プルリクエストの設定
     open-pull-requests-limit: 10
     labels:
