@@ -33,7 +33,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@tailwindcss/vite": "^4.3.3",
-    "daisyui": "^5.7.47",
+    "daisyui": "^5.7.48",
     "react": "~19.3.0",
     "react-dom": "~19.3.0",
     "tailwindcss": "^4.1.17"
